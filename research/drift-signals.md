@@ -121,7 +121,7 @@ The eleven papers cover adjacent ground, but none occupies this paper's cell:
 3. Both HumanEval+ and MBPP+ at 1.5B.
 4. A direct comparison of LLM judgment with structural telemetry.
 
-R2V-Agent is the reviewer's likely "already done" objection, since it uses HumanEval+ with a test action and full-EvalPlus labels. The answer is its under-escalation: 0.6% routed against an 8.1% oracle. That gap fits failures that look fine to step-level features, which is this paper's thesis. This reading is an inference; R2V gives no breakdown by visible vs hidden outcome. Before claiming novelty, check [arXiv 2610.16661](https://arxiv.org/html/2610.16661), "Agent-as-a-Router" ([2606.22902](https://alphaxiv.org/audio/2606.22902v1)) and the unidentified SWE-Router paper. None was read.
+R2V-Agent is the reviewer's likely "already done" objection, since it uses HumanEval+ with a test action and full-EvalPlus labels. The answer is its under-escalation: 0.6% routed against an 8.1% oracle. That gap fits failures that look fine to step-level features, which is this paper's thesis. This reading is an inference; R2V gives no breakdown by visible vs hidden outcome. Do not use this argument in the paper (Oct 16 review): see the R2V-Agent entry in docs/research-plan.md. Before claiming novelty, check [arXiv 2610.16661](https://arxiv.org/html/2610.16661), "Agent-as-a-Router" ([2606.22902](https://alphaxiv.org/audio/2606.22902v1)) and the unidentified SWE-Router paper. None was read.
 
 **Reviewers will expect these baselines**, all evaluated at matched frontier-call rates:
 

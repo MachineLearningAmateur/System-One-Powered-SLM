@@ -92,7 +92,8 @@ async def main_async(args) -> int:
     tokenizer = load_tokenizer()
     visible = VisibleRunner(max_concurrent=args.visible_workers)
     try:
-        proto = protocol(tokenizer, visible, dirty, commit, args.concurrency)
+        # Compared as stored: a JSON round trip turns tuples into lists.
+        proto = json.loads(json.dumps(protocol(tokenizer, visible, dirty, commit, args.concurrency)))
     except monitor.ServerMismatch as e:
         print(f"STOP: {e}")
         return 2
@@ -111,7 +112,8 @@ async def main_async(args) -> int:
     store, ledger = CostLedger(out / "trajectories.jsonl"), CostLedger(out / "ledger.jsonl")
     failures = CostLedger(out / "failures.jsonl")
     done = finished(store)
-    jobs = [(tid, a) for tid in ids for a in range(args.attempts) if (tid, a) not in done]
+    attempts = range(args.first_attempt, args.attempts)
+    jobs = [(tid, a) for tid in ids for a in attempts if (tid, a) not in done]
     session = {"started": datetime.now(timezone.utc).isoformat(), "ended": None, "elapsed_s": None,
                "args": {k: v for k, v in vars(args).items()}, "n_jobs": len(jobs), "n_failed": None}
     meta["sessions"].append(session)
@@ -159,7 +161,7 @@ async def main_async(args) -> int:
                         "n_failed": n_failed, **sampler.stop(), "vllm_metrics_start": metrics_start,
                         "vllm_metrics_end": metrics_end, "vllm_delta": monitor.metrics_delta(metrics_start, metrics_end)})
         meta_path.write_text(json.dumps(meta, indent=1), encoding="utf-8")
-    missing = [(t, a) for t in ids for a in range(args.attempts) if (t, a) not in finished(store)]
+    missing = [(t, a) for t in ids for a in attempts if (t, a) not in finished(store)]
     print(f"finished in {session['elapsed_s']:.0f} s; {len(missing)} requested attempts incomplete", flush=True)
     return 1 if missing else 0
 
@@ -171,7 +173,9 @@ def main() -> int:
     ap.add_argument("--benchmark", choices=["all", "humaneval+", "mbpp+"], default="all")
     ap.add_argument("--limit", type=int, default=0, help="first N tasks of the split (0 = all)")
     ap.add_argument("--tasks-file", default="", help="JSON file with a 'tasks' list (repo-relative); only these run")
-    ap.add_argument("--attempts", type=int, default=1)
+    ap.add_argument("--attempts", type=int, default=1, help="attempt indices run up to (not including) this value")
+    ap.add_argument("--first-attempt", type=int, default=0,
+                    help="first attempt index; seeds depend on the index, so attempt k is the same in any run")
     ap.add_argument("--concurrency", type=int, default=3)
     ap.add_argument("--visible-workers", type=int, default=4, help="visible-check containers at the same time")
     ap.add_argument("--allow-dirty", action="store_true", help="smoke runs only: the run is marked non-protocol")

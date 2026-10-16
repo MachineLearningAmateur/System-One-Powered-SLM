@@ -234,10 +234,12 @@ def driver(tmp_path, monkeypatch):
     monkeypatch.setattr(drv, "load_tokenizer", lambda: None)
     monkeypatch.setattr(drv, "git_state", lambda: ("abc123", False))
     monkeypatch.setattr(drv.monitor, "vllm_metrics", lambda: {"num_preemptions_total": 0.0})
-    monkeypatch.setattr(drv.monitor, "vllm_server_identity", lambda expected: {"vllm_image_id": "sha256:v"})
+    monkeypatch.setattr(drv.monitor, "vllm_server_identity",
+                        lambda expected: {"vllm_image_id": "sha256:v", "vllm_models": [("m", 16384)]})
     monkeypatch.setattr(drv.monitor, "PowerSampler", FakeSampler)
     monkeypatch.setattr(drv, "Generator", lambda client, tok: DriverGen([]))
     args = argparse.Namespace(run_id="r", split="dev", benchmark="all", limit=0, tasks_file="", attempts=2,
+                              first_attempt=0,
                               concurrency=2, visible_workers=2, allow_dirty=False)
     return drv, args
 
@@ -436,3 +438,12 @@ def test_frozen_pilot_subsample():
     assert {b: len(v) for b, v in frozen["benchmarks"].items()} == {"humaneval+": 22, "mbpp+": 50}
     for b, ids in frozen["benchmarks"].items():
         assert set(ids) <= set(split["benchmarks"][b]["dev"])  # development tasks only
+
+
+def test_driver_first_attempt_runs_only_later_attempts(driver, tmp_path, capsys):
+    drv, args = driver
+    args.first_attempt, args.attempts = 1, 3
+    assert asyncio.run(drv.main_async(args)) == 1  # B still fails
+    assert "6 attempts to run (0 already done)" in capsys.readouterr().out
+    rows, _ = CostLedger(tmp_path / "runs" / "r" / "trajectories.jsonl").read()
+    assert {r["attempt"] for r in rows} == {1, 2}
