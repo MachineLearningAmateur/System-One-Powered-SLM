@@ -237,7 +237,7 @@ def driver(tmp_path, monkeypatch):
     monkeypatch.setattr(drv.monitor, "vllm_server_identity", lambda expected: {"vllm_image_id": "sha256:v"})
     monkeypatch.setattr(drv.monitor, "PowerSampler", FakeSampler)
     monkeypatch.setattr(drv, "Generator", lambda client, tok: DriverGen([]))
-    args = argparse.Namespace(run_id="r", split="dev", benchmark="all", limit=0, attempts=2,
+    args = argparse.Namespace(run_id="r", split="dev", benchmark="all", limit=0, tasks_file="", attempts=2,
                               concurrency=2, visible_workers=2, allow_dirty=False)
     return drv, args
 
@@ -416,3 +416,23 @@ def test_failed_cleanup_discards_the_result_and_stops_later_checks(monkeypatch):
         vr.run("x", [{"kind": "assert", "source": "assert True"}])
     with pytest.raises(SandboxError, match="stopped"):
         vr.run("x", [{"kind": "assert", "source": "assert True"}])
+
+
+def test_driver_runs_only_the_tasks_in_a_tasks_file(driver, tmp_path, monkeypatch, capsys):
+    drv, args = driver
+    (tmp_path / "subset.json").write_text(json.dumps({"tasks": ["C"]}), encoding="utf-8")
+    monkeypatch.setattr(drv, "ROOT", tmp_path)
+    args.tasks_file, args.attempts = "subset.json", 3
+    assert asyncio.run(drv.main_async(args)) == 0
+    assert "3 attempts to run (0 already done)" in capsys.readouterr().out
+
+
+def test_frozen_pilot_subsample():
+    sub = load_script("make_pilot_subsample")
+    frozen = json.loads(sub.SUBSAMPLE_PATH.read_text(encoding="utf-8"))
+    from system1.eval.split import load_split
+    split = load_split()
+    assert frozen["benchmarks"] == sub.draw(split)  # the rule reproduces the file
+    assert {b: len(v) for b, v in frozen["benchmarks"].items()} == {"humaneval+": 22, "mbpp+": 50}
+    for b, ids in frozen["benchmarks"].items():
+        assert set(ids) <= set(split["benchmarks"][b]["dev"])  # development tasks only

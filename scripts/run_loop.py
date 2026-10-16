@@ -76,6 +76,9 @@ async def main_async(args) -> int:
     tasks = load_tasks()
     ids = [t for b in ("humaneval+", "mbpp+") if args.benchmark in ("all", b)
            for t in split["benchmarks"][b][args.split]]
+    if args.tasks_file:  # a frozen task list, e.g. configs/pilot_subsample_v1.json
+        keep = set(json.loads((ROOT / args.tasks_file).read_text(encoding="utf-8"))["tasks"])
+        ids = [t for t in ids if t in keep]
     if args.limit:
         ids = ids[: args.limit]
 
@@ -167,6 +170,7 @@ def main() -> int:
     ap.add_argument("--split", choices=["dev", "test"], default="dev")
     ap.add_argument("--benchmark", choices=["all", "humaneval+", "mbpp+"], default="all")
     ap.add_argument("--limit", type=int, default=0, help="first N tasks of the split (0 = all)")
+    ap.add_argument("--tasks-file", default="", help="JSON file with a 'tasks' list (repo-relative); only these run")
     ap.add_argument("--attempts", type=int, default=1)
     ap.add_argument("--concurrency", type=int, default=3)
     ap.add_argument("--visible-workers", type=int, default=4, help="visible-check containers at the same time")
