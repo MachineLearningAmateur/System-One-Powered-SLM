@@ -59,12 +59,13 @@ EXPECTED_SERVER = {"--model": MODEL, "--revision": REVISION, "--max-model-len": 
                    "--dtype": "bfloat16", "--seed": "0"}
 
 
-def protocol(tokenizer, visible: VisibleRunner, dirty: bool, commit: str, concurrency: int) -> dict:
+def protocol(tokenizer, visible: VisibleRunner, dirty: bool, commit: str, concurrency: int,
+             think_cap: int = THINK_CAP) -> dict:
     template = tokenizer.chat_template if tokenizer is not None else None
     return {"model": MODEL, "revision": REVISION, **monitor.vllm_server_identity(EXPECTED_SERVER),
             "generation_concurrency": concurrency,
             "chat_template_sha256": hashlib.sha256(template.encode()).hexdigest() if template else None,
-            "sampling": SAMPLING, "seed_tag": SEED_TAG, "think_cap": THINK_CAP, "code_tokens": CODE_TOKENS,
+            "sampling": SAMPLING, "seed_tag": SEED_TAG, "think_cap": think_cap, "code_tokens": CODE_TOKENS,
             "max_model_len": MAX_MODEL_LEN, "top_logprobs": TOP_LOGPROBS, "max_rounds": MAX_ROUNDS,
             "visible_timeout_s": VISIBLE_TIMEOUT_S, **visible.protocol(),
             "split_sha256": file_sha256(SPLIT_PATH), "visible_tests_sha256": file_sha256(VISIBLE_TESTS_PATH),
@@ -93,7 +94,8 @@ async def main_async(args) -> int:
     visible = VisibleRunner(max_concurrent=args.visible_workers)
     try:
         # Compared as stored: a JSON round trip turns tuples into lists.
-        proto = json.loads(json.dumps(protocol(tokenizer, visible, dirty, commit, args.concurrency)))
+        proto = json.loads(json.dumps(protocol(tokenizer, visible, dirty, commit, args.concurrency,
+                                               args.think_cap)))
     except monitor.ServerMismatch as e:
         print(f"STOP: {e}")
         return 2
@@ -128,7 +130,7 @@ async def main_async(args) -> int:
     outcome = "interrupted"
     try:
         async with httpx.AsyncClient() as client:
-            ctx = RunContext(run_id=args.run_id, split=args.split, generator=Generator(client, tokenizer),
+            ctx = RunContext(run_id=args.run_id, split=args.split, generator=Generator(client, tokenizer, think_cap=args.think_cap),
                              visible=visible, store=store, ledger=ledger, failures=failures,
                              logprob_dir=out / "logprobs")
 
@@ -176,10 +178,15 @@ def main() -> int:
     ap.add_argument("--attempts", type=int, default=1, help="attempt indices run up to (not including) this value")
     ap.add_argument("--first-attempt", type=int, default=0,
                     help="first attempt index; seeds depend on the index, so attempt k is the same in any run")
+    ap.add_argument("--think-cap", type=int, default=THINK_CAP,
+                    help="thinking tokens per round; only for the cap comparison (part of the protocol)")
     ap.add_argument("--concurrency", type=int, default=3)
     ap.add_argument("--visible-workers", type=int, default=4, help="visible-check containers at the same time")
     ap.add_argument("--allow-dirty", action="store_true", help="smoke runs only: the run is marked non-protocol")
     args = ap.parse_args()
+    if not 0 < args.think_cap <= MAX_MODEL_LEN - CODE_TOKENS:
+        print(f"--think-cap must be in 1..{MAX_MODEL_LEN - CODE_TOKENS}")
+        return 2
     if args.split == "test":
         print("Test tasks get no generation until the protocol is frozen (docs/research-plan.md). "
               "Remove this guard only after the freeze.")

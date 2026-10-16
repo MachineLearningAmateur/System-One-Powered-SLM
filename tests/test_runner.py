@@ -237,9 +237,9 @@ def driver(tmp_path, monkeypatch):
     monkeypatch.setattr(drv.monitor, "vllm_server_identity",
                         lambda expected: {"vllm_image_id": "sha256:v", "vllm_models": [("m", 16384)]})
     monkeypatch.setattr(drv.monitor, "PowerSampler", FakeSampler)
-    monkeypatch.setattr(drv, "Generator", lambda client, tok: DriverGen([]))
+    monkeypatch.setattr(drv, "Generator", lambda client, tok, think_cap: DriverGen([]))
     args = argparse.Namespace(run_id="r", split="dev", benchmark="all", limit=0, tasks_file="", attempts=2,
-                              first_attempt=0,
+                              first_attempt=0, think_cap=drv.THINK_CAP,
                               concurrency=2, visible_workers=2, allow_dirty=False)
     return drv, args
 
@@ -267,7 +267,7 @@ def test_driver_runs_skips_finished_attempts_and_survives_a_failed_one(driver, t
 def test_driver_refuses_a_resume_with_another_protocol(driver, monkeypatch, capsys):
     drv, args = driver
     asyncio.run(drv.main_async(args))
-    monkeypatch.setattr(drv, "THINK_CAP", 12_288)
+    args.think_cap = 12_288
     assert asyncio.run(drv.main_async(args)) == 2
     assert "differs in: think_cap" in capsys.readouterr().out
 
@@ -447,3 +447,13 @@ def test_driver_first_attempt_runs_only_later_attempts(driver, tmp_path, capsys)
     assert "6 attempts to run (0 already done)" in capsys.readouterr().out
     rows, _ = CostLedger(tmp_path / "runs" / "r" / "trajectories.jsonl").read()
     assert {r["attempt"] for r in rows} == {1, 2}
+
+
+def test_driver_think_cap_reaches_the_generator_and_the_protocol(driver, tmp_path, monkeypatch):
+    drv, args = driver
+    caps = []
+    monkeypatch.setattr(drv, "Generator", lambda client, tok, think_cap: caps.append(think_cap) or DriverGen([]))
+    args.think_cap = 12_288
+    asyncio.run(drv.main_async(args))
+    meta = json.loads((tmp_path / "runs" / "r" / "run_meta.json").read_text(encoding="utf-8"))
+    assert caps == [12_288] and meta["protocol"]["think_cap"] == 12_288
