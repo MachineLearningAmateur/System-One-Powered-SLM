@@ -1,0 +1,23 @@
+# Pinned prices for the cost ledger: dollars = tokens x these prices.
+# Change as_of whenever a value changes. A null price means "not confirmed";
+# the ledger then leaves usd_computed empty instead of guessing.
+as_of: 2026-10-16
+
+models:
+  anthropic/claude-sonnet-5.5-20260928:
+    provider: openrouter
+    usd_per_m_input: 2.00
+    usd_per_m_output: 10.00
+    note: Frontier helper. Price from the research plan.
+  jev-latest:
+    provider: typesafe
+    usd_per_m_input: null   # TODO: confirm on the TypeSafe account (direct API)
+    usd_per_m_output: null  # OpenRouter says Jev output is free there; unconfirmed for the direct API
+    note: Alias; the ledger logs the version the API returns.
+
+local_gpu:
+  owned_hardware:            # main cost view: electricity-only marginal cost
+    board_power_watts: 220   # RTX 3070, assumed
+    usd_per_kwh: 0.15        # assumed
+  cloud_equivalent:          # sensitivity view
+    usd_per_hour: 1.006      # EC2 g5.xlarge (A10G) on demand

@@ -1,0 +1,267 @@
+<!-- Exported 2026-10-16 from the Claude Doc "Research Plan: When Should a Small Model Ask for Help?" (https://claude.ai/code/artifact/7e826324-5c25-4f14-b827-99cc125a33f8). The Claude Doc is the source of truth; re-export after edits. -->
+
+# Research Plan: When Should a Small Model Ask for Help?
+
+*Status as of October 16, 2026. Updated after three second-opinion reviews (Astra): Jev reads the thinking with typed drift questions; the primary task is checkpoint failure prediction on a fixed 40/60 development/test split; drift labels come from two blind frontier judges as a supporting result; go/no-go gates are technical only; cost savings are measured, not presumed.*
+
+## Submission
+
+- **Venue:** IEEE BigData 2026 Workshop on Data and Model Efficiency for Scalable AI.
+- **Deadline:** October 29, 2026. The confirmed time zone is Anywhere on Earth: 11:59 PM AoE, from the workshop page (efficientaiworkshop.github.io). Plan to submit on October 28.
+- **Format:** short paper, up to 5 pages in IEEE two-column format, with references counted inside the limit. Review is single-blind, so author names go on the submission.
+- **Presentation:** one author must present in person in Phoenix, AZ. Confirm who.
+- **CFP topics this hits:** efficient reasoning and agentic workflows for LLMs, and trade-offs between efficiency, accuracy, robustness and cost.
+
+## Research question and thesis
+
+**Question.** Can a "System One" typed decision model, used as an external judge, predict when a small thinking model's current attempt will fail the withheld tests, so the loop can consult a frontier model? And does it add signal beyond the visible-test result and cheap loop features?
+
+**Thesis.** Zero-shot System One models fail at routing from the prompt alone. In Li (2026), Jev called almost every request "cheap" and Laya scored an AUROC of 0.48. They do better at judging evidence: Jev scored an AUC of 0.95 on groundedness. On answer correctness, though, Jev scored only 0.666 AUROC against 0.868 for Pinocchio on the same 1,718 rows (Pinocchio, Appendix E.10). A small model's partial attempt carries evidence (its reasoning, its code and the visible-test output), so a System One model may judge it even though it cannot predict difficulty from the prompt.
+
+**What we predict, and what we do not claim.** Jev reads the small model's thinking and answers typed drift questions: is it on task, repeating a failed fix, changing approach without new evidence, making unsupported claims, or lost? The only objective label is checkpoint failure: does the current code fail the withheld EvalPlus tests? So the primary claim is that Jev's drift judgments predict failure. The paper never claims that Jev "detects drift". Escalation value (does a takeover improve the outcome enough to pay for itself) is a separate policy question.
+
+**Primary claim, fixed before running anything.** On the visible-pass subset of held-out test tasks, an L2-regularized logistic regression on cheap features plus Jev's drift probabilities predicts checkpoint failure better than the same pipeline on cheap features alone (paired ΔAUROC with a task-bootstrap interval). Jev is a zero-shot feature extractor; the predictor is supervised.
+
+**Secondary claim, one prespecified contrast.** The budgeted trace view adds signal beyond code, test output and repair history: ΔAUROC between the base + history + trace arm and the base + history arm, on the same checkpoints. The detectable difference depends on the positives and the pairing (about 0.08–0.12 with 50–100 positives and strong pairing). Fix a practically meaningful gain in advance. A small gain with a wide interval is inconclusive, and a null means "this budgeted trace view added no detectable value", not "the reasoning has no useful information".
+
+**Supporting result.** Agreement of Jev's drift judgments with two blind frontier labelers (one Claude model, one GPT model), per category. There is no human check, so the claim is agreement under a shared rubric, not detection of drift.
+
+**Framing.** A measurement study by default: the same primary comparison runs whatever the pilot shows, and a negative result is reported as the finding. Detection quality is the primary outcome; cost savings are measured, not presumed.
+
+**Contribution statement.** We give a controlled test of whether low-cost typed-decision judges get more hidden-test failure signal from a 1.7B thinking model's reasoning and repair history, beyond its code, visible-test feedback and cheap features, and whether that signal improves escalation at the same total cost.
+
+## Setup
+
+### Small model
+
+- **Qwen3-1.7B in thinking mode,** run locally with vLLM (0.8.5 or later) in BF16, with `enable_thinking` set explicitly. Its weights are about 3.4 GB, so it fits the RTX 3070 without quantization. It scores 33.2 on LiveCodeBench v5 with thinking on and 11.6 with it off. Thinking-off is not a free "no trace" ablation, because it changes the code the model writes. The trace ablation scores the same thinking-mode checkpoints with the trace shown or hidden.
+- **Why the switch:** System One reads the small model's reasoning for failure symptoms, and Qwen2.5-Coder-1.5B-Instruct produces no reasoning trace.
+- **Backup from a second model family:** SmolLM3-3B in thinking mode, quantized to fit 8 GB. It checks that System One isn't just learning Qwen's trace style. Off the critical path for October 29.
+- **Decoding:** temperature 0.6, top-p 0.95, top-k 20. No greedy decoding, because Qwen warns it causes endless repetition. This departs from EvalPlus's greedy protocol, so say so in the paper. Cap thinking at about 8K tokens per round with `--max-model-len 16384`. That flag sets only the context length: enforce the 8K thinking cap with an explicit generation limit, reserve tokens for the code, and define what happens when the closing think tag is missing. Log cap hits as a feature. Request logprobs, serve without the reasoning parser, and split on `</think>`.
+- **Pilot before the full run:** no candidate has published thinking-mode HumanEval+/MBPP+ scores. Run it on the development tasks only (40% of tasks, stratified by benchmark: about 66 HumanEval+ and 151 MBPP+), one seed on all of them plus a prespecified five-attempt subsample. Test tasks get no generation until the protocol is frozen. Go if the final hidden-test pass rate is about 50–80% and the projected number of test tasks with at least one visible-pass/hidden-fail checkpoint over five attempts is at least 30, projected per benchmark with a task-level interval. If not, apply a short fallback list fixed in advance (thinking cap first, then generator), then freeze. Also measure throughput on the real workload (concurrent trajectories, logprobs on, KV-cache preemption). A bandwidth estimate gives about 150–250 tokens/s, or 18–30 hours for the main run.
+- OpenRouter is for the frontier helper and the hosted routers, not the small model.
+
+### Benchmarks
+
+- **HumanEval+ (164 tasks) and MBPP+ (378 tasks)** from EvalPlus, 542 tasks in all.
+- **5 sampled attempts per task** on the test tasks, giving enough trajectories for the paired comparisons. Development tasks get one seed plus the five-attempt subsample.
+- **Each attempt is a write → test → revise loop** with at most 3 rounds, so up to 3 checkpoints per attempt.
+- **The router sees only the visible example tests.** The hidden EvalPlus tests decide the final pass/fail label.
+- **MBPP+'s visible evidence is a single assert,** so expect a weaker signal there than on HumanEval+. Say so in the paper.
+- **LiveCodeBench is dropped.** Qwen2.5-Coder-1.5B scored about 6% pass@1 there. Qwen3-1.7B in thinking mode scores about 33% (v5), so it could come back if time allows.
+- **Harness rules to fix before the full run:** pin the EvalPlus version and how the visible tests are built. Keep withheld tests and reference solutions outside the generation sandbox. Fixed loop: after each test run the policy escalates or continues. If it continues and the visible tests pass, the candidate is accepted. If they fail and rounds remain, the model revises. At round 3 it escalates or returns the last candidate. Missing code, cut-off thinking, API errors and timeouts count as failed checkpoints and are reported. Replay is valid only for policies whose continuation matches this logged loop. Do not count copies of an already accepted candidate as new checkpoints.
+
+### Frontier helper
+
+- **Model:** Claude Sonnet 5.5 through OpenRouter, at $2 per million input tokens and $10 per million output.
+- **Pinned version:** `anthropic/claude-sonnet-5.5-20260928`.
+- **Pinned provider:** set `allow_fallbacks: false` with a fixed provider order, so every call comes from the same backend.
+- **Low reasoning effort,** because thinking tokens are billed as output.
+- **`usage: {include: true}` on every call,** to log tokens and cost.
+
+### Help mode
+
+- **Takeover from scratch is the main mode.** Call the frontier once per task with only the prompt and visible tests, about 540 calls for roughly $10–20, and reuse that answer at every checkpoint. The Handoff Tax (2026) supports this, but its evidence comes from repository-level SWE-bench agents, not function-level tasks. Replay estimates results for one frontier sample per task. In each simulated policy, charge the full frontier cost when the policy uses it, stop charging small-model and router work after the handoff, and never let the frontier answer or its result enter router features.
+- **This also gives a counterfactual label:** whether the frontier solves each task. That supports an oracle "value of escalation" policy as an upper bound.
+- **Hint mode is a stretch goal.** It cannot be replayed offline, because after a hint every later checkpoint changes. If kept, allow at most one hint per attempt and precompute the small model's continuation after each hint.
+
+## Routers
+
+**Primary:**
+
+1. **Jev 1.13,** zero-shot, through the vendor's direct API (POST https://api.typesafe.ai/v1/systemone, key in TYPESAFE\_API\_KEY), as a feature extractor. One request asks all the typed drift questions about one state (vendor docs: every question is evaluated against the same state), so each evidence arm gets its own state and its own call. "jev-latest" is an alias with no documented way to pin a version; the API reports jev-1.13.0, and a run stops if the returned version changes. Get the per-option probabilities, check variation and ties, and log bytes, billed usage and the returned model version. The first smoke tests gave yes/no probabilities with two decimals, one saturated choice answer (1.0 and 0.0), and changes of about 0.01–0.02 between identical calls.
+2. **Pinocchio-0.8B,** an off-the-shelf correctness calibrator (`pip install pinocchio-uq`; Qwen3.5-0.8B base with adapter `KevinDavidHayes/pinocchio-0.8b`; Apache 2.0; runs on a CPU). It beat Jev directly, 0.868 vs. 0.666 AUROC. Score complete checkpoint answers only: on single reasoning steps it scored 0.53. It is also the operational fallback if the Jev integration fails the technical gates.
+
+**Stretch goal, if time permits:** one fine-tuned Qwen3-1.7B router, LoRA plus a binary failure head. Start only if the core pipeline works by October 21, and stop by October 23. Train on the MBPP+ development tasks only (about 151), with task-grouped out-of-fold checks inside them, and score it on the test split, with one seed and no recipe search. Give it the same evidence and byte budget as Jev. Qwen3.5 checkpoints include a vision encoder and need nightly vLLM, and the Tev1 recipe is only a starting point. Fine-tuning adds no novelty (SWE-Router already trains a trajectory reader), so report it as a comparison.
+
+**Cut for October 29 (only if time is left after the core results):** Drex v1.5, Liquid d1-3B, hint mode, SmolLM3-3B, thinking-off runs, hidden-state probes, mutated-input disagreement, the base and base + trace ablation cells, and query-only routing.
+
+**Dropped:** Laya (order-sensitive, overconfident, short context), hosted Liquid d1 (free tier unverified), and the 5-fold Qwen3.5-4B fine-tune.
+
+**What System One reads.** One architecture, no score fusion. Each checkpoint gets one canonical base state that all arms share. An arm adds blocks to it, and each arm is a separate Jev call.
+
+- **Base state:** the task, the current code, the visible test output (bounded by a fixed rule), and loop telemetry: change in pass count, similarity to the previous attempt, and whether the same error or failing tests came back.
+- **History block:** the previous code and its test output.
+- **Trace block:** the current round's thinking, taken from its start and its end in the bytes that remain under the budget, with the omitted middle marked.
+- **Byte budget:** every request, with its questions and instructions, stays under about 28,000 bytes of text, because Jev runs a slower, less accurate long-context mode above about 32,000 bytes. Enforce bytes directly, not tokens. If the base state alone is too long, apply a fixed fallback and report those cases separately. Log original and retained trace lengths.
+- **Arms:** base + history, and base + history + trace. Their difference is the prespecified trace contrast. In the arm without the trace, the questions about the thinking are "not applicable", so the contrast adds a block of trace-based features to the code-and-history predictor; it is not one question asked with and without the trace.
+- **Why the trace is a separate block:** confident traces can talk monitors out of obvious failures (CoT Red-Handed, a study of sabotage, not ordinary bugs), so the trace adds features and the predictor sets their weight.
+- **Counting rules stay out of System One.** Pass counts and code-change checks are features of the cheap baseline it has to beat.
+
+**Typed drift questions** (yes/no questions with explicit true and false criteria, frozen before the pilot; results per question are exploratory). On development data only, also try one 3-level score question, read as its probability-weighted level; in Just Ask Jev the generic 3-level score beat the generic yes/no question by +0.024 AUROC on average over 31 benchmarks:
+
+| Question about the thinking | Evidence it needs | Not applicable when |
+| --- | --- | --- |
+| Is the model still on the assigned task? | task + trace | never |
+| Is it repeating a fix that already failed? | history + trace | round 1 |
+| Does it change approach without new evidence? | history + trace | round 1 |
+| Does it make claims about the code or API that the evidence does not support? | code + trace | never |
+| Does the stated fix match the code change? | history + code + trace | round 1 |
+| Does it have a clear next step? | trace | the visible tests pass |
+
+"Not applicable" is coded separately from "symptom absent". The models are never asked to reconstruct missing history.
+
+**Design details:**
+
+- **Router question:** the typed drift questions above, in the original framing ("is the model drifting, lost or hallucinating?"). The escalate-or-continue decision comes from the supervised predictor's failure probability and a threshold chosen on development tasks.
+- **Option order:** for choice questions, score both option orders and average them; both requests must fit the byte budget. Yes/no questions return one probability.
+- **Fitting:** one L2-regularized logistic regression per pipeline, with the same scaling, data and regularization rule for both. Use task-grouped out-of-fold predictions on development tasks. No separate calibration split, no extra Platt layer, and no feature-subset or interaction search.
+- **Labels, kept apart:** (1) checkpoint failure, where the current code fails the withheld tests, is the primary label. (2) Continuation failure: the rest of the small model's loop ends in failure. (3) Escalation value: the signed outcome difference between takeover and continuation, with their remaining costs. This also counts harmful switches, where the small model would pass and the frontier fails.
+
+## Drift labels (supporting result)
+
+Two frontier models label drift on a fixed, task-diverse sample of development checkpoints. The result supports the primary claim; it never claims that Jev detects drift.
+
+- **Labelers:** one Claude model and one GPT model, through OpenRouter. They never see hidden-test results, later rounds, the frontier helper's output, Jev's scores, or each other's labels.
+- **One labeling guide** for the labelers and for Jev's typed questions: task drift, reasoning drift, hallucination (a claim the supplied evidence does not support; unsupported does not mean false), and lost. Categories can overlap. Each has examples and exclusions: a tentative hypothesis, or an error the model corrects later, is not a hallucination.
+- **Evidence spans:** labelers quote the span behind each label and may answer "insufficient evidence".
+- **Freeze** the guide and Jev's thresholds before the agreement analysis. If labels on development data guide a change, report agreement on an untouched subset.
+- **Report** Claude–GPT, Jev–Claude and Jev–GPT agreement separately per category, with prevalence, raw agreement, Cohen's kappa and task-clustered intervals. Keep disagreements; do not build a consensus "gold" set.
+- **Sample:** a fixed sample of about 300 checkpoints from many tasks, not every development checkpoint (labeling all of them would cost about $90).
+- **Limit:** with no human check, agreement shows reproducibility under one rubric, not independent truth. Frontier judges can also be persuaded by confident traces.
+
+## Baselines
+
+- Always use the small model; always use the frontier.
+- Escalate if the visible tests fail.
+- Escalate after k failed rounds.
+- Rule baseline (if statements): escalate if the pass count didn't rise, the new code is a near-copy of the last attempt, or the same error came back.
+- **Cheap-feature logistic regression (mandatory):** visible tests passed, round number, error or traceback type, code length, trace statistics (length, cap hit, "wait"-marker count), simple structural repeats (repeated code or error, return to earlier code), and a small prespecified logprob summary. The primary test compares it with and without the Jev features.
+- Token-entropy threshold, and an adaptation of DeepConf's logprob confidence. Collect top-k logprobs from the start, because selected-token logprob alone is not its metric. Mandatory, because it needs no extra generations.
+- Pinocchio-0.8B on the full checkpoint answer.
+- Blind resampling: retry from scratch instead of revising. At 1.5B on MBPP+, this beat revising with test feedback. Whether that holds for a thinking model is unknown.
+- Random escalation at the same rate as each policy.
+- Oracle value-of-escalation policy, as an upper bound.
+- Optional: a generic LLM judge (Claude Haiku 5.5) as a control.
+- Cut for October 29: the thinking-off generator, query-level routing, the hidden-state probe, the extra ablation cells, and an always-Haiku solver (needed only for a "cheapest solution" claim, which the paper does not make).
+
+Prior work, Model Cascading for Code (2024), already escalates on self-generated tests and cut cost 26% on average (up to 70%). The test-based baselines above are its modern equivalent, so we must beat them, not just the always-small model. Newer close work (CodeMonitorBench, SWE-Router) is listed under Related work.
+
+## Evaluation and statistics
+
+- **The unit of analysis is the task.** Attempts from the same task are correlated. Point estimates are pooled over checkpoints, and the paper says so; report task-weighted results where they differ.
+- **Fixed 40/60 development/test split by task,** stratified by benchmark (about 217 development and 325 test tasks), frozen before the pilot. Development data fits the logistic regressions, picks thresholds and runs the gates, with task-grouped out-of-fold predictions. Test outputs and labels stay unopened until the protocol is frozen. The stretch fine-tune trains on MBPP+ development tasks only.
+- **Confidence intervals from a bootstrap that resamples whole tasks.**
+- **One primary comparison:** the cheap-feature L2 logistic regression with vs. without the Jev features, on the whole visible-pass subset of held-out test tasks (paired ΔAUROC). One explanatory contrast: base + history + trace vs. base + history. Use Holm across these two tests; all other comparisons are descriptive. Never pick a "best router" on test results.
+- **Choose thresholds on development tasks,** and report the realized test FPR and FNR.
+- **Router metrics:** AUROC, AUPRC with prevalence and task counts, Brier score, and FNR at 5% FPR (1% and 10% exploratory), split by visible-test status, benchmark and checkpoint. These match CodeMonitorBench's metrics. Compute Brier on the predictor's failure probability, not on raw Jev answers. Also report AUROC within each task across its 5 attempts, with the count of tasks that have both outcomes. ECE and per-round detail go to the supplement.
+- **Power:** the detectable difference depends on the positives and the pairing: about 0.08–0.12 with 50–100 positives and strong pairing, and 0.13–0.18 with weak pairing. Estimate the standard error of the paired difference on development data with a task-level bootstrap. Use CodeMonitorBench's verifier results (AUROC 0.54–0.67 for 7–8B open verifiers) as context only, not as a prediction for Jev.
+- **Policy metrics:**
+  - pass rate vs. cost per task, under both named cost views (see Cost ledger)
+  - frontier tokens and calls per task, and local GPU seconds per task, reported separately
+  - escalation rate, and the break-even escalation rate under each cost view
+  - router overhead, as a share of total cost and per decision
+  - always-small and always-frontier on every curve, even if always-frontier wins
+  - no presumed headline: report "X% of always-frontier accuracy at Y% of its cost" only if a policy achieves it
+- **Latency:** dollars, tokens and GPU time are the primary cost measures. Latency from offline replay is reconstructed, not measured end to end, and is labeled so. Report hosted routers as network-inclusive, Pinocchio as CPU time, and the small model as GPU time on the RTX 3070. Do not rank routers by latency.
+
+## Go/no-go after the pilot
+
+The gates check that the measurement can run. They never decide the result, and the primary comparison stays the same whatever they show. Fix them before the pilot.
+
+1. **Technical gates for Jev:** measured on development checkpoints. Record the share of valid responses and of calls that fail after retries, per arm, with "not applicable" kept apart from failure. For each feature, record the count of distinct values, the share at the most common value and at 0 or 1, and the spread. Record the share of failing/passing pairs on visible-pass checkpoints with the same score, the duplicate feature vectors, and the score changes on a small repeat sample with the same evidence and model version. Every request must fit the byte budget. Do not gate on distinct values divided by sample size, and do not reject a feature only because many values are at 0 or 1. If Jev fails them, Pinocchio-0.8B becomes the main judge, and the paper says why.
+2. **Headroom gate for the generator:** a final hidden-test pass rate of about 50–80%, and at least 30 projected positive test tasks (see the pilot). If not, apply the fixed fallback list, then freeze.
+3. **Resource guide, not a result:** if LR + Jev beats LR by at least 0.03 AUROC out of fold on development tasks, spend the time on the full typed questions and the drift labels. If not, keep Jev in the primary comparison but cut those extras first.
+
+## Offline replay
+
+At every checkpoint, log the small model's state, every router's score, and the frontier takeover result for that task. Any threshold policy can then be simulated offline with no new API calls.
+
+## Cost ledger
+
+- **One row per HTTP attempt, linked by call\_id and http\_attempt and with a status field; retries and failures are included, and unknown usage stays null** in an append-only JSONL file, for the small model, routers and frontier alike. Fields: `task_id`, `attempt`, `step`, `component`, `model`, `provider`, `input_tokens`, `output_tokens`, `reasoning_tokens`, `usd_reported`, `latency_ms`, `gpu_seconds`, `ts`.
+- **Pin a dated `prices.yaml`.** Compute dollars as tokens × pinned price and cross-check against OpenRouter's reported cost.
+- **Price local GPU time** in two named cost views. Owned hardware (main view): API spend plus electricity for the local GPU; an RTX 3070 draws about 220 W, so at an assumed $0.15/kWh one attempt costs about $0.0003. Cloud-equivalent (sensitivity view): GPU time at the A10G on-demand EC2 rate of $1.006/hour, a hypothetical normalization of 3070 runtime. Report the break-even escalation rate under each view: local work plus judging must cost less than the frontier calls it avoids. Never call local inference free; say "electricity-only marginal cost".
+- **Log router calls even when the router says "continue."** Li (2026) left out the pre-screen model's own cost, and a reported 23.9% saving turned out to be 4.3%.
+- **Track actual spend separately** on OpenRouter's Activity page and on the TypeSafe account, and set a credit limit on both keys. A sum of computed dollars is not total spend: report the attempts with unknown cost (for example timeouts) next to it.
+- **Charge everything a policy needs:** every resample, probe-input generation, execution, feature extraction, retry, and every view and option-order call. Keep experiment spend, simulated deployment cost and training amortization separate.
+
+## Budget
+
+- Frontier takeover calls: about $10–20. Add $30–50 if hint mode is run.
+- Router calls (Jev, direct API): the vendor docs give no price. One smoke call used 502 input and 70 output tokens. Confirm both token prices on the TypeSafe account; until then the ledger leaves dollars empty, and the estimate is two arms × every checkpoint at that price. Pinocchio-0.8B runs locally at no API cost.
+- Rented A10G for fine-tuning and full-precision runs: about $10–25.
+- Drift labels: about $12–20 for two labelers on about 300 checkpoints (about $3 per labeler per 150 checkpoints at Sonnet 5.5 prices; check the GPT labeler's price).
+
+## Compute and environment
+
+- **Local machine:** Windows with an RTX 3070 (8 GB).
+- **Docker setup:** Docker Desktop with the WSL 2 backend, a current NVIDIA driver installed on Windows, and an up-to-date WSL kernel (`wsl --update`). Confirm GPU access with the CUDA nbody sample container.
+- **Two images:**
+  - a `gpu` image built on a pinned official vLLM image, for the small model and any local routers
+  - a slim `cpu` image for API routers, replay and analysis, which runs on any laptop, including Macs
+- **Pin every version** in a locked requirements file plus `docker-compose.yml`.
+- **Secrets** go in a `.env` file listed in `.gitignore`.
+- **Mount `data/` and the Hugging Face cache as volumes** rather than baking them into the image.
+- **Sandbox generated code:** run the tests with timeouts and `--network none`.
+- **Generate the small model's trajectories once** on one machine and share the logs. Different GPUs produce slightly different outputs, and Docker does not fix hardware differences.
+- **Windows tips:**
+  - Keep the repo inside the WSL filesystem, not on `C:`.
+  - Raise WSL's memory limit in `.wslconfig` if needed.
+  - Start vLLM with `--gpu-memory-utilization` and `--max-model-len` set so the model fits in 8 GB.
+- **Cloud GPU:** a plain EC2 `g5.xlarge` (A10G, 24 GB) at $1.006/hour runs the same image and is cheaper than a SageMaker notebook at $1.41/hour. Shut it down when idle.
+- **First milestone:** a `make smoke` command that runs 5 HumanEval+ tasks end to end, including the cost ledger.
+
+## Timeline
+
+| Dates | Work |
+| --- | --- |
+| Oct 16–17 | Fix the 40/60 split, the loop rules, the labeling guide, the typed questions and the byte budget. Build the Docker images, harness and cost ledger, and pass the smoke test. Run Jev's technical gates (scores, several questions per call, byte budget). Start the paper skeleton and methods. |
+| Oct 17–18 | Pilot on development tasks (one seed plus the five-attempt subsample). Score development checkpoints with Jev, Pinocchio and the cheap features as they arrive. Run the headroom gate and the resource guide, then freeze the protocol. |
+| Oct 18–21 | Generate test trajectories (325 tasks × 5) and one frontier takeover answer per task. Label the fixed drift sample. |
+| Oct 21–23 | Stretch goal, only if the pipeline works by Oct 21: one Qwen3-1.7B fine-tune on MBPP+ development tasks. Stop by Oct 23. |
+| Oct 22–24 | Score test checkpoints with the frozen pipelines, run the trace contrast, replay policies under both cost views, and run the task-bootstrap statistics. Freeze experiments on Oct 24. |
+| Oct 25–27 | Write the paper. |
+| Oct 28 | Audit claims and figures, reproduce the headline results, and submit. |
+| Oct 29 | Hard deadline, 11:59 PM AoE. Buffer only. |
+
+## Paper outline (5 pages)
+
+- **Sections:** introduction, related work, method, setup, results, and discussion with limitations.
+- **Exhibits:**
+  - Table 1: LR, LR + Jev, Pinocchio and the logprob comparator on the visible-pass test subset, with AUROC and CI, the paired ΔAUROC and CI, AUPRC and FNR at 5% FPR. The caption gives prevalence and task counts and separates standalone judges from feature additions.
+  - Figure 1A: the paired trace contrast (ΔAUROC and CI), with zero and the prespecified meaningful gain marked.
+  - Figure 1B: pass rate vs. cost under the owned-hardware view, with always-small and always-frontier; break-even values in the caption.
+  - Drift-label agreement: a few sentences; per-category tables in the supplement.
+- **Supplement:** ECE, Brier detail, per-round results, the full cost ledger and extra evidence cells.
+
+## Related work to cite and differentiate
+
+**Must cite:**
+
+- **Fast Models, Slow Evidence** (Li, 2026), arXiv:2610.02267. Neither Jev nor Laya beats chance at zero-shot model routing, while evidence-judging works. This is our motivating null result. Jev's 99.5% "cheap" decisions do not by themselves prove chance-level ranking.
+- **CodeMonitorBench** ("Code Monitor Red Teaming for Public-Test-Passing Code"), [arXiv:2607.20852](https://arxiv.org/abs/2607.20852). Weak LLM verifiers look for hidden bugs in code that passed the public tests: 7–8B open verifiers reach AUROC 0.54–0.67, GLM-5.1 0.83. It already defines the visible-pass/hidden-fail setup. It has no reasoning trace, no repair history and no cost analysis; those are our differences.
+- **SWE-Router,** [arXiv:2607.00053](https://arxiv.org/html/2607.00053v1). A LoRA value head on Qwen2.5-Coder-7B reads a cheap agent's partial trajectory and chooses to continue or to restart with a strong model, on SWE-bench. It already covers trajectory-based code routing. We differ with a zero-shot typed judge, a 1.7B generator and controlled evidence ablations.
+- **Playing Psychic,** [arXiv:2604.16931](https://arxiv.org/abs/2604.16931). Thought-tree features of reasoning traces predict coding-task correctness for frontier reasoning models. "Traces reveal coding failures" is therefore taken; our question is the trace's added value beyond code, tests and history.
+- **Pinocchio,** [arXiv:2609.24881](https://arxiv.org/html/2609.24881v2). An external black-box correctness calibrator. Appendix E.10 tests Jev directly: 0.666 vs. 0.868 AUROC on the same rows. Also one of our comparators.
+- **Structural Baselines Matter,** [arXiv:2610.16661](https://arxiv.org/html/2610.16661). For agent failure detection, a zero-shot LLM judge scored 0.433 AUROC, below length (0.640) and step count (0.716). Report gains over content-blind baselines.
+- **R2V-Agent,** arXiv:2605.16604. A step-level small-to-large router for agents, including HumanEval+ with write, test and submit actions. It needs an expensive distilled small model and measures cost as the share of steps escalated, not dollars.
+- **Knowing When to Ask for Help: Bayesian Self-Escalation,** arXiv:2608.24087. Theory of escalation during generation, with only a small real-model test.
+- **STEPGATE: "Do I Need the Cloud?"** [arXiv:2610.07816](https://arxiv.org/html/2610.07816). The paper header names the "SLMs for Agentic Systems" workshop (Paris, 2026) and gives no acceptance; the earlier NeurIPS attribution is unconfirmed. Uncertainty-based step-level handoff from Qwen2.5-1.5B to 7B on BFCL function calling and scripted multi-turn tasks. It has no code tasks and no dollar costs.
+- **Model Cascading for Code,** arXiv:2405.15842. Escalation driven by self-generated tests, the prior form of our heuristic baseline.
+- **The Handoff Tax,** arXiv:2608.24358. Escalating with the weak model's full trajectory recovers less than half the quality gap, which supports takeover from scratch. Its evidence is repository-level SWE-bench.
+- **Just Ask Jev,** [arXiv:2609.29429](https://arxiv.org/html/2609.29429). Zero-shot Jev detects ten kinds of alignment failure, such as hallucination and reward hacking. One generic question reaches a median AUROC of 0.886 over 31 benchmarks, and targeted questions add only +0.006 (interval includes zero). So "Jev detects failures" is not new, and six questions are not expected to beat one on their own.
+- **Automata from Agent Traces,** [arXiv:2608.23670](https://arxiv.org/html/2608.23670). A small state machine built from agent traces ranks failing runs from a partial trace (AUROC up to 0.94 on 12 datasets, including SWE-agent and SWE-smith). Cheap structural features can be strong, so our cheap-feature baseline includes simple repeat features.
+- **The Tell-Tale Trace,** [arXiv:2608.03291](https://arxiv.org/abs/2608.03291). Reasoning-trace dynamics predict failures on SAT/UNSAT logic problems. Conceptual background only: no code, tests or escalation.
+
+**Flagged by the reviewer, now read (summaries in research/drift-signals.md):**
+
+- TACIT-Switch, arXiv:2608.27911
+- TSDS, arXiv:2607.26865
+- AgentCollab, arXiv:2603.26034
+- GMI Router experiment: https://www.gmicloud.ai/en/blog/dynamic-model-escalation-for-coding-agents-a-gmi-router-experiment-across-two-harnesses
+- Pinocchio, arXiv:2609.24881, an external calibrator for black-box models. It is the closest design to System One and a likely baseline.
+
+**Background to cite:** FrugalGPT, RouteLLM, AutoMix, Co-LLM, Self-REF confidence tokens (arXiv:2410.13284), R2R token routing (arXiv:2505.21600), and a routing and cascading survey (arXiv:2603.04445).
+
+**Claims to drop or soften:** do not claim to be first at public-pass monitoring, at trajectory-based code routing, or at using Jev as a correctness judge. Say "predicts checkpoint failure", not "detects drift or confusion". Treat the 1.7B model, the two benchmarks and the cost ledger as setting and design strengths, not contributions. Do not presume cost savings, and do not call local inference free. Correct two notes in research/: CoT Red-Handed's "CoT monitor" reads reasoning plus code, and Code-MUE's AUROC above 0.85 predicts whether any of N samples solves the task (0.635 at N=5).
+
+## Open items
+
+- Confirm the in-person presenter. The deadline is confirmed: October 29, 11:59 PM AoE.
+- Jev smoke test done on the direct API (October 16): the key works, several typed questions per call work, responses pass validation, and the model reports jev-1.13.0. Still open: the token prices on the TypeSafe account, and whether the direct API has the long-context mode above about 32,000 bytes that OpenRouter describes.
+- Write and freeze the labeling guide, the typed questions with their applicability table, the fallback list and the 0.03 resource guide before the pilot.
+- Pick the GPT labeler and check its route and price on OpenRouter.
+- Install `pinocchio-uq` and confirm that the weights load.
+- Check whether CodeMonitorBench's data is released.
+- Set a credit limit on the OpenRouter key.
