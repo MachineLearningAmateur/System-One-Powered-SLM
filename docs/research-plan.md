@@ -20,9 +20,9 @@
 
 **What we predict, and what we do not claim.** Jev reads the small model's thinking and answers typed drift questions: is it on task, repeating a failed fix, changing approach without new evidence, making unsupported claims, or lost? The only objective label is checkpoint failure: does the current code fail the withheld EvalPlus tests? So the primary claim is that Jev's drift judgments predict failure. The paper never claims that Jev "detects drift". Escalation value (does a takeover improve the outcome enough to pay for itself) is a separate policy question.
 
-**Primary claim, fixed before running anything.** On the visible-pass subset of held-out test tasks, an L2-regularized logistic regression on cheap features plus Jev's drift probabilities predicts checkpoint failure better than the same pipeline on cheap features alone (paired ΔAUROC with a task-bootstrap interval). Jev is a zero-shot feature extractor; the predictor is supervised.
+**Primary claim, fixed before running anything.** On the visible-pass subset of held-out test tasks, an L2-regularized logistic regression on cheap features plus the Jev feature set (the code answers from the history arm plus the thinking answers from the trace arm) predicts checkpoint failure better than the same pipeline on cheap features alone (paired ΔAUROC with a task-bootstrap interval). Jev is a zero-shot feature extractor; the predictor is supervised.
 
-**Secondary claim, one prespecified contrast.** The budgeted trace view adds signal beyond code, test output and repair history: ΔAUROC between the base + history + trace arm and the base + history arm, on the same checkpoints. The detectable difference depends on the positives and the pairing (about 0.08–0.12 with 50–100 positives and strong pairing). Fix a practically meaningful gain in advance. A small gain with a wide interval is inconclusive, and a null means "this budgeted trace view added no detectable value", not "the reasoning has no useful information".
+**Secondary claim, one prespecified contrast.** The budgeted trace view adds signal beyond code, test output and repair history: ΔAUROC between two prespecified feature sets on the same checkpoints: cheap features + the code answers from the history arm, against the same + the six thinking answers from the trace arm. The two sides differ only in the thinking answers. The code answers that the trace arm also returns are reported only as a description of how reading the thinking changes Jev's judgment of the code. The detectable difference depends on the positives and the pairing (about 0.08–0.12 with 50–100 positives and strong pairing). Fix a practically meaningful gain in advance. A small gain with a wide interval is inconclusive, and a null means "this budgeted trace view added no detectable value", not "the reasoning has no useful information".
 
 **Supporting result.** Agreement of Jev's drift judgments with two blind frontier labelers (one Claude model, one GPT model), per category. There is no human check, so the claim is agreement under a shared rubric, not detection of drift.
 
@@ -83,8 +83,8 @@
 - **Base state:** the task, the current code, the visible test output (bounded by a fixed rule), and loop telemetry: change in pass count, similarity to the previous attempt, and whether the same error or failing tests came back.
 - **History block:** the previous code and its test output.
 - **Trace block:** the current round's thinking, taken from its start and its end in the bytes that remain under the budget, with the omitted middle marked.
-- **Byte budget:** every request, with its questions and instructions, stays under about 28,000 bytes of text, because Jev runs a slower, less accurate long-context mode above about 32,000 bytes. Enforce bytes directly, not tokens. If the base state alone is too long, apply a fixed fallback and report those cases separately. Log original and retained trace lengths.
-- **Arms:** base + history, and base + history + trace. Their difference is the prespecified trace contrast. In the arm without the trace, the questions about the thinking are "not applicable", so the contrast adds a block of trace-based features to the code-and-history predictor; it is not one question asked with and without the trace.
+- **Byte budget:** every request, with its questions and instructions, stays under about 28,000 bytes of text, because Jev runs a slower, less accurate long-context mode above about 32,000 bytes. Enforce bytes directly, not tokens. If the base and history alone are too long, cut the task to 4,000 characters and the current and previous code to 6,000 characters each (start and end kept), for every arm of that checkpoint, and mark the records base\_trimmed. If even that does not fit, record every arm as evidence\_too\_large. Report both kinds of case separately. Log original and retained trace lengths.
+- **Arms:** base + history, and base + history + trace. Both arms are built together on one shared base. The history arm answers the three code questions; the trace arm answers the same three plus the six thinking questions. The trace contrast is defined by feature sets, not by arms (see the secondary claim): it adds the block of thinking answers to the code-and-history predictor, and its code answers always come from the history arm.
 - **Why the trace is a separate block:** confident traces can talk monitors out of obvious failures (CoT Red-Handed, a study of sabotage, not ordinary bugs), so the trace adds features and the predictor sets their weight.
 - **Counting rules stay out of System One.** Pass counts and code-change checks are features of the cheap baseline it has to beat.
 
@@ -92,14 +92,14 @@
 
 | Question about the thinking | Evidence it needs | Not applicable when |
 | --- | --- | --- |
-| Is the model still on the assigned task? | task + trace | never |
+| Is the model working on the assigned problem as it is stated? (a bug it does not notice is still on task) | task + trace | never |
 | Is it repeating a fix that already failed? | history + trace | round 1 |
 | Does it change approach without new evidence? | history + trace | round 1 |
 | Does it make claims about the code or API that the evidence does not support? | code + trace | never |
 | Does the stated fix match the code change? | history + code + trace | round 1 |
 | Does it have a clear next step? | trace | the visible tests pass |
 
-"Not applicable" is coded separately from "symptom absent". The models are never asked to reconstruct missing history.
+The three code questions need no thinking and are asked in both arms: is the current code likely to fail on valid inputs beyond the visible tests; does it special-case the visible test inputs; is it essentially the same as the previous attempt (not applicable in round 1). Empty thinking makes every thinking question "not applicable". "Not applicable" is coded separately from "symptom absent". The models are never asked to reconstruct missing history.
 
 **Design details:**
 
@@ -142,7 +142,7 @@ Prior work, Model Cascading for Code (2024), already escalates on self-generated
 - **The unit of analysis is the task.** Attempts from the same task are correlated. Point estimates are pooled over checkpoints, and the paper says so; report task-weighted results where they differ.
 - **Fixed 40/60 development/test split by task,** stratified by benchmark (about 217 development and 325 test tasks), frozen before the pilot. Development data fits the logistic regressions, picks thresholds and runs the gates, with task-grouped out-of-fold predictions. Test outputs and labels stay unopened until the protocol is frozen. The stretch fine-tune trains on MBPP+ development tasks only.
 - **Confidence intervals from a bootstrap that resamples whole tasks.**
-- **One primary comparison:** the cheap-feature L2 logistic regression with vs. without the Jev features, on the whole visible-pass subset of held-out test tasks (paired ΔAUROC). One explanatory contrast: base + history + trace vs. base + history. Use Holm across these two tests; all other comparisons are descriptive. Never pick a "best router" on test results.
+- **One primary comparison:** the cheap-feature L2 logistic regression with vs. without the Jev features, on the whole visible-pass subset of held-out test tasks (paired ΔAUROC). One explanatory contrast: the feature-set trace contrast defined in the secondary claim. Use Holm across these two tests; all other comparisons are descriptive. Never pick a "best router" on test results.
 - **Choose thresholds on development tasks,** and report the realized test FPR and FNR.
 - **Router metrics:** AUROC, AUPRC with prevalence and task counts, Brier score, and FNR at 5% FPR (1% and 10% exploratory), split by visible-test status, benchmark and checkpoint. These match CodeMonitorBench's metrics. Compute Brier on the predictor's failure probability, not on raw Jev answers. Also report AUROC within each task across its 5 attempts, with the count of tasks that have both outcomes. ECE and per-round detail go to the supplement.
 - **Power:** the detectable difference depends on the positives and the pairing: about 0.08–0.12 with 50–100 positives and strong pairing, and 0.13–0.18 with weak pairing. Estimate the standard error of the paired difference on development data with a task-level bootstrap. Use CodeMonitorBench's verifier results (AUROC 0.54–0.67 for 7–8B open verifiers) as context only, not as a prediction for Jev.

@@ -8,6 +8,7 @@ response is used only after it passes validation.
 
 from __future__ import annotations
 
+import hashlib
 import json
 import math
 import os
@@ -57,6 +58,7 @@ class JevResult:
     output_tokens: int
     latency_ms: float  # whole logical call, including retries and backoff
     request_bytes: int
+    request_sha256: str  # hash of the exact bytes sent
     call_id: str
     http_attempts: int
     raw: dict
@@ -84,6 +86,11 @@ class JevResult:
 def encode_body(body: dict) -> bytes:
     """Compact UTF-8 JSON; NaN and Infinity are rejected before anything is sent."""
     return json.dumps(body, ensure_ascii=False, separators=(",", ":"), allow_nan=False).encode("utf-8")
+
+
+def request_body(model: str, state: Any, questions: dict) -> bytes:
+    """The exact bytes of a Jev request. The budget check, the hash and the send all use this."""
+    return encode_body({"model": model, "state": state, "questions": questions})
 
 
 def _is_count(x: Any) -> bool:
@@ -246,7 +253,7 @@ class JevClient:
         arm: str | None = None,
     ) -> JevResult:
         check_questions(questions)
-        payload = encode_body({"model": self.model, "state": state, "questions": questions})
+        payload = request_body(self.model, state, questions)
         n_bytes = len(payload)
         if self.byte_budget is not None and n_bytes > self.byte_budget:
             raise ByteBudgetExceeded(f"request is {n_bytes} bytes; budget is {self.byte_budget}")
@@ -297,6 +304,7 @@ class JevClient:
                     output_tokens=out_tok,
                     latency_ms=(time.perf_counter() - t_call) * 1000,
                     request_bytes=n_bytes,
+                    request_sha256=hashlib.sha256(payload).hexdigest(),
                     call_id=call_id,
                     http_attempts=i + 1,
                     raw=data,

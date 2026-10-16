@@ -63,7 +63,11 @@ class CostLedger:
                 f.write(b"\n")
 
     def append(self, row: LedgerRow) -> None:
-        line = json.dumps(asdict(row), ensure_ascii=False)
+        self.append_obj(asdict(row))
+
+    def append_obj(self, obj: dict) -> None:
+        """Append one JSON object as a line (also used by other JSONL stores)."""
+        line = json.dumps(obj, ensure_ascii=False)
         with self._lock, open(self.path, "a", encoding="utf-8") as f:
             f.write(line + "\n")
 
