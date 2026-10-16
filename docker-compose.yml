@@ -1,0 +1,75 @@
+# Local services for the small-model loop.
+#
+#   docker compose build sandbox                           # the sandbox image (also used for visible checks)
+#   docker compose up -d vllm                              # generation (scripts/run_loop.py)
+#   docker compose stop vllm && docker compose up -d sandbox   # hidden grading (scripts/grade_hidden.py)
+#   docker compose --profile setup run --rm sandbox-setup  # once: EvalPlus ground truth
+#
+# Visible checks do not use a service: each one is a disposable `docker run` of
+# the sandbox image (src/system1/loop/sandbox.py, VisibleRunner).
+#
+# vLLM settings were tested on the RTX 3070 (8 GB): weights 4.08 GiB, KV cache
+# about 16,700 tokens at --gpu-memory-utilization 0.85.
+name: system1
+
+services:
+  vllm:
+    image: vllm/vllm-openai:v0.30.0@sha256:5f5e535216848d0c52159c8c13a0af04be5f6fe1a84e79914300610796f76d40
+    ports: ["8000:8000"]
+    volumes:
+      - ./hf_cache:/root/.cache/huggingface
+    environment:
+      - HF_HUB_OFFLINE=1
+    command:
+      - --model=Qwen/Qwen3-1.7B
+      - --revision=70d244cc86ccca08cf5af4e1e306ecf908b1ad5e
+      - --dtype=bfloat16
+      - --max-model-len=16384
+      - --gpu-memory-utilization=0.85
+      - --max-logprobs=20
+      - --seed=0
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+
+  # Hidden-test grader (docker/sandbox/worker.py): runs model-written code with
+  # no network, read-only root, limited memory and processes. It holds the
+  # hidden tests, so it never runs during generation. Its worker sets the
+  # per-candidate address-space limit itself (worker size + 4 GiB).
+  sandbox:
+    build: docker/sandbox
+    image: system1-sandbox:v2
+    network_mode: none
+    read_only: true
+    tmpfs:
+      - /tmp:size=512m
+    mem_limit: 10g  # worker with one dataset (1-2.4 GB) + one graded child (up to 4 GiB)
+    memswap_limit: 10g
+    pids_limit: 512
+    cpus: 4
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]
+    cgroup: private
+    environment:
+      - XDG_CACHE_HOME=/cache
+    volumes:
+      - ./data/evalplus_cache:/cache:ro
+
+  # One-time setup: computes the EvalPlus ground truth into the (writable) cache.
+  # It has no network, so first copy the two dataset files into
+  # data/evalplus_cache/evalplus/ (any `uv run python scripts/make_split.py`
+  # run downloads them to the user cache): HumanEvalPlus-v0.1.10.jsonl and
+  # MbppPlus-v0.2.0.jsonl.
+  sandbox-setup:
+    profiles: [setup]
+    image: system1-sandbox:v2
+    network_mode: none
+    environment:
+      - XDG_CACHE_HOME=/cache
+    volumes:
+      - ./data/evalplus_cache:/cache
+    command: ["python", "/opt/sandbox/worker.py", "--precompute"]
