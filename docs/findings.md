@@ -178,6 +178,28 @@ Cost per attempt (corrected; the pilot times already include the 3 parallel traj
 
 So budgets are set in frontier calls, not dollars, and the paper reports both cost views; it does not claim savings in general.
 
+## 12. Dev replay (code check, October 17)
+
+The evaluator (`scripts/replay.py`, `src/system1/eval/replay.py`) passed a
+three-round code review. Routers frozen in `configs/routers_v1.json`. On dev the
+thresholds were set on the same out-of-fold scores, so this is a code check and
+a descriptive dev result, not an estimate for the test data.
+
+| Policy (505 dev attempts, 470 decisions) | Final hidden pass | Frontier calls per attempt | Gain over random at the same rate (pp) |
+|---|---|---|---|
+| always-small | 0.701 | 0.000 | |
+| forced-failure-only (q_VP = 0) | 0.755 | 0.069 | |
+| cheap, top-K 25% | 0.840 | 0.303 | +5.3 (+2.3 to +8.4) |
+| cheap+code, top-K 25% | 0.844 | 0.303 | +5.7 (+2.2 to +9.1) |
+| cheap+code+thinking (primary), top-K 25% | 0.844 | 0.303 | +5.7 (+2.2 to +9.0) |
+| strong4 mean, top-K 25% | 0.848 | 0.303 | +6.1 (+3.0 to +9.2) |
+| always-frontier | 0.881 | 1.000 | |
+| oracle | 0.894 | 0.208 | |
+
+- Every router beats random escalation at the same rate at all three budgets (+2 to +6 pp); the routers differ from each other by at most about 1 pp, which is within the noise.
+- At a 25% budget (30% of attempts call the frontier), the routers reach about 0.84-0.85 against 0.88 for always-frontier.
+- Full table: `docs/results/replay_pilot-v1+pilot-v1b_dev-oof.json`.
+
 ## Costs to date
 
 - Jev: about $0.18 of the approved $2 (3.67M input tokens for the full scoring, plus the checks), at the third-party price of $0.042 per million input tokens with free output. The TypeSafe account price is still unconfirmed.
@@ -187,6 +209,6 @@ So budgets are set in frontier calls, not dollars, and the paper reports both co
 ## Still to freeze or do
 
 - Frozen on October 17 (plan, "Still to freeze before the replay"): escalation budgets q_VP = 10/25/50% from dev OOF quantiles weighted 1 / attempts of the task, tie rule, cheap-LR fallback for a missing Jev score, deployment view and label-free top-K ranking view, net gain over realized-rate random as the central replay result.
-- Replay evaluator (code review before use), then the dev replay as a code check.
+- Replay evaluator: done and reviewed; dev replay done (section 12).
 - Pinocchio-0.8B baseline (time-boxed install).
 - Protocol freeze, then the main run on the 325 test tasks and the test takeover answers (new approval).
