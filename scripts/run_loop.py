@@ -42,6 +42,9 @@ from system1.loop.sandbox import VisibleRunner
 from system1.loop.tasks import VISIBLE_TESTS_PATH, load_tasks
 
 
+FREEZE_TAG = "protocol-freeze-v1"
+
+
 def finished(store: CostLedger) -> set[tuple[str, int]]:
     """(task, attempt) pairs with a complete execution. Incomplete executions are rerun;
     their rows stay, marked by exec_id, and complete_executions() drops them."""
@@ -189,9 +192,14 @@ def main() -> int:
         print(f"--think-cap must be in 1..{MAX_MODEL_LEN - CODE_TOKENS}")
         return 2
     if args.split == "test":
-        print("Test tasks get no generation until the protocol is frozen (docs/research-plan.md). "
-              "Remove this guard only after the freeze.")
-        return 1
+        # Test tasks get generation only after the protocol freeze (docs/research-plan.md): the freeze
+        # tag must exist and be in the history of the commit that runs.
+        r = subprocess.run(["git", "merge-base", "--is-ancestor", FREEZE_TAG, "HEAD"], cwd=ROOT,
+                           capture_output=True, text=True)
+        if r.returncode != 0:
+            print(f"Test tasks get no generation before the protocol freeze: tag {FREEZE_TAG} is missing "
+                  f"or not in the history of HEAD.")
+            return 1
     return asyncio.run(main_async(args))
 
 
