@@ -6,6 +6,7 @@ For each router (the predict-v2 feature sets, the sensitivity cheap+strong4, and
 the strong4 mean) on the visible-pass development checkpoints:
   - the final model: one LR refitted on all rows (portable; the mean needs none);
   - the out-of-fold scores (REPEATS split averages, as in the resource guide);
+  - the weighted dev score distribution (for percentiles in the ranking view);
   - for q_VP in replay.RATES, (t, alpha) = the weighted quantile of those scores,
     each row weighted 1 / (the number of sampled attempts of its task), plus the
     pooled and attempt-0-only thresholds as sensitivities.
@@ -84,6 +85,9 @@ def main() -> int:
             s = np.mean([P.oof_scores(X, y, groups, seed) for seed in range(rg.REPEATS)], axis=0)
             model = {"kind": "lr", "feature_set": name, **P.fit_final(X, y, cols)}
         routers[name] = {"model": model, "thresholds": thresholds(s, w, ids),
+                         # The weighted dev distribution: the ranking view maps scores to percentiles in it,
+                         # so a cheap-LR fallback score and a router score share one scale.
+                         "dev_distribution": {"scores": [float(v) for v in s], "weights": [float(v) for v in w]},
                          "sensitivity_thresholds": {"pooled": thresholds(s, np.ones(len(s)), ids),
                                                     "attempt0": thresholds(s[a0], np.ones(a0.sum()),
                                                                            [i for i, k in zip(ids, a0) if k])}}

@@ -95,3 +95,34 @@ def test_bootstrap_gain_is_centered_on_the_mean_difference():
     a = np.linspace(0, 1, 40)
     mean, lo, hi = R.task_bootstrap_gain(att, a, np.zeros(40), n_boot=500)
     assert mean == pytest.approx(0.5) and lo < mean < hi
+
+
+def test_gain_vs_random_recomputes_the_rate_in_each_resample():
+    # Codex's case: two failing small attempts, both always rescued; the router escalates one.
+    att = R.build_attempts([cp("r", "A", 0, 1, True, False), cp("r", "B", 0, 1, True, False)])
+    z = {"A": np.ones(3), "B": np.ones(3)}
+    res = R.outcome(att, z, np.array([True, False]), "p")
+    point, lo, hi = R.gain_vs_random(att, z, res, n_boot=500)
+    assert point == pytest.approx(0.0) and lo == pytest.approx(0.0) and hi == pytest.approx(0.0)
+
+
+def test_oracle_rescues_and_costs_are_counted_per_replicate():
+    att = R.build_attempts([cp("r", "A", 0, 1, True, False)])
+    z = {"A": np.array([1.0, 0.0, 0.0])}
+    orc = R.oracle(att, z)
+    s = R.summarize(orc, att, z)
+    assert s["rescues_per_attempt"] == pytest.approx(1 / 3) and orc.final[0] == pytest.approx(1 / 3)
+    cost = R.frontier_matrix(att, {"A": np.array([9.0, 1.0, 1.0])})
+    assert R.frontier_cost(orc, cost)[0] == pytest.approx(3.0)
+
+
+def test_dev_percentile_puts_scores_on_one_scale():
+    dev = np.array([0.1, 0.2, 0.2, 0.9])
+    w = np.array([1.0, 1.0, 1.0, 1.0])
+    assert R.dev_percentile(0.2, dev, w) == pytest.approx((1 + 1) / 4)
+    assert R.dev_percentile(1.0, dev, w) == 1.0 and R.dev_percentile(0.0, dev, w) == 0.0
+
+
+def test_the_same_checkpoint_in_two_runs_is_refused():
+    with pytest.raises(ValueError):
+        R.build_attempts([cp("r1", "A", 0, 1, True, True), cp("r2", "A", 0, 1, True, True)])

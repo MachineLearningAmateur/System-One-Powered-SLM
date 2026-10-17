@@ -15,18 +15,26 @@ Two views per router and budget q_VP in {10, 25, 50}%:
   frozen   escalate if s > t, or s = t and u < alpha (deployment view; the
            realized rate is reported);
   top-k    exactly round(q M) decision checkpoints by score (label-free
-           ranking view at identical budgets).
+           ranking view at identical budgets). Scores are ranked as
+           percentiles in the router's frozen dev distribution, and a
+           cheap-LR fallback score as its percentile in the cheap
+           distribution, so the two share one scale.
 Each is compared with random escalation at its realized rate (closed form) and
 with forced-failure-only. Endpoints: always-small, forced-failure-only,
 always-frontier, and the oracle (escalate when the frontier answer passes and
 the small model's does not; per replicate). Gains: percentage points of final
 hidden pass per attempt, mean over the frontier replicates, with a task
-bootstrap within benchmark.
+bootstrap within benchmark; the realized rate and the random expectation are
+recomputed inside each resample (conditional on the policy's selection).
+Frontier labels must belong to the graded session and to the answer's code.
 
 Costs per attempt, two views: the small model's share of its run's energy
 (owned hardware) or wall time (cloud equivalent), Jev input tokens at decision
-checkpoints for the arms a router uses (dollars at the third-party price,
-unconfirmed), and the frontier's reported cost for the calls made.
+checkpoints for the arms a router uses, counted over the HTTP attempts of the
+call behind each stored score (stability repeats excluded; dollars at the
+third-party price, unconfirmed), and the frontier's cost over all HTTP
+attempts of each call made. Unknown usage is counted and reported, never
+treated as zero.
 Writes results/replay_<runs>_<scores>.json.
 """
 
@@ -43,7 +51,7 @@ import numpy as np
 from system1.config import CONFIGS, RESULTS, ROOT, load_prices
 from system1.eval import predict as P
 from system1.eval import replay as R
-from system1.eval.labels import load_labelled
+from system1.eval.labels import code_sha, load_labelled
 from system1.eval.ledger import read_jsonl
 
 JEV_USD_PER_M_INPUT = 0.042  # third-party price, unconfirmed for the direct API (findings.md, Costs)
@@ -58,25 +66,68 @@ def load_rg():
     return mod
 
 
-def frontier_outcomes(run_id: str) -> tuple[dict[str, np.ndarray], dict[str, np.ndarray]]:
-    """Per task: hidden pass of each replicate (0/1) and the reported cost of each replicate."""
+def _rows(path, what: str) -> list[dict]:
+    if not path.exists():
+        raise SystemExit(f"STOP: {path} is missing ({what})")
+    rows, bad = read_jsonl(path)
+    if bad:
+        raise SystemExit(f"STOP: {len(bad)} damaged lines in {path}")
+    return rows
+
+
+def call_cost(ledger_rows: list[dict], call_id: str) -> tuple[float, bool]:
+    """Dollars of one logical frontier call over all its HTTP attempts; flag False if any attempt
+    that reached the provider has no cost."""
+    usd, complete = 0.0, True
+    for r in ledger_rows:
+        if r["call_id"] != call_id:
+            continue
+        v = r["usd_reported"] if r["usd_reported"] is not None else r["usd_computed"]
+        if v is None:
+            if r["output_tokens"] is not None or not (r["status"] or "").startswith(("transport:", "http:")):
+                complete = False
+            continue
+        usd += v
+    return usd, complete
+
+
+def frontier_outcomes(run_id: str) -> tuple[dict[str, np.ndarray], dict[str, np.ndarray], dict]:
+    """Per task: hidden pass of each replicate (0/1) and the cost of each replicate's call.
+    Each label must belong to the session in frontier_grade_meta.json and to the answer's exact code."""
     d = RESULTS / "runs" / run_id
     meta = json.loads((d / "frontier_grade_meta.json").read_text(encoding="utf-8"))
     if not meta["protocol"] or meta["labels"]["invalid"]:
         raise SystemExit(f"STOP: {run_id} frontier grades are not a clean protocol session")
-    labels = {l["checkpoint_id"]: l for l in read_jsonl(d / "frontier_labels.jsonl")[0]}
-    answers = read_jsonl(d / "frontier_answers.jsonl")[0]
+    labels: dict[str, dict] = {}
+    for lab in _rows(d / "frontier_labels.jsonl", "frontier labels"):
+        if lab["checkpoint_id"] in labels:
+            raise SystemExit(f"STOP: two frontier labels for {lab['checkpoint_id']}")
+        if lab["grade_session"] != meta["session"]:
+            raise SystemExit(f"STOP: {lab['checkpoint_id']} was graded in another session")
+        labels[lab["checkpoint_id"]] = lab
+    ledger = _rows(d / "ledger.jsonl", "frontier ledger")
     z, cost = defaultdict(dict), defaultdict(dict)
-    for a in answers:
+    incomplete = 0
+    for a in _rows(d / "frontier_answers.jsonl", "frontier answers"):
         cid = f"{a['task_id']}/frontier/s{a['sample']}"
-        z[a["task_id"]][a["sample"]] = float(labels[cid]["passed"])
-        cost[a["task_id"]][a["sample"]] = a["usd_reported"] if a["usd_reported"] is not None else a["usd_computed"]
+        if a["sample"] in z[a["task_id"]]:
+            raise SystemExit(f"STOP: two answers for {cid}")
+        lab = labels.get(cid)
+        if lab is None or lab["code_sha256"] != code_sha(a["code"]):
+            raise SystemExit(f"STOP: the label of {cid} does not belong to its answer's code")
+        z[a["task_id"]][a["sample"]] = float(lab["passed"])
+        usd, complete = call_cost(ledger, a["call_id"])
+        incomplete += not complete
+        cost[a["task_id"]][a["sample"]] = usd
     n_rep = {len(v) for v in z.values()}
     if len(n_rep) != 1:
         raise SystemExit(f"STOP: tasks have different numbers of frontier replicates {n_rep}")
     k = n_rep.pop()
+    if any(sorted(v) != list(range(k)) for v in z.values()):
+        raise SystemExit("STOP: replicate indices are not 0..k-1 for every task")
+    info = {"replicates": k, "calls_with_unknown_cost": incomplete, "grade_session": meta["session"]}
     return ({t: np.array([v[s] for s in range(k)]) for t, v in z.items()},
-            {t: np.array([v[s] for s in range(k)]) for t, v in cost.items()})
+            {t: np.array([v[s] for s in range(k)]) for t, v in cost.items()}, info)
 
 
 def score_final(row: dict, router: dict) -> float | None:
@@ -93,12 +144,21 @@ def score_final(row: dict, router: dict) -> float | None:
     return float(P.predict_final(m, P.matrix([vec], m["columns"]))[0])
 
 
-def jev_tokens(run_ids: list[str]) -> dict[tuple, int]:
-    """Input tokens per (task, attempt, round, arm) over all HTTP attempts of the scoring calls."""
-    out: dict[tuple, int] = defaultdict(int)
+def jev_tokens(run_ids: list[str]) -> dict[tuple, int | None]:
+    """Input tokens of the scoring call behind each stored score, per (checkpoint, arm), over all of
+    that call's HTTP attempts. Calls that no stored score uses (the stability repeats, superseded
+    rescoring) are experiment cost, not router cost. None = the call's usage is unknown."""
+    out: dict[tuple, int | None] = {}
     for rid in run_ids:
-        for r in read_jsonl(RESULTS / "runs" / rid / "jev_ledger.jsonl")[0]:
-            out[(r["task_id"], r["attempt"], r["step"], r["arm"])] += r["input_tokens"] or 0
+        d = RESULTS / "runs" / rid
+        scores = {(r["checkpoint_id"], r["arm"]): r for r in _rows(d / "jev_scores.jsonl", "Jev scores")}
+        by_call: dict[str, list[dict]] = defaultdict(list)
+        for r in _rows(d / "jev_ledger.jsonl", "Jev ledger"):
+            by_call[r["call_id"]].append(r)
+        for key, rec in scores.items():
+            rows = by_call.get(rec.get("call_id"), [])
+            out[key] = None if not rows or any(r["input_tokens"] is None for r in rows) else sum(
+                r["input_tokens"] for r in rows)
     return out
 
 
@@ -116,16 +176,17 @@ def main() -> int:
     cfg = json.loads((CONFIGS / "routers_v1.json").read_text(encoding="utf-8"))
     prices = load_prices()["local_gpu"]
 
-    # Attempts and their decision checkpoints
+    # Attempts and their decision checkpoints (build_attempts refuses a checkpoint id in two runs)
     cps = [c for rid in args.run_id for c in load_labelled(RESULTS / "runs" / rid)]
     attempts = R.build_attempts(cps)
-    totals = {}
+    totals, cost_complete = {}, True
     for rid in args.run_id:
         meta = json.loads((RESULTS / "runs" / rid / "run_meta.json").read_text(encoding="utf-8"))
-        totals[rid] = (sum(s["elapsed_s"] for s in meta["sessions"] if s.get("elapsed_s")),
-                       sum(s["energy_wh"] for s in meta["sessions"] if s.get("energy_wh")))
+        sess = meta["sessions"]
+        cost_complete &= all(s.get("elapsed_s") is not None and s.get("energy_wh") is not None for s in sess)
+        totals[rid] = (sum(s.get("elapsed_s") or 0.0 for s in sess), sum(s.get("energy_wh") or 0.0 for s in sess))
     R.allocate_run_costs(attempts, totals)
-    z, fcost = frontier_outcomes(args.frontier_run)
+    z, fcost, finfo = frontier_outcomes(args.frontier_run)
     missing = {a.task_id for a in attempts} - set(z)
     if missing:
         raise SystemExit(f"STOP: {len(missing)} tasks have no frontier answers")
@@ -142,37 +203,52 @@ def main() -> int:
         for name in cfg["routers"]:
             scores[name] = np.array([dev["scores"][name][c] for c in ids])
             fallback_used[name] = 0
+        cheap = scores["cheap"]
     else:
         rg = load_rg()
         rows = {d["cp"]["checkpoint_id"]: d for d in rg.load(args.run_id, split=args.split, require_ok=False)}
-        cheap = np.array([score_final(rows[c], cfg["routers"]["cheap"]) for c in ids])
+        cheap = np.array([score_final(rows[c], cfg["routers"]["cheap"]) for c in ids], float)
         for name, router in cfg["routers"].items():
             s = [score_final(rows[c], router) for c in ids]
             fallback_used[name] = sum(v is None for v in s)
-            scores[name] = np.array([v if v is not None else np.nan for v in s])
-            scores[f"{name}__cheap"] = cheap  # used where the router's own score is missing
+            scores[name] = np.array([np.nan if v is None else v for v in s], float)
 
+    # Percentiles in each router's frozen dev distribution: the ranking view's common scale
+    def pct(name: str, values: np.ndarray) -> np.ndarray:
+        dd = cfg["routers"][name]["dev_distribution"]
+        ds, dw = np.array(dd["scores"]), np.array(dd["weights"])
+        return np.array([R.dev_percentile(v, ds, dw) for v in values])
+
+    cheap_pct = pct("cheap", cheap)
     tok = jev_tokens(args.run_id)
+    jev_unknown: dict[str, int] = {}
 
     def jev_cost(name: str) -> np.ndarray:
-        """Jev dollars per attempt for a router (decision checkpoints only)."""
+        """Jev dollars per attempt for a router: its arms at the decision checkpoint only."""
         out = np.zeros(len(attempts))
+        unknown = 0
         for i in vp_idx:
-            a = attempts[i]
-            rnd = int(a.decision_id.rsplit("/r", 1)[1])
-            n = sum(tok.get((a.task_id, a.attempt, rnd, arm), 0) for arm in ARMS[name])
+            n = 0
+            for arm in ARMS[name]:
+                v = tok.get((attempts[i].decision_id, arm))
+                if v is None:
+                    unknown += 1
+                else:
+                    n += v
             out[i] = n * JEV_USD_PER_M_INPUT / 1e6
+        jev_unknown[name] = unknown
         return out
 
     small_owned = np.array([a.energy_wh / 1000 * prices["owned_hardware"]["usd_per_kwh"] for a in attempts])
     small_cloud = np.array([a.gpu_s / 3600 * prices["cloud_equivalent"]["usd_per_hour"] for a in attempts])
-    fc = np.array([fcost[a.task_id].mean() for a in attempts])
+    fc = R.frontier_matrix(attempts, fcost)
 
     def costs(res: R.PolicyResult, router: str | None, small: bool = True) -> dict:
         jev = jev_cost(router) if router else np.zeros(len(attempts))
-        front = res.escalated * fc
+        front = R.frontier_cost(res, fc)
         base_o, base_c = (small_owned, small_cloud) if small else (0.0, 0.0)
         return {"usd_owned": float(np.mean(base_o + jev + front)), "usd_cloud": float(np.mean(base_c + jev + front)),
+                "usd_small_owned": float(np.mean(base_o)), "usd_small_cloud": float(np.mean(base_c)),
                 "usd_frontier": float(front.mean()), "usd_jev": float(jev.mean()),
                 "jev_price_note": "third-party $0.042/M input, unconfirmed"}
 
@@ -184,55 +260,47 @@ def main() -> int:
     out = {"runs": args.run_id, "frontier_run": args.frontier_run, "split": args.split, "scores": args.scores,
            "routers_version": cfg["version"], "n_attempts": len(attempts), "n_decisions": len(vp_idx),
            "forced_share": float(np.mean([a.forced for a in attempts])), "fallback_used": fallback_used,
-           "policies": []}
+           "frontier": finfo, "small_model_cost_complete": cost_complete, "policies": []}
 
     forced_only = R.outcome(attempts, z, np.zeros(len(attempts), bool), "forced-failure-only")
-    anchors = [(R.outcome(attempts, z, np.zeros(len(attempts), bool), "always-small", forced_to_frontier=False), None,
-                True),
-               (forced_only, None, True), (R.always_frontier(attempts, z), None, False)]
-    # Oracle per replicate: escalate exactly when that replicate's answer passes and the small model's does not.
-    by_rep = np.stack([np.where([a.forced for a in attempts], [z[a.task_id][r] for a in attempts],
-                                [max(a.y, z[a.task_id][r]) for a in attempts]) for r in range(len(next(iter(z.values()))))])
-    orc_opt = np.mean([[0.0 if a.forced else float(z[a.task_id][r] > a.y) for a in attempts]
-                       for r in range(by_rep.shape[0])], axis=0)
-    forced_f = np.array([a.forced for a in attempts], float)
-    oracle = R.PolicyResult("oracle", by_rep.mean(axis=0), by_rep, forced_f + orc_opt, orc_opt)
-    anchors.append((oracle, None, True))
-    for res, router, small in anchors:
-        out["policies"].append({**R.summarize(res, attempts, z), **costs(res, router, small), "view": "endpoint"})
+    anchors = [(R.outcome(attempts, z, np.zeros(len(attempts), bool), "always-small", forced_to_frontier=False), True),
+               (forced_only, True), (R.always_frontier(attempts, z), False), (R.oracle(attempts, z), True)]
+    for res, small in anchors:
+        out["policies"].append({**R.summarize(res, attempts, z), **costs(res, None, small), "view": "endpoint"})
 
+    fb_name = cfg["fallback_when_jev_missing"]
     for name in cfg["routers"]:
         s = scores[name]
+        miss = np.isnan(s)
+        rank = np.where(miss, cheap_pct, pct(name, np.where(miss, 0.0, s)))
         for q in R.RATES:
             th = cfg["routers"][name]["thresholds"][f"{q:.2f}"]
-            fb = cfg["routers"][cfg["fallback_when_jev_missing"]]["thresholds"][f"{q:.2f}"]
-            frozen = np.array([
-                R.escalate(s[j], th["t"], th["alpha"], ids[j]) if not np.isnan(s[j]) else
-                R.escalate(scores[f"{name}__cheap"][j], fb["t"], fb["alpha"], ids[j]) for j in range(len(ids))])
-            filled = np.where(np.isnan(s), scores.get(f"{name}__cheap", s), s)
-            topk = R.top_k(filled, ids, q)
+            fb = cfg["routers"][fb_name]["thresholds"][f"{q:.2f}"]
+            frozen = np.array([R.escalate(cheap[j], fb["t"], fb["alpha"], ids[j]) if miss[j] else
+                               R.escalate(s[j], th["t"], th["alpha"], ids[j]) for j in range(len(ids))])
+            topk = R.top_k(rank, ids, q)
             for view, sel in (("frozen", frozen), ("top-k", topk)):
                 res = R.outcome(attempts, z, esc_mask(sel), f"{name} | {view} | q={q:.2f}")
-                q_real = float(sel.mean())
-                rnd = R.random_expected(attempts, z, q_real)
-                g_r = R.task_bootstrap_gain(attempts, res.final, rnd.final, args.n_boot)
+                g_r = R.gain_vs_random(attempts, z, res, args.n_boot)
                 g_f = R.task_bootstrap_gain(attempts, res.final, forced_only.final, args.n_boot)
                 bench = {}
                 for b in sorted({a.benchmark for a in attempts}):
                     m = np.array([a.benchmark == b for a in attempts])
-                    vb = np.array([not a.forced for a in attempts]) & m
-                    qb = float(res.optional[vb].mean())
-                    rb = R.random_expected([a for a, k in zip(attempts, m) if k], z, qb)
-                    bench[b] = {"pass": float(res.final[m].mean()), "q_vp": qb,
-                                "gain_vs_random_within_benchmark": float((res.final[m] - rb.final).mean())}
+                    sub = [a for a, k in zip(attempts, m) if k]
+                    sub_res = R.PolicyResult(res.name, res.final_by_replicate[:, m], res.escalated_by_replicate[:, m],
+                                             res.optional_by_replicate[:, m])
+                    bench[b] = {"pass": float(res.final[m].mean()), "q_vp": R.summarize(sub_res, sub, z)["q_vp"],
+                                "gain_vs_random_within_benchmark": R.gain_vs_random(sub, z, sub_res, 1)[0]}
                 out["policies"].append({**R.summarize(res, attempts, z), **costs(res, name), "router": name,
-                                        "view": view, "q_nominal": q, "q_vp_realized": q_real,
-                                        "gain_vs_random": g_r, "gain_vs_forced_only": g_f,
-                                        "random_pass": float(rnd.final.mean()), "by_benchmark": bench})
+                                        "view": view, "q_nominal": q, "gain_vs_random": g_r,
+                                        "gain_vs_forced_only": g_f, "by_benchmark": bench})
+    out["jev_calls_with_unknown_usage"] = jev_unknown
 
     path = RESULTS / f"replay_{'+'.join(args.run_id)}_{args.scores}.json"
     path.write_text(json.dumps(out, indent=1), encoding="utf-8")
-    print(f"{len(attempts)} attempts, {len(vp_idx)} decisions, forced share {out['forced_share']:.3f}")
+    print(f"{len(attempts)} attempts, {len(vp_idx)} decisions, forced share {out['forced_share']:.3f}; "
+          f"fallback used {fallback_used}; frontier {finfo}; small-model cost complete {cost_complete}; "
+          f"Jev calls with unknown usage {jev_unknown}")
     print(f"{'policy':42s} {'pass':>6s} {'q_vp':>6s} {'calls':>6s} {'gain vs random (pp)':>24s} {'$ owned':>9s} {'$ cloud':>9s}")
     for p in out["policies"]:
         g = p.get("gain_vs_random")
