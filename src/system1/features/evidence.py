@@ -25,7 +25,8 @@ from typing import Any
 from system1.routers.jev import request_body
 
 # Bump when any rule below changes; it is stored with every scoring record.
-EVIDENCE_VERSION = "evidence-v2"
+# v3: the default byte budget went from 28,000 to 56,000 (routers/jev.py).
+EVIDENCE_VERSION = "evidence-v3"
 
 ARMS: dict[str, frozenset[str]] = {
     "base+history": frozenset({"history"}),

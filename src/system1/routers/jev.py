@@ -27,9 +27,13 @@ from system1.eval.ledger import CostLedger, LedgerRow, usd_for
 
 API_URL = "https://api.typesafe.ai/v1/systemone"
 DEFAULT_MODEL = "jev-latest"
-# Requests above ~32,000 bytes of text run in a slower, less accurate
-# long-context mode (OpenRouter's Jev guide), so every arm stays under this.
-BYTE_BUDGET = 28_000
+# The earlier 28,000-byte budget came from a "~32,000 bytes long-context mode"
+# note that no source confirms; third-party sources give 32K *tokens* for the
+# state. Measured on 2026-10-16 (jev-1.13.0): requests up to 55,776 bytes
+# (14,320 input tokens) were valid with unchanged latency. At the 8K thinking
+# cap the largest of 621 dev trace requests was 41,855 bytes, so 56,000 keeps
+# every 8K trace whole and stays within the size tested live.
+BYTE_BUDGET = 56_000
 RETRY_STATUS = {429, 500, 502, 503, 529}
 MAX_BACKOFF_S = 60.0
 PROB_SUM_TOLERANCE = 0.02

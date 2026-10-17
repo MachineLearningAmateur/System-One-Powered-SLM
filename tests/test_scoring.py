@@ -25,7 +25,7 @@ from system1.features.jev_scoring import (
     applicability,
     load_rubric,
 )
-from system1.routers.jev import JevClient, request_body
+from system1.routers.jev import BYTE_BUDGET, JevClient, request_body
 
 RUBRIC = load_rubric()
 TRACE_QS = {"on_task", "repeating_failed_fix", "approach_change_without_evidence",
@@ -229,7 +229,7 @@ def test_scores_both_arms_with_durable_records(tmp_path):
     for rec, req in ((hist, seen[0]), (full, seen[1])):
         assert rec.request_sha256 == hashlib.sha256(req.content).hexdigest()
         assert rec.request_bytes == len(req.content)
-        assert rec.evidence_version and rec.byte_budget == 28_000 and rec.visible_pass is False
+        assert rec.evidence_version and rec.byte_budget == 56_000 and rec.visible_pass is False
     rows, bad = store.read()
     assert bad == [] and len(rows) == 2 and rows[1]["call_id"] == full.call_id
     assert rows[1]["rubric_sha256"] == RUBRIC.sha256 and rows[1]["raw_answers"]["on_task"]["noul"] == 0.42
@@ -293,3 +293,12 @@ def test_resumed_run_still_detects_a_version_change(tmp_path):
     assert resumed.model_version == "jev-1.13.0"
     with pytest.raises(ModelVersionChanged):
         resumed.score_arms(checkpoint(attempt=2))
+
+
+def test_default_budget_keeps_a_full_8k_trace():
+    # The largest 8K-cap thinking in the pilot was 37,543 characters; with the
+    # rest of the evidence the request stays under the default budget, uncut.
+    cp = checkpoint(thinking="step " * 8_000)  # 40,000 characters
+    qs = {q: RUBRIC.api_question(q) for q, s in applicability(RUBRIC, cp, "base+history+trace").items() if s == APPLICABLE}
+    ev = build_evidence(cp, "base+history+trace", qs, model="jev-latest", budget=BYTE_BUDGET)
+    assert ev.trace_truncated is False and ev.payload_bytes <= BYTE_BUDGET
