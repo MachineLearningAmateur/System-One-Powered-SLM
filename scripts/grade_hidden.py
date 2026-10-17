@@ -25,6 +25,12 @@ Outputs in results/runs/<run-id>/:
 The session file is written before the labels are replaced, and
 system1.eval.labels.load_labelled() checks that labels and session match.
 A session with vLLM running or a changed git tree is marked non-protocol.
+
+--frontier grades the takeover answers of a frontier run (scripts/run_frontier.py)
+with the same rules: one unit per (task, sample) answer, read from
+frontier_answers.jsonl; outputs frontier_labels.jsonl and frontier_grade_meta.json
+(plus the shared hidden_grades.jsonl and grade_sessions/). An answer without code
+is a failure without grading.
 """
 
 from __future__ import annotations
@@ -112,14 +118,32 @@ def decide(grades: list[dict]) -> tuple[str, dict | None]:
     return ("undecided" if len(grades) < 3 else "invalid"), None
 
 
+FRONTIER_LABELS, FRONTIER_META = "frontier_labels.jsonl", "frontier_grade_meta.json"
+
+
+def frontier_units(rows: list[dict]) -> list[dict]:
+    """One gradable record per (task, sample) takeover answer, in the shape the grader uses."""
+    seen: dict[tuple[str, int], dict] = {}
+    for r in rows:
+        key = (r["task_id"], r["sample"])
+        if key in seen:
+            raise SystemExit(f"STOP: two answers for {key}; the run must have one per (task, sample)")
+        cid = f"{r['task_id']}/frontier/s{r['sample']}"
+        seen[key] = {"exec_id": cid, "checkpoint_id": cid, "benchmark": r["benchmark"], "task_id": r["task_id"],
+                     "code": r["code"]}
+    return list(seen.values())
+
+
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--run-id", required=True)
     ap.add_argument("--force", action="store_true", help="grade again although hidden_labels.jsonl exists")
     ap.add_argument("--allow-vllm", action="store_true", help="grade while vLLM runs (marks the labels non-protocol)")
+    ap.add_argument("--frontier", action="store_true", help="grade the takeover answers of a frontier run")
     args = ap.parse_args()
     out = RESULTS / "runs" / args.run_id
-    labels_path = out / LABELS_FILE
+    labels_path = out / (FRONTIER_LABELS if args.frontier else LABELS_FILE)
+    meta_file = FRONTIER_META if args.frontier else META_FILE
     if labels_path.exists() and not args.force:
         print(f"{labels_path} exists; use --force to grade again")
         return 1
@@ -128,15 +152,16 @@ def main() -> int:
         print("vLLM is running; stop it first (docker compose stop vllm)")
         return 1
 
-    rows, bad = read_jsonl(out / "trajectories.jsonl")
+    source = "frontier_answers.jsonl" if args.frontier else "trajectories.jsonl"
+    rows, bad = read_jsonl(out / source)
     if bad:
-        print(f"STOP: {len(bad)} damaged lines in trajectories.jsonl; repair them before grading")
+        print(f"STOP: {len(bad)} damaged lines in {source}; repair them before grading")
         return 2
     dropped: list[dict] = []
-    cps = complete_executions(rows, dropped=dropped)
+    cps = frontier_units(rows) if args.frontier else complete_executions(rows, dropped=dropped)
     session = f"{datetime.now(timezone.utc):%Y%m%dT%H%M%S}-{uuid.uuid4().hex[:6]}"
     commit, dirty = git_state()
-    meta: dict = {"run_id": args.run_id, "session": session, "started": datetime.now(timezone.utc).isoformat(),
+    meta: dict = {"run_id": args.run_id, "session": session, "source": source, "started": datetime.now(timezone.utc).isoformat(),
                   "protocol": not (vllm or dirty), "vllm_running": vllm, "git_commit": commit, "git_dirty": dirty,
                   "grading_code_sha256": sha256_files([ROOT / p for p in GRADING_CODE], ROOT),
                   "evalplus_cache_sha256": sha256_files([p for p in CACHE_DIR.rglob("*") if p.is_file()], CACHE_DIR),
@@ -219,7 +244,7 @@ def main() -> int:
     tmp = labels_path.with_suffix(".tmp")
     tmp.write_text("".join(json.dumps(x) + "\n" for x in labels), encoding="utf-8")
     tmp.replace(labels_path)
-    (out / META_FILE).write_text(json.dumps(meta, indent=1), encoding="utf-8")
+    (out / meta_file).write_text(json.dumps(meta, indent=1), encoding="utf-8")
     print(f"labels: {counts}; first two grades disagree on {meta['first_two_disagree']} of {len(pairs)} codes"
           + ("" if meta["protocol"] else "; NON-PROTOCOL session (vLLM running or git tree changed)"))
     return 0 if counts["invalid"] == 0 else 3
