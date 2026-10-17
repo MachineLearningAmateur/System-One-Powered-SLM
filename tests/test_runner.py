@@ -282,10 +282,22 @@ def test_driver_refuses_a_dirty_tree_unless_allowed(driver, monkeypatch, tmp_pat
     assert meta["non_protocol"] is True and meta["protocol"]["git_dirty"] is True
 
 
-def test_driver_refuses_the_test_split(monkeypatch):
+def test_driver_refuses_the_test_split_before_the_freeze_tag(monkeypatch):
     drv = load_script("run_loop")
     monkeypatch.setattr("sys.argv", ["run_loop.py", "--run-id", "x", "--split", "test"])
-    assert drv.main() == 1
+    started = []
+    # Never start a real run from a test: main_async is replaced in both cases.
+    monkeypatch.setattr(drv, "main_async", lambda args: started.append(args) or None)
+    monkeypatch.setattr(drv.asyncio, "run", lambda coro: 0)
+
+    class Res:
+        def __init__(self, code):
+            self.returncode = code
+
+    monkeypatch.setattr(drv.subprocess, "run", lambda *a, **k: Res(1))  # tag missing / not an ancestor
+    assert drv.main() == 1 and started == []
+    monkeypatch.setattr(drv.subprocess, "run", lambda *a, **k: Res(0))  # after the freeze
+    assert drv.main() == 0 and len(started) == 1 and started[0].split == "test"
 
 
 # --- grader rules and labels -------------------------------------------------------
