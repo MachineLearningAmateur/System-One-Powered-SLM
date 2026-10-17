@@ -63,15 +63,18 @@ def select_records(records: list[dict], checkpoints: list[dict], tasks, version:
     """The one valid score record per checkpoint id: same exec_id, same rebuilt input hash, the
     given input version and, with require_pinned, every PINNED field. Stale records (another
     execution, input or setup) are counted, never used; two valid records for one checkpoint are
-    an error. Returns (records by checkpoint id, counts)."""
+    an error. counts["rejected"] lists checkpoints that have records but no valid one: callers
+    must stop on these, never treat them as a missing score. Returns (records by id, counts)."""
     want = {c["checkpoint_id"]: (c["exec_id"], input_sha(*build_input(c, tasks, version))) for c in checkpoints}
     out: dict[str, dict] = {}
-    counts = {"used": 0, "stale": 0, "other_checkpoints": 0}
+    counts = {"used": 0, "stale": 0, "other_checkpoints": 0, "rejected": []}
+    seen: set[str] = set()
     for r in records:
         cid = r["checkpoint_id"]
         if cid not in want:
             counts["other_checkpoints"] += 1
             continue
+        seen.add(cid)
         ok = (r.get("input_version") == version and (r["exec_id"], r["input_sha256"]) == want[cid]
               and (not require_pinned or all(r.get(k) == v for k, v in PINNED.items())))
         if not ok:
@@ -81,6 +84,8 @@ def select_records(records: list[dict], checkpoints: list[dict], tasks, version:
             raise PinocchioRecordError(f"two valid Pinocchio records for {cid}")
         out[cid] = r
     counts["used"] = len(out)
+    # Checkpoints that have records but none valid: a provenance failure, not a missing score.
+    counts["rejected"] = sorted(seen - set(out))
     return out, counts
 
 

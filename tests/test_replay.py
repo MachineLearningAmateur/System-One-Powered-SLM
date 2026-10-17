@@ -193,3 +193,22 @@ def test_pinocchio_records_must_match_execution_input_and_setup():
             PI.select_records([good, dict(good)], [cp_], tasks, PI.V2, require_pinned=True)
     finally:
         mod.first_round_messages = orig
+
+
+def test_rejected_pinocchio_records_are_reported_not_missing():
+    from system1.features import pinocchio_input as PI
+    import system1.features.pinocchio_input as mod
+    tasks = {"T": type("Task", (), {"prompt": "def f():"})()}
+    cp_ = {"checkpoint_id": "T/a0/r1", "exec_id": "e1", "task_id": "T", "answer": "x", "code": "y"}
+    orig = mod.first_round_messages
+    mod.first_round_messages = lambda task: [{"role": "user", "content": task.prompt}]
+    try:
+        bad = {"checkpoint_id": "T/a0/r1", "exec_id": "e1", "input_version": PI.V1,
+               "input_sha256": PI.input_sha(*PI.build_input(cp_, tasks, PI.V1)),
+               **{**PI.PINNED, "adapter_revision": "wrong"}}
+        recs, counts = PI.select_records([bad], [cp_], tasks, PI.V1, require_pinned=True)
+        assert recs == {} and counts["rejected"] == ["T/a0/r1"]
+        recs, counts = PI.select_records([], [cp_], tasks, PI.V1, require_pinned=True)
+        assert recs == {} and counts["rejected"] == []  # genuinely missing
+    finally:
+        mod.first_round_messages = orig

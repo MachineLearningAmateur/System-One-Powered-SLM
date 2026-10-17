@@ -9,8 +9,10 @@ package's truncation, the dtype and the placeholder image before it scores; ever
 record carries these fields. Labels are never read.
 
 Resume: a checkpoint is skipped only if a record with the same execution, the same
-rebuilt input and the full pinned setup exists. Records made before the setup was
-pinned (the first input-v1 dev scores) are therefore not reused by this script.
+rebuilt input and the full pinned setup exists. If the file already holds records
+for a checkpoint that do not pass these checks (for example the first input-v1 dev
+scores, made before the setup was pinned), the script stops instead of appending:
+a file never mixes record generations.
 Output: results/runs/<run-id>/<file of the input version>. "cpu_seconds" is the
 elapsed time of one score on the CPU (not process CPU time; loading excluded).
 """
@@ -66,6 +68,13 @@ def main() -> int:
     tasks = load_tasks()
     valid, counts = PI.select_records(PI.read_records(d, args.input_version), cps, tasks, args.input_version,
                                       require_pinned=True)
+    if counts["rejected"]:
+        # Appending pinned replacements next to records that other readers accept (legacy, unpinned)
+        # would leave two valid records for those readers. Never mix: score into a new input version.
+        print(f"STOP: {len(counts['rejected'])} checkpoints already have records in {PI.FILES[args.input_version]} "
+              f"that do not match the pinned setup or the current execution (e.g. {counts['rejected'][0]}); "
+              f"this script does not append replacements to that file")
+        return 2
     todo = [c for c in cps if c["checkpoint_id"] not in valid]
     if args.limit:
         todo = todo[: args.limit]

@@ -142,6 +142,9 @@ def pinocchio_rows(run_ids: list[str], setup: list, checkpoints: list[dict], req
         cps = [c for c in checkpoints if c["run_id"] == rid]
         recs, counts = PI.select_records(PI.read_records(RESULTS / "runs" / rid, PI.V1), cps, tasks, PI.V1,
                                          require_pinned=require_pinned)
+        if counts["rejected"]:
+            raise SystemExit(f"STOP: {rid}: {len(counts['rejected'])} checkpoints have Pinocchio records that fail "
+                             f"the provenance checks (e.g. {counts['rejected'][0]}); this is not a missing score")
         for cid, r in recs.items():
             if [r["input_version"], r["adapter"], r["base_model"], r["package"]] != setup:
                 raise SystemExit(f"STOP: {cid} was scored with another Pinocchio setup")

@@ -54,7 +54,10 @@ def pinocchio_scores(run_ids: list[str], data: list[dict]) -> tuple[dict[str, fl
         cps = [d["cp"] for d in data if d["run"] == rid]
         recs, counts = PI.select_records(PI.read_records(RESULTS / "runs" / rid, PI.V1), cps, tasks, PI.V1,
                                          require_pinned=False)
-        print(f"  pinocchio {rid}: {counts}")
+        print(f"  pinocchio {rid}: { {k: v for k, v in counts.items() if k != 'rejected'} }")
+        if counts["rejected"]:
+            raise SystemExit(f"STOP: {rid}: Pinocchio records fail the provenance checks for "
+                             f"{len(counts['rejected'])} checkpoints")
         for cid, r in recs.items():
             out[cid] = r["score"]
             setups.add((r["input_version"], r["adapter"], r["base_model"], r["package"]))
