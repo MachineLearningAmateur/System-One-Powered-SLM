@@ -42,7 +42,7 @@ from typing import Callable
 
 from system1.config import RESULTS, ROOT
 from system1.eval.labels import LABELS_FILE, META_FILE, SESSIONS_DIR, code_sha
-from system1.eval.ledger import CostLedger
+from system1.eval.ledger import CostLedger, read_jsonl
 from system1.loop.runner import complete_executions
 from system1.loop.sandbox import DEFAULT_CONTAINER, Sandbox, SandboxError
 
@@ -128,7 +128,7 @@ def main() -> int:
         print("vLLM is running; stop it first (docker compose stop vllm)")
         return 1
 
-    rows, bad = CostLedger(out / "trajectories.jsonl").read()
+    rows, bad = read_jsonl(out / "trajectories.jsonl")
     if bad:
         print(f"STOP: {len(bad)} damaged lines in trajectories.jsonl; repair them before grading")
         return 2

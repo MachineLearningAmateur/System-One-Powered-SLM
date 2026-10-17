@@ -1,4 +1,4 @@
-# Findings so far (as of October 16, 2026)
+# Findings so far (as of October 17, 2026)
 
 Development data only. No test task has been generated or scored. The Claude
 Doc research plan (exported to `docs/research-plan.md`, rev 86) is the source
@@ -36,10 +36,10 @@ replicates.
 ## 2. Thinking cap: frozen at 8K, no presence penalty
 
 - Cap hits: 12.1% at attempt 0 on all dev tasks; 16.6% pooled over 621 checkpoints (the subsample's HumanEval+ tasks hit the cap more). The pooled rate crossed the 15% rule, so the 12K comparison ran.
-- 12K on the 33 cap-hit tasks: cap hits 52.5% -> 29.8% of checkpoints, final hidden pass 8/33 -> 10/33 (5 gains, 3 losses). Most gains finished under 8K or hit 12K again, so they reflect run-to-run variation; only one gain needed more than 8K. Cost: +25% thinking tokens and 5 KV-cache preemptions (0 at 8K).
+- 12K on the 33 cap-hit tasks: cap hits 52.5% -> 29.8% of checkpoints, final hidden pass 8/33 -> 10/33 (5 gains, 3 losses). Most gains finished under 8K or hit 12K again, which is consistent with run-to-run variation (not proof of it); only one gain needed more than 8K. Cost: +25% thinking tokens and 5 KV-cache preemptions (0 at 8K).
 - 12K is the most the RTX 3070 (8 GB) allows. Qwen recommends 32,768 output tokens; the paper states the 8K cap as a limitation.
 - Cap hits are a strong failure signal and a large cost: hidden pass 9.7% (cap hit) vs 66.4% (no cap hit); 17% of checkpoints but 38% of generated tokens and 40% of generation time; 32% of cap-hit code did not load or crashed (3% otherwise).
-- Cap hits are mostly not token loops: 4 of 103 end in a verbatim loop (0 of 518 other checkpoints). The rest is long reasoning that circles with new words, so a presence penalty would not help.
+- Cap hits are mostly not token loops: 4 of 103 end in a verbatim loop (0 of 518 other checkpoints). The rest is long reasoning that circles with new words, so a presence penalty has no clear target here (we did not test one).
 
 ## 3. Reproducibility
 
@@ -86,6 +86,71 @@ task bootstrap:
 - Meaning: no incremental gain shown under this pipeline, not equivalence. The cheap baseline is strong: the largest coefficients are the logprob confidence of the thinking and the answer, and code similarity. The task-weighted result is a reported sensitivity, never the rule.
 - predict-v2 corrected defects found in a second-opinion review (duplicate missing indicators that changed the L2 penalty, a timeout case error, a missing telemetry feature, data-dependent columns). C = 1, the feature sets and the rule did not change. Both results are on record; the pipeline is frozen.
 - Details: `docs/results/resource_guide_pilot-v1+pilot-v1b_predict-v1.json` and `..._predict-v2.json`.
+
+## 8. Does the thinking change Jev's judgment? (same-question contrast)
+
+The trace arm answers the same three code questions as the history arm, but
+also reads the thinking. Comparing the two answers to the same question on the
+same checkpoints isolates the effect of the chain of thought. Prespecified on
+October 16 as a descriptive analysis (outside the Holm family). Visible-pass dev
+checkpoints, no new Jev calls (`scripts/analysis/trace_effect.py`).
+
+| Answer (standalone AUROC) | Without thinking | With thinking | Difference (task bootstrap) |
+|---|---|---|---|
+| `code_likely_fails` | 0.786 | 0.796 | +0.009 (-0.027 to +0.054) |
+| `special_cases_visible_tests` | 0.778 | 0.750 | -0.028 (-0.093 to +0.044) |
+| `repeats_previous_code` (39 rows) | 0.325 | 0.351 | |
+
+| Thinking answer (standalone AUROC) | Value |
+|---|---|
+| `on_task` | 0.194 (higher `on_task`, fewer fails: 0.806 as a separator) |
+| `unsupported_claim` | 0.718 |
+| `approach_change_without_evidence` (39 rows) | 0.776 |
+| `repeating_failed_fix` (39 rows) | 0.643 |
+| `stated_fix_matches_change` (39 rows) | 0.325 |
+
+| Frozen predictor (out-of-fold) | AUROC | Task-weighted |
+|---|---|---|
+| cheap | 0.796 | 0.770 |
+| cheap + code answers, history arm | 0.815 | 0.822 |
+| cheap + code answers, trace arm | 0.810 | 0.806 |
+| cheap + code + thinking (frozen) | 0.803 | 0.806 |
+| cheap + all trace-arm answers | 0.800 | 0.794 |
+
+- Trace arm minus history arm code answers in the predictor: -0.018 to +0.009 pooled; -0.031 to -0.002 task-weighted.
+- Reading: the thinking answers carry signal alone (`on_task` is as strong as the best code answer), but on dev they add little to the cheap features and the code answers. Overlap is a possible explanation, not an established mechanism: removing the logprob columns lowers cheap only to 0.789. The trace-arm answers also see the code, so their signal is not from the thinking alone. Not evidence of no effect: 49 positive tasks, wide intervals, and the round-2+ questions rest on 39 checkpoints.
+
+## 9. Strong Jev answers: frozen as a descriptive sensitivity
+
+A dev heuristic (standalone AUROC >= 0.70 or <= 0.30 on >= 100 applicable rows,
+chosen after the per-answer results above) kept four answers:
+`code_likely_fails`, `special_cases_visible_tests`, `on_task`,
+`unsupported_claim`. They are frozen by name (`predict.STRONG_QS`), not the
+rule. Scripts: `scripts/analysis/jev_select.py`, `scripts/analysis/jev_strong.py`.
+
+| Predictor (visible-pass dev, out-of-fold) | AUROC | Gain over cheap (task bootstrap) | Task-weighted gain |
+|---|---|---|---|
+| cheap (predict-v2) | 0.796 | | |
+| cheap + code + thinking (predict-v2 primary) | 0.803 | +0.007 (-0.045 to +0.046) | +0.036 |
+| cheap + code | 0.815 | +0.020 (-0.007 to +0.048) | +0.052 |
+| cheap + strong4 (sensitivity) | 0.814 | +0.018 (-0.022 to +0.050) | +0.047 |
+| strong4 mean, no fitting (sensitivity) | 0.803 | +0.008 (-0.044 to +0.059) | +0.058 |
+| Nested: rule applied inside each fold, cheap on the same folds | 0.811 vs 0.792 | +0.019 (-0.009 to +0.046) | +0.044 |
+| Nested forward selection | 0.813 vs 0.802 | +0.011 (-0.016 to +0.041) | |
+
+- The rule picked the same four answers in 20 of 25 nested folds (three in the other 5). The nested check guards against within-fold selection leakage; it does not validate the rule, which was chosen after looking.
+- strong4 mean by subgroup: HumanEval+ 0.878 vs cheap 0.778; MBPP+ 0.769 vs 0.802; cap hit (30 rows) 0.768 vs 0.395. Hypotheses for the test data, not results.
+- A rank-based mean (0.839) and a three-answer mean (0.821) were also looked at after the plain mean was defined. They stay in this audit and are not used (forking paths).
+- Decision (October 16, after two second-opinion reviews): predict-v2 stays primary. cheap + strong4 (one LR refitted on all dev visible-pass rows) and the strong4 mean are computed on test exactly as frozen and reported as "selected on dev after the freeze; descriptive". They cannot change the primary conclusion.
+
+## 10. Scope and schedule decisions (October 16)
+
+- Holm test: two-sided paired task bootstrap centered on the null, 19,999 replicates, stratified by benchmark (`predict.bootstrap_test`, `predict.holm`).
+- Visible-fail rule, the same for every routing policy: rounds 1-2 continue the repair loop with no judge call; round 3 is a terminal frontier takeover. Policies differ only at visible-pass checkpoints.
+- Frontier: 3 takeover samples per task (target), 1 per task (floor, 325 calls).
+- Fallback: if the replay is not validated by October 20, narrow the paper to failure prediction and selective acceptance.
+- Cut: the fine-tune stretch goal, takeover with context, drift labels and the 3-level question; blind resampling and the generic judge unless they need no new code path. Pinocchio is time-boxed.
+- Our visible-test baselines are not the equivalent of Model Cascading for Code (which generates tests); this is a stated limitation.
 
 ## Costs to date
 

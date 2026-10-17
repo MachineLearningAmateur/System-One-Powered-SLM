@@ -24,6 +24,17 @@ test rows always get the same columns in the same order. Missing values:
 clear_next_step is not applicable at a visible pass, so it is not in the
 visible-pass predictor. The pipeline is fixed: standard scaling, then an L2
 logistic regression with C = 1. Folds are grouped by task.
+
+Sensitivity analyses (descriptive, never the primary result). On October 16,
+after the predict-v2 freeze and after inspecting development outcomes (no test
+trajectory existed), the four answers in STRONG_QS were selected on
+development data and frozen as named:
+
+    cheap+strong4   cheap features + the four answers (code answers from the
+                    history arm, thinking answers from the trace arm)
+    strong4 mean    an equal-weight mean of the four answers, oriented so that
+                    higher = more likely to fail (directions from the rubric
+                    text); not a calibrated probability (jev_mean)
 """
 
 from __future__ import annotations
@@ -58,6 +69,11 @@ CODE_QS = ["code_likely_fails", "special_cases_visible_tests", "repeats_previous
 THINKING_QS = ["on_task", "repeating_failed_fix", "approach_change_without_evidence", "unsupported_claim",
                "stated_fix_matches_change", "clear_next_step"]
 FEATURE_SETS = ("cheap", "cheap+code", "cheap+code+thinking")
+STRONG_QS = ["code_likely_fails", "special_cases_visible_tests", "on_task", "unsupported_claim"]
+SENSITIVITY_SETS = ("cheap+strong4",)
+# rubric_v2.yaml: "true" means trouble for every question except these two.
+TRUE_IS_GOOD = {"on_task", "stated_fix_matches_change"}
+NA_ORIENTED = 0.5  # a structurally unavailable component of the mean counts as neutral
 HISTORY_ARM, TRACE_ARM = "base+history", "base+history+trace"
 # Reasons for a structural NA (jev_scoring.applicability); "arm_lacks_*" never
 # happens for the arm each question is read from.
@@ -79,7 +95,9 @@ def columns(feature_set: str, visible_pass_only: bool) -> list[str]:
         cols += [f"jev_{q}" for q in CODE_QS]
     if feature_set == "cheap+code+thinking":
         cols += [f"jev_{q}" for q in THINKING_QS if not (visible_pass_only and q == "clear_next_step")]
-    if feature_set not in FEATURE_SETS:
+    if feature_set == "cheap+strong4":
+        cols += [f"jev_{q}" for q in STRONG_QS]
+    if feature_set not in FEATURE_SETS + SENSITIVITY_SETS:
         raise ValueError(f"unknown feature set {feature_set!r}")
     return cols
 
@@ -118,6 +136,8 @@ def jev_vector(history: dict, trace: dict, feature_set: str) -> dict[str, float]
         qs += [(q, history) for q in CODE_QS]
     if feature_set == "cheap+code+thinking":
         qs += [(q, trace) for q in THINKING_QS]
+    if feature_set == "cheap+strong4":
+        qs += [(q, history if q in CODE_QS else trace) for q in STRONG_QS]
     for q, rec in qs:
         app = rec["applicability"][q]
         v = _num(rec["features"].get(q))
@@ -131,6 +151,29 @@ def jev_vector(history: dict, trace: dict, feature_set: str) -> dict[str, float]
                 raise ValueError(f"{rec['checkpoint_id']} {rec['arm']}: {q} not applicable for {app}")
             out[f"jev_{q}"] = 0.0
     return out
+
+
+def jev_mean(history: dict, trace: dict, qs: list[str] = STRONG_QS) -> float | None:
+    """The frozen equal-weight Jev score: the mean of the oriented answers (higher = more
+    likely to fail). A structurally unavailable answer counts as NA_ORIENTED and the
+    denominator stays len(qs). A record that is not "ok" (a failed scoring call) makes the
+    score unavailable (None); such rows are counted and left out, never filled."""
+    vals = []
+    for q in qs:
+        rec = history if q in CODE_QS else trace
+        if rec.get("status", "ok") != "ok":
+            return None
+        if rec["applicability"][q] != "applicable":
+            reasons = set(rec["applicability"][q].removeprefix("na:").split(","))
+            if not reasons <= STRUCTURAL_NA:
+                raise ValueError(f"{rec['checkpoint_id']} {rec['arm']}: {q} not applicable for {reasons}")
+            vals.append(NA_ORIENTED)
+            continue
+        v = _num(rec["features"].get(q))
+        if v is None:
+            raise ValueError(f"{rec['checkpoint_id']} {rec['arm']}: {q} applies but has no value")
+        vals.append(1.0 - v if q in TRUE_IS_GOOD else v)
+    return float(np.mean(vals))
 
 
 def row_vector(cp_features: dict, has_trace: bool, history: dict, trace: dict, feature_set: str) -> dict[str, float]:
@@ -203,3 +246,35 @@ def task_bootstrap(y: np.ndarray, groups: np.ndarray, preds: dict[str, np.ndarra
             "delta": {f"{hi} - {lo}": ci(v) for (lo, hi), v in delta.items()},
             # Share of resamples with a positive difference: descriptive, not a probability that it helps.
             "delta_share_positive": {f"{hi} - {lo}": float(np.mean(np.array(v) > 0)) for (lo, hi), v in delta.items()}}
+
+
+def bootstrap_test(y: np.ndarray, groups: np.ndarray, strata: np.ndarray, score_a: np.ndarray,
+                   score_b: np.ndarray, n_boot: int = 19_999, seed: int = 0) -> dict:
+    """Two-sided paired task bootstrap test of dAUROC = AUROC(b) - AUROC(a), centered on
+    the null (Hall and Wilson): whole tasks are resampled within each stratum (benchmark)
+    with all their rows and both scores; p = (1 + #{|d* - d| >= |d|}) / (B + 1). Also
+    returns the unadjusted percentile interval of d. Asymptotic, not exact."""
+    rng = np.random.default_rng(seed)
+    d_hat = roc_auc_score(y, score_b) - roc_auc_score(y, score_a)
+    by_stratum = {s: np.unique(groups[strata == s]) for s in np.unique(strata)}
+    idx = {t: np.flatnonzero(groups == t) for t in np.unique(groups)}
+    ds = []
+    for _ in range(n_boot):
+        rows = np.concatenate([idx[t] for ts in by_stratum.values() for t in rng.choice(ts, len(ts), replace=True)])
+        if len(set(y[rows])) < 2:
+            continue
+        ds.append(roc_auc_score(y[rows], score_b[rows]) - roc_auc_score(y[rows], score_a[rows]))
+    ds = np.array(ds)
+    p = (1 + np.sum(np.abs(ds - d_hat) >= abs(d_hat))) / (len(ds) + 1)
+    return {"delta": float(d_hat), "p_two_sided": float(p), "n_boot": int(len(ds)),
+            "ci95": (float(np.percentile(ds, 2.5)), float(np.percentile(ds, 97.5)))}
+
+
+def holm(pvalues: dict[str, float]) -> dict[str, float]:
+    """Holm-adjusted p-values (familywise), in the input order."""
+    order = sorted(pvalues, key=pvalues.get)
+    m, out, running = len(order), {}, 0.0
+    for i, k in enumerate(order):
+        running = max(running, min(1.0, (m - i) * pvalues[k]))
+        out[k] = running
+    return {k: out[k] for k in pvalues}

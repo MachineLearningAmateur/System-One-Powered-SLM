@@ -23,12 +23,12 @@ from collections import Counter
 
 from system1.config import RESULTS
 from system1.eval.labels import load_labelled
-from system1.eval.ledger import CostLedger
+from system1.eval.ledger import read_jsonl
 from system1.features.evidence import ARMS
 
 
 def last_records(path) -> dict:
-    rows, bad = CostLedger(path).read()
+    rows, bad = read_jsonl(path)
     if bad:
         raise RuntimeError(f"{len(bad)} damaged lines in {path}")
     return {(r["checkpoint_id"], r["arm"]): r for r in rows}
@@ -60,7 +60,7 @@ def main() -> int:
         if (d / "jev_repeat.jsonl").exists():
             for k, r in last_records(d / "jev_repeat.jsonl").items():
                 repeats[(rid, *k)] = r
-        ledger += CostLedger(d / "jev_ledger.jsonl").read()[0]
+        ledger += read_jsonl(d / "jev_ledger.jsonl")[0]
     missing = [k for k in labels if any((*k, arm) not in scores for arm in ARMS)]
     out: dict = {"runs": args.run_id, "checkpoints": len(labels), "unscored_checkpoints": len(missing)}
     print(f"checkpoints {len(labels)}; without a record in every arm: {len(missing)}")

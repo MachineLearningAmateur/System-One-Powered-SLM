@@ -12,7 +12,9 @@ first. The task-weighted AUROC is a reported sensitivity, never the rule.
 This is a guide for effort, not a result: development data only.
 
 It also refits the frozen test predictor of each feature set (one LR on all
-visible-pass development rows) and stores it in a portable form.
+visible-pass development rows) and stores it in a portable form, for the
+primary sets and for the sensitivity set cheap+strong4. The strong4 mean
+needs no fitting; its development AUROC is reported next to them.
 
 load() refuses: a run that is not a development run, Jev scores made with
 another rubric, evidence version or byte budget, and a score whose request
@@ -33,7 +35,7 @@ from sklearn.metrics import roc_auc_score
 from system1.config import RESULTS
 from system1.eval import predict as P
 from system1.eval.labels import load_labelled
-from system1.eval.ledger import CostLedger
+from system1.eval.ledger import read_jsonl
 from system1.features.evidence import EVIDENCE_VERSION, build_arms
 from system1.features.jev_scoring import APPLICABLE, applicability, load_rubric
 from system1.loop.runner import to_scoring_checkpoint
@@ -42,6 +44,9 @@ from system1.routers.jev import BYTE_BUDGET, request_body
 GUIDE_GAIN = 0.03
 REPEATS = 20
 PAIRS = [("cheap", "cheap+code+thinking"), ("cheap+code", "cheap+code+thinking"), ("cheap", "cheap+code")]
+# Sensitivities selected on development data after the freeze (predict.py docstring); descriptive.
+MEAN = "strong4 mean"
+SENS_PAIRS = [("cheap", "cheap+strong4"), ("cheap", MEAN)]
 
 
 class LoadError(RuntimeError):
@@ -71,7 +76,7 @@ def load(run_ids: list[str]) -> list[dict]:
         bad = {k: (proto.get(k), v) for k, v in want.items() if proto.get(k) != v}
         if bad:
             raise LoadError(f"{rid}: Jev scores were made with another protocol {bad}")
-        rows, damaged = CostLedger(d / "jev_scores.jsonl").read()
+        rows, damaged = read_jsonl(d / "jev_scores.jsonl")
         if damaged:
             raise LoadError(f"{rid}: {len(damaged)} damaged lines in jev_scores.jsonl")
         scores = {(r["checkpoint_id"], r["arm"]): r for r in rows}  # last record wins
@@ -99,29 +104,35 @@ def evaluate(data: list[dict], label: str, visible_pass_only: bool) -> dict:
     groups = np.array([d["cp"]["task_id"] for d in data])
     w = P.task_weights(groups)
     preds, per_split, cols, final = {}, {}, {}, {}
-    for fs in P.FEATURE_SETS:
+    for fs in P.FEATURE_SETS + P.SENSITIVITY_SETS:
         X, cols[fs] = design(data, fs, visible_pass_only)
         runs = [P.oof_scores(X, y, groups, seed) for seed in range(REPEATS)]
         per_split[fs] = [roc_auc_score(y, p) for p in runs]
         preds[fs] = np.mean(runs, axis=0)
         final[fs] = P.fit_final(X, y, cols[fs])
+    means = [P.jev_mean(d["history"], d["trace"]) for d in data]
+    assert all(m is not None for m in means)  # load() keeps only rows with both arms ok
+    preds[MEAN] = np.array(means)
     res = {"subset": label, "n": len(y), "positives": int(y.sum()), "positive_tasks": len(set(groups[y == 1])),
            "tasks": len(set(groups)), "first_round_rows": int(sum(d["cp"]["round"] == 1 for d in data)),
            "auroc": {fs: roc_auc_score(y, p) for fs, p in preds.items()},
            "auroc_task_weighted": {fs: roc_auc_score(y, p, sample_weight=w) for fs, p in preds.items()},
            "auroc_single_split_mean": {fs: float(np.mean(v)) for fs, v in per_split.items()},
            "auroc_single_split_range": {fs: (min(v), max(v)) for fs, v in per_split.items()},
-           "bootstrap": P.task_bootstrap(y, groups, preds, PAIRS),
-           "bootstrap_task_weighted": P.task_bootstrap(y, groups, preds, PAIRS, weighted=True),
+           "bootstrap": P.task_bootstrap(y, groups, preds, PAIRS + SENS_PAIRS),
+           "bootstrap_task_weighted": P.task_bootstrap(y, groups, preds, PAIRS + SENS_PAIRS, weighted=True),
            "columns": cols, "final_models": final}
     print(f"\n== {label}: {res['n']} checkpoints, {res['positives']} hidden fail from {res['positive_tasks']} tasks, "
           f"{res['tasks']} tasks, {res['first_round_rows']} round-1 rows")
-    for fs in P.FEATURE_SETS:
+    for fs in P.FEATURE_SETS + P.SENSITIVITY_SETS:
         lo, hi = res["bootstrap"]["auroc"][fs]
         a, b = res["auroc_single_split_range"][fs]
         print(f"  {fs:22s} AUROC {res['auroc'][fs]:.3f} ({lo:.3f}-{hi:.3f}); task-weighted "
               f"{res['auroc_task_weighted'][fs]:.3f}; single splits {a:.3f}-{b:.3f}; {len(cols[fs])} columns")
-    for lo_, hi_ in PAIRS:
+    a, lohi = res["auroc"][MEAN], res["bootstrap"]["auroc"][MEAN]
+    print(f"  {MEAN:22s} AUROC {a:.3f} ({lohi[0]:.3f}-{lohi[1]:.3f}); task-weighted "
+          f"{res['auroc_task_weighted'][MEAN]:.3f}; no fitting (sensitivity)")
+    for lo_, hi_ in PAIRS + SENS_PAIRS:
         k = f"{hi_} - {lo_}"
         lo, hi = res["bootstrap"]["delta"][k]
         wlo, whi = res["bootstrap_task_weighted"]["delta"][k]

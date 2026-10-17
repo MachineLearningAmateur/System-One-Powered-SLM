@@ -16,6 +16,9 @@ repository root with `uv run python scripts/analysis/<name>.py`. They read
 | `jev_check.py` + `jev_check_report.py` | First Jev integration check, 50 checkpoints (evidence-v2, 28,000-byte budget) | billed Jev calls |
 | `jev_budget.py` + `jev_budget_report.py` | Full vs cut traces on the 15 cut checkpoints | billed Jev calls |
 | `jev_probe.py` | Largest natural requests (55,776 bytes) from the 12K run | billed Jev calls |
+| `trace_effect.py` | Same-question contrast: code answers with vs without the thinking; thinking answers alone | none (reads the stored scores) |
+| `jev_select.py` | Add-one value of each answer, subgroups, nested forward selection, no-logprob check | none |
+| `jev_strong.py` | The strong-answer heuristic, nested with a matched cheap comparator; the fixed strong4 mean | none |
 
 The Jev scripts were run once with the user's approval (cap $2; spent about
 $0.03 on them). `jev_check.py` refuses to run again on the same output

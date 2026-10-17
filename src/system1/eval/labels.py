@@ -16,7 +16,7 @@ import hashlib
 import json
 from pathlib import Path
 
-from system1.eval.ledger import CostLedger
+from system1.eval.ledger import read_jsonl
 from system1.loop.runner import complete_executions
 
 LABELS_FILE = "hidden_labels.jsonl"
@@ -39,12 +39,12 @@ def load_labelled(run_dir: Path, allow_invalid: bool = False, allow_nonprotocol:
     `report`, if given, receives what the caller must state: the grading
     session, executions left out as incomplete or replaced, and invalid labels
     left out (only with allow_invalid)."""
-    rows, bad = CostLedger(run_dir / "trajectories.jsonl").read()
+    rows, bad = read_jsonl(run_dir / "trajectories.jsonl")
     if bad:
         raise LabelError(f"{len(bad)} damaged lines in trajectories.jsonl")
     dropped: list[dict] = []
     cps = complete_executions(rows, dropped=dropped)
-    labels, bad = CostLedger(run_dir / LABELS_FILE).read()
+    labels, bad = read_jsonl(run_dir / LABELS_FILE)
     if bad:
         raise LabelError(f"{len(bad)} damaged lines in {LABELS_FILE}")
     sessions = {lab.get("grade_session") for lab in labels}

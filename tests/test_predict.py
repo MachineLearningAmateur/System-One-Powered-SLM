@@ -172,3 +172,46 @@ def test_resource_guide_rebuilds_the_request_hash_like_the_scorer(tmp_path):
     changed = Checkpoint(**{**cp.__dict__, "code": "def f(): return 1"})
     assert rg.request_hashes(changed, load_rubric(), client.model, client.byte_budget) != hashes
     assert hashlib.sha256(b"").hexdigest() not in hashes.values()
+
+
+def test_strong4_set_takes_code_answers_from_history_and_thinking_from_trace():
+    h = jev(P.HISTORY_ARM, code_likely_fails=0.7, special_cases_visible_tests=0.1)
+    t = jev(P.TRACE_ARM, code_likely_fails=0.2, on_task=0.9, unsupported_claim=0.3)
+    v = P.jev_vector(h, t, "cheap+strong4")
+    assert v == {"jev_code_likely_fails": 0.7, "jev_special_cases_visible_tests": 0.1, "jev_on_task": 0.9,
+                 "jev_unsupported_claim": 0.3}
+    cols = P.columns("cheap+strong4", True)
+    assert cols[:len(P.columns("cheap", True))] == P.columns("cheap", True)
+    assert "cheap+strong4" not in P.FEATURE_SETS  # a sensitivity, never a primary set
+
+
+def test_jev_mean_orients_by_rubric_and_handles_na_and_failures():
+    h = jev(P.HISTORY_ARM, code_likely_fails=0.8, special_cases_visible_tests=0.0)
+    t = jev(P.TRACE_ARM, on_task=0.9, unsupported_claim=0.5)
+    assert P.jev_mean(h, t) == pytest.approx((0.8 + 0.0 + (1 - 0.9) + 0.5) / 4)
+    # A structural NA counts as 0.5 and the denominator stays 4.
+    t2 = jev(P.TRACE_ARM, on_task=0.9, unsupported_claim=0.5)
+    t2["applicability"]["on_task"] = "na:trace_missing"
+    t2["features"]["on_task"] = None
+    assert P.jev_mean(h, t2) == pytest.approx((0.8 + 0.0 + 0.5 + 0.5) / 4)
+    # A failed scoring call makes the score unavailable.
+    assert P.jev_mean(h, {**t, "status": "failed"}) is None
+    assert "stated_fix_matches_change" in P.TRUE_IS_GOOD and "on_task" in P.TRUE_IS_GOOD
+
+
+def test_bootstrap_test_finds_a_real_difference_and_not_a_null():
+    rng = np.random.default_rng(1)
+    groups = np.repeat(np.arange(60), 4)
+    strata = np.where(groups < 30, "a", "b")
+    y = rng.integers(0, 2, len(groups))
+    noise = rng.normal(size=len(y))
+    good = y + rng.normal(0, 0.6, len(y))
+    r = P.bootstrap_test(y, groups, strata, noise, good, n_boot=999)
+    assert r["delta"] > 0 and r["p_two_sided"] < 0.01 and r["ci95"][0] > 0
+    r0 = P.bootstrap_test(y, groups, strata, good, good + 1e-9 * rng.normal(size=len(y)), n_boot=999)
+    assert r0["p_two_sided"] > 0.5
+
+
+def test_holm():
+    adj = P.holm({"a": 0.01, "b": 0.04, "c": 0.03})
+    assert adj == pytest.approx({"a": 0.03, "b": 0.06, "c": 0.06})

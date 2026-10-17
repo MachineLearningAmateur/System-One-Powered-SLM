@@ -72,21 +72,30 @@ class CostLedger:
             f.write(line + "\n")
 
     def read(self) -> tuple[list[dict], list[tuple[int, str]]]:
-        """Return (rows, bad_lines). Bad lines keep their 1-based line number for audit;
-        bytes that are not valid UTF-8 are shown with replacement characters."""
-        rows: list[dict] = []
-        bad: list[tuple[int, str]] = []
-        if not self.path.exists():
-            return rows, bad
-        with self._lock, open(self.path, "rb") as f:
-            for n, raw in enumerate(f, start=1):
-                if not raw.strip():
-                    continue
-                try:
-                    rows.append(json.loads(raw.decode("utf-8")))
-                except (UnicodeDecodeError, json.JSONDecodeError):
-                    bad.append((n, raw.rstrip(b"\n").decode("utf-8", errors="replace")))
+        """Return (rows, bad_lines); see read_jsonl."""
+        with self._lock:
+            return read_jsonl(self.path)
+
+
+def read_jsonl(path: Path | str) -> tuple[list[dict], list[tuple[int, str]]]:
+    """Read a JSONL file without opening it for writing (analysis loaders use this, so a
+    read never changes a run's files). Returns (rows, bad_lines); bad lines keep their
+    1-based line number for audit; bytes that are not valid UTF-8 are shown with
+    replacement characters."""
+    rows: list[dict] = []
+    bad: list[tuple[int, str]] = []
+    path = Path(path)
+    if not path.exists():
         return rows, bad
+    with open(path, "rb") as f:
+        for n, raw in enumerate(f, start=1):
+            if not raw.strip():
+                continue
+            try:
+                rows.append(json.loads(raw.decode("utf-8")))
+            except (UnicodeDecodeError, json.JSONDecodeError):
+                bad.append((n, raw.rstrip(b"\n").decode("utf-8", errors="replace")))
+    return rows, bad
 
 
 def usd_for(prices: dict | None, model: str, input_tokens: int | None, output_tokens: int | None) -> float | None:

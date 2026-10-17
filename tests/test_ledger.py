@@ -1,4 +1,4 @@
-from system1.eval.ledger import CostLedger, LedgerRow, usd_for
+from system1.eval.ledger import CostLedger, LedgerRow, read_jsonl, usd_for
 
 PRICES = {
     "models": {
@@ -52,6 +52,16 @@ def test_invalid_utf8_line_kept_for_audit(tmp_path):
     path.write_bytes(b'{"component": "router"}' + b"\n" + b'{"x": "' + truncated_euro + b'"}' + b"\n")
     rows, bad = CostLedger(path).read()
     assert len(rows) == 1 and len(bad) == 1 and bad[0][0] == 2
+
+
+def test_read_jsonl_never_writes(tmp_path):
+    path = tmp_path / "ledger.jsonl"
+    data = ('{"component": "router"}' + NL + '{"component": "rou').encode()
+    path.write_bytes(data)
+    rows, bad = read_jsonl(path)
+    assert len(rows) == 1 and bad == [(2, '{"component": "rou')]
+    assert path.read_bytes() == data  # the damaged tail is not terminated by a read
+    assert read_jsonl(tmp_path / "none.jsonl") == ([], [])
 
 
 def test_usd_for():

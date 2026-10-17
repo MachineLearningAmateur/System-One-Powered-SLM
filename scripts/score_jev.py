@@ -28,7 +28,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 from system1.config import RESULTS, ROOT, load_prices
-from system1.eval.ledger import CostLedger
+from system1.eval.ledger import CostLedger, read_jsonl
 from system1.features.evidence import ARMS, EVIDENCE_VERSION
 from system1.features.jev_scoring import JevScorer, ModelVersionChanged, ScoreStore, load_rubric
 from system1.loop.runner import complete_executions, to_scoring_checkpoint
@@ -67,7 +67,7 @@ def used_input_tokens(ledger: CostLedger) -> int:
 
 def score_run(run_dir: Path, client: JevClient, *, repeat: int = 0, max_input_tokens: int = 4_000_000,
               limit: int = 0, commit: str = "", dirty: bool = False, log=print) -> int:
-    rows, bad = CostLedger(run_dir / "trajectories.jsonl").read()
+    rows, bad = read_jsonl(run_dir / "trajectories.jsonl")
     if bad:
         log(f"{len(bad)} damaged lines in trajectories.jsonl")
         return 2
