@@ -32,3 +32,6 @@ pythonpath = ["src"]
 dev = [
     "pytest>=9.1.1",
 ]
+pinocchio = [
+    "pinocchio-uq==0.1.1",
+]
