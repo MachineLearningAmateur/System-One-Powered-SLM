@@ -25,6 +25,9 @@ Outputs in results/runs/<run-id>/:
 The session file is written before the labels are replaced, and
 system1.eval.labels.load_labelled() checks that labels and session match.
 A session with vLLM running or a changed git tree is marked non-protocol.
+Tasks in configs/grading_exclusions_v1.json (Amendment A2) are dropped before
+calibration: they get no grading call and no label, and the session records
+which checkpoints it dropped (system1.eval.exclusions).
 
 --frontier grades the takeover answers of a frontier run (scripts/run_frontier.py)
 with the same rules: one unit per (task, sample) answer, read from
@@ -47,6 +50,7 @@ from pathlib import Path
 from typing import Callable
 
 from system1.config import RESULTS, ROOT
+from system1.eval.exclusions import load_exclusions, session_record, split_excluded
 from system1.eval.labels import LABELS_FILE, META_FILE, SESSIONS_DIR, code_sha
 from system1.eval.ledger import CostLedger, read_jsonl
 from system1.loop.runner import complete_executions
@@ -54,7 +58,8 @@ from system1.loop.sandbox import DEFAULT_CONTAINER, Sandbox, SandboxError
 
 CACHE_DIR = ROOT / "data" / "evalplus_cache" / "evalplus"
 GRADING_CODE = ("scripts/grade_hidden.py", "src/system1/loop/sandbox.py", "src/system1/eval/labels.py",
-                "docker/sandbox/worker.py", "docker/sandbox/Dockerfile", "docker-compose.yml")
+                "src/system1/eval/exclusions.py", "docker/sandbox/worker.py", "docker/sandbox/Dockerfile",
+                "docker-compose.yml")
 CANARY = "\n_s1_memory_canary = bytearray(1024 ** 3)\n"
 DATASET = {"humaneval+": "humaneval", "mbpp+": "mbpp"}
 
@@ -159,13 +164,17 @@ def main() -> int:
         return 2
     dropped: list[dict] = []
     cps = frontier_units(rows) if args.frontier else complete_executions(rows, dropped=dropped)
+    excl = load_exclusions()
+    n_before = len(cps)
+    cps, gone = split_excluded(cps, excl)
     session = f"{datetime.now(timezone.utc):%Y%m%dT%H%M%S}-{uuid.uuid4().hex[:6]}"
     commit, dirty = git_state()
     meta: dict = {"run_id": args.run_id, "session": session, "source": source, "started": datetime.now(timezone.utc).isoformat(),
                   "protocol": not (vllm or dirty), "vllm_running": vllm, "git_commit": commit, "git_dirty": dirty,
                   "grading_code_sha256": sha256_files([ROOT / p for p in GRADING_CODE], ROOT),
                   "evalplus_cache_sha256": sha256_files([p for p in CACHE_DIR.rglob("*") if p.is_file()], CACHE_DIR),
-                  "container": container_facts(), "n_checkpoints": len(cps), "dropped_executions": dropped}
+                  "container": container_facts(), "n_checkpoints": len(cps), "dropped_executions": dropped,
+                  "exclusions": session_record(excl, gone, n_before)}
 
     # Distinct (dataset, task, code) units; checkpoints without code need no grade.
     units: dict[tuple[str, str, str], str] = {}

@@ -1,0 +1,92 @@
+{
+ "version": "grading-exclusions-v1",
+ "amendment": "A2 (docs/research-plan.md)",
+ "decided_utc": "2026-10-17T20:45:00Z",
+ "freeze_tag": "protocol-freeze-v1 (d749eea)",
+ "rule": "An excluded task gets no hidden grade and no label, in small-model and frontier grading. load_labelled() drops all its checkpoints (every attempt and round) and reports them. run_frontier.py makes no call for it. The split is unchanged: the task stays a test task, excluded from evaluation.",
+ "scope": [
+  "main test analysis (primary test, Holm family, Table 1)",
+  "frontier grading and escalation replay",
+  "A1.1 transfer (when HumanEval+ is the test target)",
+  "A1.2 32K arm (both arms of every paired comparison)"
+ ],
+ "tasks": [
+  {
+   "task_id": "HumanEval/32",
+   "benchmark": "humaneval+",
+   "split": "test",
+   "entry_point": "find_zero",
+   "reason": "The pinned EvalPlus 0.3.1 cannot give this task a valid pass. Its special find_zero oracle (evalplus/eval/__init__.py lines 187-189) ends with `continue`, which skips `details[i] = True` and `progress.value += 1`; untrusted_check then turns PASS into FAIL because len(details) != len(inputs). Every solution that does not time out grades 'fail'. Separately, the reference solution (Newton method) fails the residual oracle (atol 1e-4) on 7 of 788 plus inputs, so a repaired oracle would still fail calibration.",
+   "found_by": "grade_hidden.py reference calibration, session 20261017T201106-ac7de6 of run main-test-v1 (results/runs/main-test-v1/hidden_grades.jsonl: 98 calibration calls and 1 canary, no candidate call)",
+   "hidden_outcomes_consulted": false,
+   "evidence": {
+    "evalplus": "0.3.1",
+    "python": "3.12.14",
+    "atol": 0.0001,
+    "n_base": 100,
+    "n_plus": 788,
+    "reference_residual_failures": {
+     "base_input": [],
+     "plus_input": [
+      {
+       "index": 119,
+       "residual": 0.00231503
+      },
+      {
+       "index": 177,
+       "residual": 25.3608
+      },
+      {
+       "index": 185,
+       "residual": 142.993
+      },
+      {
+       "index": 399,
+       "residual": 0.00239356
+      },
+      {
+       "index": 616,
+       "residual": 684373000.0
+      },
+      {
+       "index": 650,
+       "residual": 2.81113e+20
+      },
+      {
+       "index": 694,
+       "residual": 16.4692
+      }
+     ]
+    },
+    "evalplus_eval_init_sha256": "e9d4960c7da3547e2dbd20a1a3aa8bbea77f2caf16215b600a0a9ef5e14bfd80",
+    "dataset_sha256": "b6ed6a3a7e560bad75038eb9e72029ace2d26592e04b3f0596b4b75a55529465",
+    "grader_image": "system1-sandbox:v2 sha256:207c21732a0a8d66b487e1623777bcf4ec4f07bf98b522c50ac97ef3e9cc2d19",
+    "calibration_grade": {
+     "base": "fail",
+     "plus": "fail",
+     "valid": true
+    },
+    "untrusted_check_fast_check_false": {
+     "base": "fail, 0 details recorded",
+     "plus": "fail, 7 details recorded (all False)"
+    },
+    "other_references": "all 378 MBPP+ and the other 163 HumanEval+ reference solutions pass"
+   },
+   "main_test_v1_counts": {
+    "attempts": 5,
+    "checkpoints": 12,
+    "visible_pass_checkpoints": 4,
+    "retained": {
+     "tasks": 324,
+     "attempts": 1620,
+     "checkpoints": 2086,
+     "visible_pass_checkpoints": 1457,
+     "vp_tasks": {
+      "humaneval+": 93,
+      "mbpp+": 216
+     }
+    }
+   }
+  }
+ ]
+}

@@ -52,8 +52,10 @@ import numpy as np
 from system1.config import CONFIGS, RESULTS, ROOT, load_prices
 from system1.eval import predict as P
 from system1.eval import replay as R
+from system1.eval.exclusions import load_exclusions
 from system1.eval.labels import code_sha, load_labelled
 from system1.eval.ledger import read_jsonl
+from system1.loop.runner import complete_executions
 
 JEV_USD_PER_M_INPUT = 0.042  # third-party price, unconfirmed for the direct API (findings.md, Costs)
 ARMS = {"cheap": [], "cheap+code": [P.HISTORY_ARM], "cheap+code+thinking": [P.HISTORY_ARM, P.TRACE_ARM],
@@ -99,6 +101,10 @@ def frontier_outcomes(run_id: str) -> tuple[dict[str, np.ndarray], dict[str, np.
     meta = json.loads((d / "frontier_grade_meta.json").read_text(encoding="utf-8"))
     if not meta["protocol"] or meta["labels"]["invalid"]:
         raise SystemExit(f"STOP: {run_id} frontier grades are not a clean protocol session")
+    excl = load_exclusions()
+    rec = meta.get("exclusions")
+    if rec is not None and rec["sha256"] != excl["sha256"]:
+        raise SystemExit(f"STOP: {run_id} frontier grades applied other exclusions than {excl['version']}")
     labels: dict[str, dict] = {}
     for lab in _rows(d / "frontier_labels.jsonl", "frontier labels"):
         if lab["checkpoint_id"] in labels:
@@ -108,8 +114,11 @@ def frontier_outcomes(run_id: str) -> tuple[dict[str, np.ndarray], dict[str, np.
         labels[lab["checkpoint_id"]] = lab
     ledger = _rows(d / "ledger.jsonl", "frontier ledger")
     z, cost = defaultdict(dict), defaultdict(dict)
-    incomplete = 0
+    incomplete, excluded = 0, 0
     for a in _rows(d / "frontier_answers.jsonl", "frontier answers"):
+        if a["task_id"] in excl["tasks"]:
+            excluded += 1  # no label by design (Amendment A2)
+            continue
         cid = f"{a['task_id']}/frontier/s{a['sample']}"
         if a["sample"] in z[a["task_id"]]:
             raise SystemExit(f"STOP: two answers for {cid}")
@@ -126,7 +135,8 @@ def frontier_outcomes(run_id: str) -> tuple[dict[str, np.ndarray], dict[str, np.
     k = n_rep.pop()
     if any(sorted(v) != list(range(k)) for v in z.values()):
         raise SystemExit("STOP: replicate indices are not 0..k-1 for every task")
-    info = {"replicates": k, "calls_with_unknown_cost": incomplete, "grade_session": meta["session"]}
+    info = {"replicates": k, "calls_with_unknown_cost": incomplete, "grade_session": meta["session"],
+            "answers_of_excluded_tasks": excluded}
     return ({t: np.array([v[s] for s in range(k)]) for t, v in z.items()},
             {t: np.array([v[s] for s in range(k)]) for t, v in cost.items()}, info)
 
@@ -204,15 +214,23 @@ def main() -> int:
     prices = load_prices()["local_gpu"]
 
     # Attempts and their decision checkpoints (build_attempts refuses a checkpoint id in two runs)
-    cps = [c for rid in args.run_id for c in load_labelled(RESULTS / "runs" / rid)]
+    label_reports = {rid: {} for rid in args.run_id}
+    cps = [c for rid in args.run_id for c in load_labelled(RESULTS / "runs" / rid, report=label_reports[rid])]
     attempts = R.build_attempts(cps)
-    totals, cost_complete = {}, True
+    totals, cost_complete, run_tokens = {}, True, {}
     for rid in args.run_id:
         meta = json.loads((RESULTS / "runs" / rid / "run_meta.json").read_text(encoding="utf-8"))
         sess = meta["sessions"]
         cost_complete &= all(s.get("elapsed_s") is not None and s.get("energy_wh") is not None for s in sess)
         totals[rid] = (sum(s.get("elapsed_s") or 0.0 for s in sess), sum(s.get("energy_wh") or 0.0 for s in sess))
-    R.allocate_run_costs(attempts, totals)
+        # The cost denominator is every complete generated checkpoint of the run, excluded tasks
+        # included, so an exclusion does not move its share onto the kept attempts (Amendment A2).
+        traj = _rows(RESULTS / "runs" / rid / "trajectories.jsonl", "trajectories")
+        run_tokens[rid] = sum(c["generation"]["thinking_tokens"] + c["generation"]["answer_tokens"]
+                              for c in complete_executions(traj))
+    R.allocate_run_costs(attempts, totals, run_tokens)
+    excluded_share = {rid: 1 - sum(a.gen_tokens for a in attempts if a.run == rid) / run_tokens[rid]
+                      for rid in args.run_id}
     z, fcost, finfo = frontier_outcomes(args.frontier_run)
     missing = {a.task_id for a in attempts} - set(z)
     if missing:
@@ -300,7 +318,9 @@ def main() -> int:
            "pinocchio_cpu": pin_cpu,
            "routers_version": cfg["version"], "n_attempts": len(attempts), "n_decisions": len(vp_idx),
            "forced_share": float(np.mean([a.forced for a in attempts])), "fallback_used": fallback_used,
-           "frontier": finfo, "small_model_cost_complete": cost_complete, "policies": []}
+           "frontier": finfo, "small_model_cost_complete": cost_complete,
+           "excluded_checkpoints": {rid: rep["excluded_checkpoints"] for rid, rep in label_reports.items()},
+           "excluded_share_of_run_cost": excluded_share, "policies": []}
 
     forced_only = R.outcome(attempts, z, np.zeros(len(attempts), bool), "forced-failure-only")
     anchors = [(R.outcome(attempts, z, np.zeros(len(attempts), bool), "always-small", forced_to_frontier=False), True),

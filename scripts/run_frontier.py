@@ -15,6 +15,8 @@ A rerun with the same run id skips (task, sample) pairs that already have an
 answer and stops if the protocol differs. The spend guard (--limit-usd, a
 required, user-approved limit) counts every frontier row in this run's ledger.
 --split test needs --confirm-test (test generation only after the protocol freeze).
+Tasks in configs/grading_exclusions_v1.json (Amendment A2) get no call; each
+session records the exclusion file it applied.
 Hidden grades come later: scripts/grade_hidden.py --run-id <run-id> --frontier.
 """
 
@@ -30,6 +32,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime, timezone
 
 from system1.config import RESULTS, ROOT, load_prices
+from system1.eval.exclusions import load_exclusions
 from system1.eval.ledger import CostLedger, read_jsonl
 from system1.eval.split import SPLIT_PATH, file_sha256, load_split
 from system1.frontier.client import (MAX_TOKENS, MODEL, PROVIDER, REASONING, FrontierClient, FrontierRequestError,
@@ -75,7 +78,8 @@ def main() -> int:
         return 2
 
     split, tasks = load_split(), load_tasks()
-    ids = [t for b in ("humaneval+", "mbpp+") for t in split["benchmarks"][b][args.split]]
+    excl = load_exclusions()
+    ids = [t for b in ("humaneval+", "mbpp+") for t in split["benchmarks"][b][args.split] if t not in excl["tasks"]]
     if args.limit:
         ids = random.Random(SELECT_SEED).sample(ids, len(ids))[: args.limit]
 
@@ -92,7 +96,9 @@ def main() -> int:
     else:
         meta = {"run_id": args.run_id, "split": args.split, "protocol": proto, "git_commit": commit, "sessions": []}
     meta["sessions"].append({"started": datetime.now(timezone.utc).isoformat(), "git_commit": commit,
-                             "limit_usd": args.limit_usd, "samples": args.samples, "n_tasks": len(ids)})
+                             "limit_usd": args.limit_usd, "samples": args.samples, "n_tasks": len(ids),
+                             "exclusions": {"version": excl["version"], "sha256": excl["sha256"],
+                                            "tasks": sorted(excl["tasks"])}})
     meta_path.write_text(json.dumps(meta, indent=1), encoding="utf-8")
 
     done = {(r["task_id"], r["sample"]) for r in read_jsonl(out / ANSWERS)[0]}

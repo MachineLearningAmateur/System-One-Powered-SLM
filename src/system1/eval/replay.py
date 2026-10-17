@@ -126,11 +126,16 @@ def build_attempts(checkpoints: list[dict], max_rounds: int = 3) -> list[Attempt
     return out
 
 
-def allocate_run_costs(attempts: list[Attempt], run_totals: dict[str, tuple[float, float]]) -> None:
-    """Give each attempt its share (by generated tokens) of its run's wall time and energy."""
+def allocate_run_costs(attempts: list[Attempt], run_totals: dict[str, tuple[float, float]],
+                       run_tokens: dict[str, int] | None = None) -> None:
+    """Give each attempt its share (by generated tokens) of its run's wall time and energy.
+    `run_tokens` is the denominator per run: all generated tokens of the run, including attempts
+    left out of the replay (excluded tasks); without it, the attempts given share the whole cost."""
     for run, (secs, wh) in run_totals.items():
         mine = [a for a in attempts if a.run == run]
-        n = sum(a.gen_tokens for a in mine)
+        n = run_tokens[run] if run_tokens is not None else sum(a.gen_tokens for a in mine)
+        if n < sum(a.gen_tokens for a in mine):
+            raise ValueError(f"{run}: the token denominator is smaller than the attempts' tokens")
         for a in mine:
             a.gpu_s, a.energy_wh = secs * a.gen_tokens / n, wh * a.gen_tokens / n
 

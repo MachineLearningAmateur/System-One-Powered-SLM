@@ -89,6 +89,15 @@ def test_costs_are_allocated_by_tokens():
     assert [a.gpu_s for a in att] == [75.0, 25.0] and [a.energy_wh for a in att] == [6.0, 2.0]
 
 
+def test_excluded_tasks_keep_their_cost_share():
+    # The run generated 50 tokens; an excluded task's 10 are not in the replay, and keep their share.
+    att = R.build_attempts([cp("r", "A", 0, 1, True, True, tokens=30), cp("r", "B", 0, 1, True, True, tokens=10)])
+    R.allocate_run_costs(att, {"r": (100.0, 8.0)}, {"r": 50})
+    assert [a.gpu_s for a in att] == [60.0, 20.0] and [a.energy_wh for a in att] == [4.8, 1.6]
+    with pytest.raises(ValueError, match="denominator"):
+        R.allocate_run_costs(att, {"r": (100.0, 8.0)}, {"r": 39})
+
+
 def test_bootstrap_gain_is_centered_on_the_mean_difference():
     att = R.build_attempts([cp("r", f"T{i}", 0, 1, True, True, bench="mbpp+" if i % 2 else "humaneval+")
                             for i in range(40)])

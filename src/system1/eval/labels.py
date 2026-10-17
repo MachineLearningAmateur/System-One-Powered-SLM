@@ -7,7 +7,10 @@ load_labelled(). It never falls back to another label source, and it stops on:
 damaged trajectory lines, a checkpoint without a label, a duplicate label, a
 label for other code, labels from more than one session or without their
 session file, a non-protocol session (unless allowed), or an invalid label
-(unless allowed).
+(unless allowed). Checkpoints of tasks in configs/grading_exclusions_v1.json
+(Amendment A2) are dropped before the join and reported; a session that
+recorded exclusions must have used the same exclusion file and dropped the
+same checkpoints. Sessions from before A2 recorded none.
 """
 
 from __future__ import annotations
@@ -16,6 +19,7 @@ import hashlib
 import json
 from pathlib import Path
 
+from system1.eval.exclusions import load_exclusions, split_excluded
 from system1.eval.ledger import read_jsonl
 from system1.loop.runner import complete_executions
 
@@ -37,8 +41,8 @@ def load_labelled(run_dir: Path, allow_invalid: bool = False, allow_nonprotocol:
     """Complete checkpoints with a "hidden" field {"passed", "base", "plus", "status", "n_valid_votes"}.
 
     `report`, if given, receives what the caller must state: the grading
-    session, executions left out as incomplete or replaced, and invalid labels
-    left out (only with allow_invalid)."""
+    session, executions left out as incomplete or replaced, checkpoints of
+    excluded tasks, and invalid labels left out (only with allow_invalid)."""
     rows, bad = read_jsonl(run_dir / "trajectories.jsonl")
     if bad:
         raise LabelError(f"{len(bad)} damaged lines in trajectories.jsonl")
@@ -57,6 +61,12 @@ def load_labelled(run_dir: Path, allow_invalid: bool = False, allow_nonprotocol:
     meta = json.loads(meta_path.read_text(encoding="utf-8"))
     if not meta.get("protocol") and not allow_nonprotocol:
         raise LabelError(f"grading session {session} is not protocol (vLLM running or git tree changed)")
+    excl = load_exclusions()
+    cps, gone = split_excluded(cps, excl)
+    excluded = sorted(r["checkpoint_id"] for r in gone)
+    rec = meta.get("exclusions")
+    if rec is not None and (rec["sha256"] != excl["sha256"] or rec["excluded_checkpoints"] != excluded):
+        raise LabelError(f"grading session {session} applied other exclusions than {excl['version']}")
 
     by_key: dict[tuple[str, str], dict] = {}
     for lab in labels:
@@ -79,5 +89,6 @@ def load_labelled(run_dir: Path, allow_invalid: bool = False, allow_nonprotocol:
         out.append({**r, "hidden": {k: lab[k] for k in ("passed", "base", "plus", "status", "n_valid_votes")}})
     if report is not None:
         report.update({"grade_session": session, "protocol": bool(meta.get("protocol")),
-                       "dropped_executions": dropped, "invalid_labels": invalid})
+                       "dropped_executions": dropped, "excluded_checkpoints": excluded,
+                       "exclusions_version": excl["version"], "invalid_labels": invalid})
     return out

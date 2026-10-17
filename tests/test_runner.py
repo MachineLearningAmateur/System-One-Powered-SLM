@@ -10,6 +10,7 @@ import httpx
 import numpy as np
 import pytest
 
+from system1.eval.exclusions import load_exclusions
 from system1.eval.labels import LabelError, code_sha, load_labelled
 from system1.eval.ledger import CostLedger
 from system1.features.telemetry import cheap_features
@@ -351,6 +352,58 @@ def test_labels_join_only_on_matching_complete_checkpoints(tmp_path):
         f.write('{"broken\n')
     with pytest.raises(LabelError, match="damaged"):
         load_labelled(tmp_path)
+
+
+def test_exclusion_file_lists_humaneval_32_as_a_test_task():
+    excl = load_exclusions()
+    assert excl["version"] == "grading-exclusions-v1" and excl["tasks"] == {"HumanEval/32": "humaneval+"}
+
+
+def test_grader_never_grades_an_excluded_task_and_the_loader_drops_it(tmp_path, monkeypatch):
+    gh = load_script("grade_hidden")
+    run = tmp_path / "runs" / "r"
+    run.mkdir(parents=True)
+    cp = lambda task, code: {**row(f"e-{task}", 1, True, task=task), "checkpoint_id": f"{task}/a0/r1",
+                             "benchmark": "humaneval+", "code": code}
+    write_jsonl(run / "trajectories.jsonl", [cp("HumanEval/0", "c0"), cp("HumanEval/32", "c32")])
+    calls = []
+    ok = {"ok": True, "valid": True, "passed": True, "base": "pass", "plus": "pass"}
+
+    class FakeSandbox:
+        def __init__(self, **kw): pass
+        def ping(self): return {"version": "test", "settings": {}}
+        def load(self, ds): return {"vm_size": 2**30}
+        def canonical(self, ds, task, extra): calls.append(("canonical", task)); return dict(ok)
+        def hidden(self, ds, task, code): calls.append(("hidden", task)); return dict(ok)
+        def close(self): pass
+
+    for name, value in {"RESULTS": tmp_path, "Sandbox": FakeSandbox, "vllm_running": lambda: False,
+                        "git_state": lambda: ("abc", False), "container_facts": lambda: {},
+                        "sha256_files": lambda paths, root: "x"}.items():
+        monkeypatch.setattr(gh, name, value)
+    monkeypatch.setattr("sys.argv", ["grade_hidden.py", "--run-id", "r"])
+    assert gh.main() == 0
+    assert calls and all(task != "HumanEval/32" for _, task in calls)
+    labels = [json.loads(x) for x in (run / "hidden_labels.jsonl").read_text(encoding="utf-8").splitlines()]
+    assert [lab["checkpoint_id"] for lab in labels] == ["HumanEval/0/a0/r1"]
+    meta = json.loads((run / "grade_meta.json").read_text(encoding="utf-8"))
+    assert meta["exclusions"]["excluded_checkpoints"] == ["HumanEval/32/a0/r1"] and meta["exclusions"]["n_after"] == 1
+
+    report = {}
+    rows = load_labelled(run, report=report)
+    assert [r["task_id"] for r in rows] == ["HumanEval/0"]
+    assert report["excluded_checkpoints"] == ["HumanEval/32/a0/r1"]
+    # A missing label for a kept task still stops the loader.
+    (run / "hidden_labels.jsonl").write_text("", encoding="utf-8")
+    with pytest.raises(LabelError):
+        load_labelled(run)
+    (run / "hidden_labels.jsonl").write_text("".join(json.dumps(x) + "\n" for x in labels), encoding="utf-8")
+    # A session that dropped other checkpoints than the exclusion file says is refused.
+    session = run / "grade_sessions" / f"{meta['session']}.json"
+    session.write_text(json.dumps({**meta, "exclusions": {**meta["exclusions"], "excluded_checkpoints": []}}),
+                       encoding="utf-8")
+    with pytest.raises(LabelError, match="other exclusions"):
+        load_labelled(run)
 
 
 # --- run telemetry -----------------------------------------------------------------
