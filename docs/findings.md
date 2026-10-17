@@ -152,15 +152,41 @@ rule. Scripts: `scripts/analysis/jev_select.py`, `scripts/analysis/jev_strong.py
 - Cut: the fine-tune stretch goal, takeover with context, drift labels and the 3-level question; blind resampling and the generic judge unless they need no new code path. Pinocchio is time-boxed.
 - Our visible-test baselines are not the equivalent of Model Cascading for Code (which generates tests); this is a stated limitation.
 
+## 11. Frontier takeover on dev (October 17)
+
+Run `frontier-dev-v1` (commit c22634a): Claude Sonnet 5.5 through OpenRouter,
+provider Anthropic pinned without fallbacks, low reasoning effort, the small
+model's round-1 message, 217 dev tasks x 3 independent samples.
+
+| | HumanEval+ | MBPP+ |
+|---|---|---|
+| Frontier hidden pass | 96.0% (190/198) | 85.9% (389/453) |
+| Small model final hidden pass, attempt 0 | 74.2% | 72.8% |
+
+- 651 calls, all valid, every answer with a code block; 0 reasoning tokens at low effort; $1.30 in total ($0.0020 per call, reported = computed). Price checked on OpenRouter on October 17: $2 / $10 per million tokens.
+- Hidden grading: protocol session, 0 invalid, the first two grades agree on all 374 distinct codes.
+- Samples agree almost always: 191 tasks pass in all 3, 21 fail in all 3, 5 are mixed.
+- Headroom on the 470 visible-pass dev checkpoints: the frontier fixes 60.3% of the 116 hidden fails (mean over samples) and would break 1.8% of the 354 hidden passes.
+- Attempts that end in a visible fail after round 3 (forced escalations): 35 of 505 (6.9%).
+
+Cost per attempt (corrected; the pilot times already include the 3 parallel trajectories):
+
+| Cost view | Small model, one attempt | Frontier, one answer |
+|---|---|---|
+| Owned hardware (electricity, $0.15/kWh) | about $0.00015 | $0.0020 |
+| Cloud equivalent (A10G, $1.006/h) | about $0.0065 | $0.0020 |
+
+So budgets are set in frontier calls, not dollars, and the paper reports both cost views; it does not claim savings in general.
+
 ## Costs to date
 
 - Jev: about $0.18 of the approved $2 (3.67M input tokens for the full scoring, plus the checks), at the third-party price of $0.042 per million input tokens with free output. The TypeSafe account price is still unconfirmed.
-- Frontier model: $0 (no calls yet).
+- Frontier model: $1.30 of the approved $5 (dev takeover answers).
 - Local GPU: about 674 Wh for the three runs.
 
 ## Still to freeze or do
 
-- Before the replay: the threshold objective (on the out-of-fold dev predictions), tie handling, the fallback for a missing score, and the rule at visible-fail checkpoints.
-- Pinocchio-0.8B baseline (install open).
-- Frontier client (Claude Sonnet 5.5, 3 samples per task) and the replay evaluator, October 18-21; billed calls need approval.
-- Protocol freeze, then the main run on the 325 test tasks.
+- Frozen on October 17 (plan, "Still to freeze before the replay"): escalation budgets q_VP = 10/25/50% from dev OOF quantiles weighted 1 / attempts of the task, tie rule, cheap-LR fallback for a missing Jev score, deployment view and label-free top-K ranking view, net gain over realized-rate random as the central replay result.
+- Replay evaluator (code review before use), then the dev replay as a code check.
+- Pinocchio-0.8B baseline (time-boxed install).
+- Protocol freeze, then the main run on the 325 test tasks and the test takeover answers (new approval).

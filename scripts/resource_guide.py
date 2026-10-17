@@ -63,14 +63,17 @@ def request_hashes(cp, rubric, model: str, budget: int) -> dict[str, str]:
     return {arm: hashlib.sha256(request_body(model, ev[arm].state, qs[arm])).hexdigest() for arm in ev}
 
 
-def load(run_ids: list[str]) -> list[dict]:
+def load(run_ids: list[str], split: str = "dev", require_ok: bool = True) -> list[dict]:
+    """Labelled checkpoints with their two Jev records. The resource guide uses the defaults
+    (development runs, both arms ok). The replay can load a test run with require_ok=False:
+    a missing or failed arm is then kept as None (the router's fallback decides)."""
     rubric = load_rubric()
     out = []
     for rid in run_ids:
         d = RESULTS / "runs" / rid
-        split = json.loads((d / "run_meta.json").read_text(encoding="utf-8"))["split"]
-        if split != "dev":
-            raise LoadError(f"{rid} is a {split} run; the resource guide uses development runs only")
+        run_split = json.loads((d / "run_meta.json").read_text(encoding="utf-8"))["split"]
+        if run_split != split:
+            raise LoadError(f"{rid} is a {run_split} run; expected {split}")
         proto = json.loads((d / "jev_meta.json").read_text(encoding="utf-8"))["protocol"]
         want = {"rubric_sha256": rubric.sha256, "evidence_version": EVIDENCE_VERSION, "byte_budget": BYTE_BUDGET}
         bad = {k: (proto.get(k), v) for k, v in want.items() if proto.get(k) != v}
@@ -82,13 +85,17 @@ def load(run_ids: list[str]) -> list[dict]:
         scores = {(r["checkpoint_id"], r["arm"]): r for r in rows}  # last record wins
         for c in load_labelled(d):
             h, t = scores.get((c["checkpoint_id"], P.HISTORY_ARM)), scores.get((c["checkpoint_id"], P.TRACE_ARM))
-            if not (h and t and h["status"] == "ok" and t["status"] == "ok"):
+            ok = bool(h and t and h["status"] == "ok" and t["status"] == "ok")
+            if require_ok and not ok:
                 raise LoadError(f"{rid} {c['checkpoint_id']}: Jev scores missing or not ok")
             cp = to_scoring_checkpoint(c)
-            hashes = request_hashes(cp, rubric, h["model_requested"], h["byte_budget"])
-            for rec in (h, t):
+            present = [r for r in (h, t) if r and r["status"] == "ok"]
+            hashes = request_hashes(cp, rubric, present[0]["model_requested"], present[0]["byte_budget"]) if present else {}
+            for rec in present:
                 if rec["request_sha256"] != hashes[rec["arm"]]:
                     raise LoadError(f"{rid} {c['checkpoint_id']} {rec['arm']}: score is for another request")
+            h = h if h and h["status"] == "ok" else None
+            t = t if t and t["status"] == "ok" else None
             out.append({"run": rid, "cp": c, "has_trace": cp.has_trace, "history": h, "trace": t})
     return out
 
