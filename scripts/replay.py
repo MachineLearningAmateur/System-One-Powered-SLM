@@ -1,10 +1,11 @@
 """Replay the escalation policies on logged attempts (descriptive; outside Holm).
 
-    uv run python scripts/replay.py --run-id pilot-v1 --run-id pilot-v1b --frontier-run frontier-dev-v1 --scores dev-oof
-    uv run python scripts/replay.py --split test --run-id <test-run> --frontier-run <test-frontier-run> --scores final
+    uv run python scripts/replay.py --run-id pilot-v1 --run-id pilot-v1b --frontier-run frontier-dev-v1 --scores dev-oof --routers v2
+    uv run python scripts/replay.py --split test --run-id <test-run> --frontier-run <test-frontier-run> --scores final --routers v2
 
 Inputs: the small model's labelled attempts, their Jev records, the frontier
-run's hidden labels (one per task and replicate), and configs/routers_v1.json.
+run's hidden labels (one per task and replicate), and configs/routers_<version>.json
+(Pinocchio's scores come from each run's pinocchio_scores.jsonl).
 Scores: "dev-oof" uses the frozen out-of-fold development scores
 (results/dev_router_scores.json; a code check, thresholds were set on them);
 "final" applies the frozen final models (the test analysis). A decision
@@ -56,7 +57,8 @@ from system1.eval.ledger import read_jsonl
 
 JEV_USD_PER_M_INPUT = 0.042  # third-party price, unconfirmed for the direct API (findings.md, Costs)
 ARMS = {"cheap": [], "cheap+code": [P.HISTORY_ARM], "cheap+code+thinking": [P.HISTORY_ARM, P.TRACE_ARM],
-        "cheap+strong4": [P.HISTORY_ARM, P.TRACE_ARM], "strong4 mean": [P.HISTORY_ARM, P.TRACE_ARM]}
+        "cheap+strong4": [P.HISTORY_ARM, P.TRACE_ARM], "strong4 mean": [P.HISTORY_ARM, P.TRACE_ARM],
+        "pinocchio": []}  # Pinocchio runs locally: its cost is reported as CPU seconds, not dollars
 
 
 def load_rg():
@@ -129,9 +131,27 @@ def frontier_outcomes(run_id: str) -> tuple[dict[str, np.ndarray], dict[str, np.
             {t: np.array([v[s] for s in range(k)]) for t, v in cost.items()}, info)
 
 
-def score_final(row: dict, router: dict) -> float | None:
-    """The frozen router's score of one decision checkpoint; None if a Jev arm it needs is missing."""
+def pinocchio_rows(run_ids: list[str], setup: list) -> dict[str, dict]:
+    """Pinocchio records per checkpoint id; every record must use the frozen setup."""
+    out = {}
+    for rid in run_ids:
+        path = RESULTS / "runs" / rid / "pinocchio_scores.jsonl"
+        for r in (_rows(path, "Pinocchio scores") if path.exists() else []):
+            if [r["input_version"], r["adapter"], r["base_model"], r["package"]] != setup:
+                raise SystemExit(f"STOP: {r['checkpoint_id']} was scored with another Pinocchio setup")
+            if r["checkpoint_id"] in out:
+                raise SystemExit(f"STOP: two Pinocchio scores for {r['checkpoint_id']}")
+            out[r["checkpoint_id"]] = r
+    return out
+
+
+def score_final(row: dict, router: dict, pin: dict[str, dict] | None = None) -> float | None:
+    """The frozen router's score of one decision checkpoint; None if an input it needs is missing
+    (a Jev arm, or a Pinocchio score)."""
     m = router["model"]
+    if m["kind"] == "external":
+        rec = (pin or {}).get(row["cp"]["checkpoint_id"])
+        return None if rec is None else float(rec["score"])
     if m["kind"] == "mean":
         if row["history"] is None or row["trace"] is None:
             return None
@@ -168,11 +188,12 @@ def main() -> int:
     ap.add_argument("--split", default="dev", choices=("dev", "test"))
     ap.add_argument("--scores", required=True, choices=("dev-oof", "final"))
     ap.add_argument("--n-boot", type=int, default=2000)
+    ap.add_argument("--routers", default="v2", help="frozen routers file: configs/routers_<version>.json")
     args = ap.parse_args()
     if args.split == "test" and args.scores != "final":
         print("test replay uses --scores final")
         return 2
-    cfg = json.loads((CONFIGS / "routers_v1.json").read_text(encoding="utf-8"))
+    cfg = json.loads((CONFIGS / f"routers_{args.routers}.json").read_text(encoding="utf-8"))
     prices = load_prices()["local_gpu"]
 
     # Attempts and their decision checkpoints (build_attempts refuses a checkpoint id in two runs)
@@ -196,7 +217,7 @@ def main() -> int:
     scores: dict[str, np.ndarray] = {}
     fallback_used: dict[str, int] = {}
     if args.scores == "dev-oof":
-        dev = json.loads((RESULTS / "dev_router_scores.json").read_text(encoding="utf-8"))
+        dev = json.loads((RESULTS / cfg.get("dev_scores_file", "dev_router_scores.json")).read_text(encoding="utf-8"))
         if dev["runs"] != args.run_id:
             raise SystemExit("STOP: the dev scores were made on other runs")
         for name in cfg["routers"]:
@@ -206,9 +227,11 @@ def main() -> int:
     else:
         rg = load_rg()
         rows = {d["cp"]["checkpoint_id"]: d for d in rg.load(args.run_id, split=args.split, require_ok=False)}
+        ext = [r for r in cfg["routers"].values() if r["model"]["kind"] == "external"]
+        pin = pinocchio_rows(args.run_id, list(ext[0]["model"]["setup"])) if ext else {}
         cheap = np.array([score_final(rows[c], cfg["routers"]["cheap"]) for c in ids], float)
         for name, router in cfg["routers"].items():
-            s = [score_final(rows[c], router) for c in ids]
+            s = [score_final(rows[c], router, pin) for c in ids]
             fallback_used[name] = sum(v is None for v in s)
             scores[name] = np.array([np.nan if v is None else v for v in s], float)
 
@@ -256,7 +279,15 @@ def main() -> int:
         m[np.array(vp_idx)[sel]] = True
         return m
 
+    pin_cpu = None
+    if "pinocchio" in cfg["routers"]:
+        recs = pinocchio_rows(args.run_id, list(cfg["routers"]["pinocchio"]["model"]["setup"]))
+        secs = [recs[c]["cpu_seconds"] for c in ids if c in recs]
+        pin_cpu = {"cpu_seconds_per_decision": float(np.mean(secs)) if secs else None,
+                   "cpu_seconds_per_attempt": float(np.sum(secs) / len(attempts)) if secs else None,
+                   "decisions_scored": len(secs)}
     out = {"runs": args.run_id, "frontier_run": args.frontier_run, "split": args.split, "scores": args.scores,
+           "pinocchio_cpu": pin_cpu,
            "routers_version": cfg["version"], "n_attempts": len(attempts), "n_decisions": len(vp_idx),
            "forced_share": float(np.mean([a.forced for a in attempts])), "fallback_used": fallback_used,
            "frontier": finfo, "small_model_cost_complete": cost_complete, "policies": []}
@@ -295,7 +326,7 @@ def main() -> int:
                                         "gain_vs_forced_only": g_f, "by_benchmark": bench})
     out["jev_calls_with_unknown_usage"] = jev_unknown
 
-    path = RESULTS / f"replay_{'+'.join(args.run_id)}_{args.scores}.json"
+    path = RESULTS / f"replay_{'+'.join(args.run_id)}_{args.scores}_{cfg['version']}.json"
     path.write_text(json.dumps(out, indent=1), encoding="utf-8")
     print(f"{len(attempts)} attempts, {len(vp_idx)} decisions, forced share {out['forced_share']:.3f}; "
           f"fallback used {fallback_used}; frontier {finfo}; small-model cost complete {cost_complete}; "

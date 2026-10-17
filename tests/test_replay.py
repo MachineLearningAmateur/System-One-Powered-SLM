@@ -149,3 +149,16 @@ def test_frontier_call_cost_never_assumes_zero_billing():
     ok = {"call_id": "c", "usd_reported": 0.002, "usd_computed": 0.002, "status": "ok", "output_tokens": 10}
     assert rs.call_cost([timeout, ok], "c") == (0.002, False)
     assert rs.call_cost([ok], "c") == (0.002, True)
+
+
+def test_external_router_score_and_missing_fallback():
+    import importlib.util
+    from pathlib import Path
+    spec = importlib.util.spec_from_file_location("replay_script2", Path(__file__).resolve().parents[1] / "scripts" / "replay.py")
+    rs = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(rs)
+    router = {"model": {"kind": "external"}}
+    row = {"cp": {"checkpoint_id": "T/a0/r1"}}
+    assert rs.score_final(row, router, {"T/a0/r1": {"score": 0.25}}) == 0.25
+    assert rs.score_final(row, router, {}) is None  # missing -> the cheap LR decides
+    assert rs.ARMS["pinocchio"] == []  # no Jev cost
