@@ -278,3 +278,32 @@ def holm(pvalues: dict[str, float]) -> dict[str, float]:
         running = max(running, min(1.0, (m - i) * pvalues[k]))
         out[k] = running
     return {k: out[k] for k in pvalues}
+
+
+# Table 1 standalone comparator (frozen October 17): the DeepConf-style tail confidence of the
+# thinking (minus the mean top-5 logprob over the last <= 1,024 thinking tokens; generate.py).
+# Lower confidence = more likely to fail, so the score is its negative. Valid scores are <= 0;
+# a missing value (no thinking tokens) gets the finite score 1.0, the highest failure rank, and all
+# missing values tie. Its count is reported.
+LOGPROB_MISSING_SCORE = 1.0
+
+
+def logprob_comparator(features: dict) -> float:
+    v = _num(features.get("thinking_tail_conf"))
+    return LOGPROB_MISSING_SCORE if v is None else -v
+
+
+def fnr_at_fpr(y: np.ndarray, scores: np.ndarray, max_fpr: float = 0.05) -> dict:
+    """Miss rate at the most permissive threshold whose false-positive rate is <= max_fpr
+    (frozen convention: thresholds at the observed score values, rule "escalate if s >= t",
+    no interpolation between ROC points; ties stay together). y = 1 for a hidden fail."""
+    y, s = np.asarray(y), np.asarray(scores, float)
+    neg, pos = (y == 0), (y == 1)
+    best = {"threshold": float("inf"), "fpr": 0.0, "fnr": 1.0}
+    for t in np.unique(s)[::-1]:
+        esc = s >= t
+        fpr = float(esc[neg].mean())
+        if fpr > max_fpr:
+            break
+        best = {"threshold": float(t), "fpr": fpr, "fnr": float(1 - esc[pos].mean())}
+    return best

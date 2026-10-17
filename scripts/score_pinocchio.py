@@ -1,23 +1,23 @@
 """Score every complete checkpoint of a run with Pinocchio-0.8B (local, CPU).
 
-    uv run --group pinocchio python scripts/score_pinocchio.py --run-id pilot-v1
+    uv run --group pinocchio python scripts/score_pinocchio.py --run-id pilot-v1 --input-version pinocchio-input-v2
 
-Frozen input format (pinocchio-input-v1, fixed on October 17 before any dev score):
-  question  the small model's round-1 message (the task and its visible tests),
-            the same for every round of the attempt;
-  answer    the checkpoint's answer text after the thinking (the thinking is not given);
-  source_model and benchmark are not given (optional; Qwen3-1.7B is not in Pinocchio's
-  training mix).
-The router score is 1 - p_correct (higher = more likely to fail). Labels are never read.
-Output: results/runs/<run-id>/pinocchio_scores.jsonl, one record per checkpoint, with the
-CPU seconds of each score. A rerun skips checkpoints that already have a score.
+The input versions and the frozen setup are defined in
+system1.features.pinocchio_input. The base model and the adapter are loaded from
+their pinned local snapshots (never a moving Hub name), and the script checks the
+package's truncation, the dtype and the placeholder image before it scores; every
+record carries these fields. Labels are never read.
+
+Resume: a checkpoint is skipped only if a record with the same execution, the same
+rebuilt input and the full pinned setup exists. Records made before the setup was
+pinned (the first input-v1 dev scores) are therefore not reused by this script.
+Output: results/runs/<run-id>/<file of the input version>. "cpu_seconds" is the
+elapsed time of one score on the CPU (not process CPU time; loading excluded).
 """
 
 from __future__ import annotations
 
 import argparse
-import hashlib
-import json
 import sys
 import time
 from datetime import datetime, timezone
@@ -25,23 +25,36 @@ from importlib.metadata import version
 
 from system1.config import RESULTS
 from system1.eval.ledger import CostLedger, read_jsonl
+from system1.features import pinocchio_input as PI
 from system1.loop.runner import complete_executions
-from system1.loop.tasks import first_round_messages, load_tasks
-
-INPUT_VERSION = "pinocchio-input-v1"
-ADAPTER = "KevinDavidHayes/pinocchio-0.8b"
-BASE = "Qwen/Qwen3.5-0.8B"
-OUT = "pinocchio_scores.jsonl"
+from system1.loop.tasks import load_tasks
 
 
-def inputs(rec: dict, tasks) -> tuple[str, str]:
-    question = first_round_messages(tasks[rec["task_id"]])[0]["content"]
-    return question, rec["answer"] or ""
+def load_judge():
+    """Pinocchio from the pinned snapshots, with the frozen setup checked."""
+    import torch
+    from huggingface_hub import snapshot_download
+    from pinocchio import Pinocchio
+    from pinocchio.prompts import TRUNCATION
+
+    base = snapshot_download(PI.BASE_REPO, revision=PI.BASE_REVISION, local_files_only=True)
+    adapter = snapshot_download(PI.ADAPTER_REPO, revision=PI.ADAPTER_REVISION, local_files_only=True)
+    judge = Pinocchio(adapter=adapter, base_model=base, device_map="cpu")
+    actual = {"adapter": PI.ADAPTER_REPO, "adapter_revision": PI.ADAPTER_REVISION, "base_model": PI.BASE_REPO,
+              "base_revision": PI.BASE_REVISION, "package": f"pinocchio-uq=={version('pinocchio-uq')}",
+              "prompt_variant": PI.PROMPT_VARIANT, "truncation": list(TRUNCATION[PI.PROMPT_VARIANT]),
+              "dtype": str(next(judge._model.parameters()).dtype), "placeholder_image": judge._processor is not None,
+              "device": str(next(judge._model.parameters()).device)}
+    if actual != PI.PINNED:
+        raise SystemExit(f"STOP: the loaded Pinocchio setup differs from the frozen one: "
+                         f"{ {k: (actual[k], PI.PINNED[k]) for k in actual if actual[k] != PI.PINNED[k]} }")
+    return judge, {**actual, "torch": torch.__version__}
 
 
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--run-id", required=True)
+    ap.add_argument("--input-version", choices=PI.INPUT_VERSIONS, required=True)
     ap.add_argument("--limit", type=int, default=0)
     args = ap.parse_args()
     d = RESULTS / "runs" / args.run_id
@@ -50,32 +63,32 @@ def main() -> int:
         print(f"STOP: {len(bad)} damaged lines in trajectories.jsonl")
         return 2
     cps = complete_executions(rows)
-    done = {r["checkpoint_id"] for r in read_jsonl(d / OUT)[0]}
-    todo = [c for c in cps if c["checkpoint_id"] not in done]
+    tasks = load_tasks()
+    valid, counts = PI.select_records(PI.read_records(d, args.input_version), cps, tasks, args.input_version,
+                                      require_pinned=True)
+    todo = [c for c in cps if c["checkpoint_id"] not in valid]
     if args.limit:
         todo = todo[: args.limit]
-    print(f"{len(cps)} checkpoints, {len(done)} already scored, {len(todo)} to score", flush=True)
+    print(f"{len(cps)} checkpoints; valid records {counts['used']}, stale {counts['stale']}; {len(todo)} to score",
+          flush=True)
+    if not todo:
+        return 0
 
-    import torch
-    from pinocchio import Pinocchio
-
-    torch.manual_seed(0)
     t0 = time.perf_counter()
-    judge = Pinocchio(adapter=ADAPTER, base_model=BASE, device_map="cpu")
-    print(f"model loaded in {time.perf_counter() - t0:.1f} s", flush=True)
-    store = CostLedger(d / OUT)
-    tasks = load_tasks()
-    meta = {"input_version": INPUT_VERSION, "adapter": ADAPTER, "base_model": BASE,
-            "package": f"pinocchio-uq=={version('pinocchio-uq')}", "torch": torch.__version__, "device": "cpu"}
+    judge, setup = load_judge()
+    print(f"model loaded in {time.perf_counter() - t0:.1f} s; setup {setup}", flush=True)
+    store = CostLedger(d / PI.FILES[args.input_version])
     for i, c in enumerate(todo, 1):
-        q, a = inputs(c, tasks)
+        q, a = PI.build_input(c, tasks, args.input_version)
         t = time.perf_counter()
-        p = float(judge.score(question=q, answer=a))
+        # The package refuses an empty answer (input-v2 of a checkpoint without code): no score, recorded
+        # as such. Such a checkpoint never passes the visible tests, so no routing decision uses it.
+        p = float(judge.score(question=q, answer=a)) if a.strip() else None
         store.append_obj({"checkpoint_id": c["checkpoint_id"], "exec_id": c["exec_id"], "task_id": c["task_id"],
-                          "attempt": c["attempt"], "round": c["round"], "p_correct": p, "score": 1.0 - p,
-                          "cpu_seconds": round(time.perf_counter() - t, 3),
-                          "input_sha256": hashlib.sha256(json.dumps([q, a]).encode()).hexdigest(), **meta,
-                          "ts": datetime.now(timezone.utc).isoformat()})
+                          "attempt": c["attempt"], "round": c["round"], "p_correct": p,
+                          "score": None if p is None else 1.0 - p, "status": "ok" if p is not None else "empty_answer",
+                          "cpu_seconds": round(time.perf_counter() - t, 3), "input_version": args.input_version,
+                          "input_sha256": PI.input_sha(q, a), **setup, "ts": datetime.now(timezone.utc).isoformat()})
         if i % 50 == 0:
             print(f"  {i}/{len(todo)}", flush=True)
     print(f"done: {len(todo)} scored in {time.perf_counter() - t0:.0f} s", flush=True)

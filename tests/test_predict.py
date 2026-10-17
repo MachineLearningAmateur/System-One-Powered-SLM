@@ -215,3 +215,16 @@ def test_bootstrap_test_finds_a_real_difference_and_not_a_null():
 def test_holm():
     adj = P.holm({"a": 0.01, "b": 0.04, "c": 0.03})
     assert adj == pytest.approx({"a": 0.03, "b": 0.06, "c": 0.06})
+
+
+def test_logprob_comparator_direction_and_missing_rank():
+    assert P.logprob_comparator({"thinking_tail_conf": 12.0}) == -12.0
+    assert P.logprob_comparator({"thinking_tail_conf": None}) == P.LOGPROB_MISSING_SCORE
+    assert P.logprob_comparator({}) > P.logprob_comparator({"thinking_tail_conf": 0.0})
+
+
+def test_fnr_at_fpr_uses_the_most_permissive_allowed_threshold():
+    y = np.array([0] * 20 + [1] * 4)
+    s = np.array(list(range(20)) + [25, 19.5, 5, 30], float)
+    r = P.fnr_at_fpr(y, s, 0.05)  # one negative (score 19) may be escalated
+    assert r["fpr"] == pytest.approx(1 / 20) and r["fnr"] == pytest.approx(1 / 4) and r["threshold"] == 19.0

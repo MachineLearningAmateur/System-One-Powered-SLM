@@ -42,22 +42,25 @@ FALLBACK = "cheap"  # decides when a Jev (or Pinocchio) score is missing
 PINOCCHIO_FILE = "pinocchio_scores.jsonl"
 
 
-def pinocchio_scores(run_ids: list[str]) -> tuple[dict[str, float], str]:
-    """Router score (1 - p_correct) per checkpoint id, and the frozen input version."""
-    from system1.eval.ledger import read_jsonl
-    out, versions = {}, set()
+def pinocchio_scores(run_ids: list[str], data: list[dict]) -> tuple[dict[str, float], str]:
+    """Router score (1 - p_correct) per checkpoint id from input-v1 records that match the current
+    execution and rebuilt input (system1.features.pinocchio_input), and the setup they share.
+    The input-v1 dev records predate the pinned setup, so the pinned fields are not required here."""
+    from system1.features import pinocchio_input as PI
+    from system1.loop.tasks import load_tasks
+    tasks = load_tasks()
+    out, setups = {}, set()
     for rid in run_ids:
-        rows, bad = read_jsonl(RESULTS / "runs" / rid / PINOCCHIO_FILE)
-        if bad:
-            raise SystemExit(f"STOP: damaged lines in {rid}/{PINOCCHIO_FILE}")
-        for r in rows:
-            if r["checkpoint_id"] in out:
-                raise SystemExit(f"STOP: two Pinocchio scores for {r['checkpoint_id']}")
-            out[r["checkpoint_id"]] = r["score"]
-            versions.add((r["input_version"], r["adapter"], r["base_model"], r["package"]))
-    if len(versions) != 1:
-        raise SystemExit(f"STOP: Pinocchio scores were made with different setups {versions}")
-    return out, json.dumps(sorted(versions)[0])
+        cps = [d["cp"] for d in data if d["run"] == rid]
+        recs, counts = PI.select_records(PI.read_records(RESULTS / "runs" / rid, PI.V1), cps, tasks, PI.V1,
+                                         require_pinned=False)
+        print(f"  pinocchio {rid}: {counts}")
+        for cid, r in recs.items():
+            out[cid] = r["score"]
+            setups.add((r["input_version"], r["adapter"], r["base_model"], r["package"]))
+    if len(setups) != 1:
+        raise SystemExit(f"STOP: Pinocchio scores were made with different setups {setups}")
+    return out, json.dumps(sorted(setups)[0])
 
 
 def load_rg():
@@ -105,7 +108,7 @@ def main() -> int:
     pin_setup = None
     for name in ROUTERS[args.version]:
         if name == "pinocchio":
-            pin, pin_setup = pinocchio_scores(args.run_id)
+            pin, pin_setup = pinocchio_scores(args.run_id, data)
             missing = [d["cp"]["checkpoint_id"] for d in vp if d["cp"]["checkpoint_id"] not in pin]
             if missing:
                 raise SystemExit(f"STOP: {len(missing)} dev decision checkpoints have no Pinocchio score")

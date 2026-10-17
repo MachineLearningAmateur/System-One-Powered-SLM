@@ -131,17 +131,21 @@ def frontier_outcomes(run_id: str) -> tuple[dict[str, np.ndarray], dict[str, np.
             {t: np.array([v[s] for s in range(k)]) for t, v in cost.items()}, info)
 
 
-def pinocchio_rows(run_ids: list[str], setup: list) -> dict[str, dict]:
-    """Pinocchio records per checkpoint id; every record must use the frozen setup."""
-    out = {}
+def pinocchio_rows(run_ids: list[str], setup: list, checkpoints: list[dict], require_pinned: bool) -> dict[str, dict]:
+    """Input-v1 Pinocchio records per checkpoint id that match the current execution and rebuilt
+    input, and the routers file's setup; on test also every pinned field (pinocchio_input.PINNED)."""
+    from system1.features import pinocchio_input as PI
+    from system1.loop.tasks import load_tasks
+    tasks = load_tasks()
+    out: dict[str, dict] = {}
     for rid in run_ids:
-        path = RESULTS / "runs" / rid / "pinocchio_scores.jsonl"
-        for r in (_rows(path, "Pinocchio scores") if path.exists() else []):
+        cps = [c for c in checkpoints if c["run_id"] == rid]
+        recs, counts = PI.select_records(PI.read_records(RESULTS / "runs" / rid, PI.V1), cps, tasks, PI.V1,
+                                         require_pinned=require_pinned)
+        for cid, r in recs.items():
             if [r["input_version"], r["adapter"], r["base_model"], r["package"]] != setup:
-                raise SystemExit(f"STOP: {r['checkpoint_id']} was scored with another Pinocchio setup")
-            if r["checkpoint_id"] in out:
-                raise SystemExit(f"STOP: two Pinocchio scores for {r['checkpoint_id']}")
-            out[r["checkpoint_id"]] = r
+                raise SystemExit(f"STOP: {cid} was scored with another Pinocchio setup")
+            out[cid] = r
     return out
 
 
@@ -228,7 +232,7 @@ def main() -> int:
         rg = load_rg()
         rows = {d["cp"]["checkpoint_id"]: d for d in rg.load(args.run_id, split=args.split, require_ok=False)}
         ext = [r for r in cfg["routers"].values() if r["model"]["kind"] == "external"]
-        pin = pinocchio_rows(args.run_id, list(ext[0]["model"]["setup"])) if ext else {}
+        pin = pinocchio_rows(args.run_id, list(ext[0]["model"]["setup"]), cps, args.split == "test") if ext else {}
         cheap = np.array([score_final(rows[c], cfg["routers"]["cheap"]) for c in ids], float)
         for name, router in cfg["routers"].items():
             s = [score_final(rows[c], router, pin) for c in ids]
@@ -272,7 +276,8 @@ def main() -> int:
         return {"usd_owned": float(np.mean(base_o + jev + front)), "usd_cloud": float(np.mean(base_c + jev + front)),
                 "usd_small_owned": float(np.mean(base_o)), "usd_small_cloud": float(np.mean(base_c)),
                 "usd_frontier": float(front.mean()), "usd_jev": float(jev.mean()),
-                "jev_price_note": "third-party $0.042/M input, unconfirmed"}
+                "jev_price_note": "third-party $0.042/M input, unconfirmed",
+                "excludes": "Pinocchio CPU compute (reported separately as elapsed CPU seconds)"}
 
     def esc_mask(sel: np.ndarray) -> np.ndarray:
         m = np.zeros(len(attempts), bool)
@@ -281,11 +286,13 @@ def main() -> int:
 
     pin_cpu = None
     if "pinocchio" in cfg["routers"]:
-        recs = pinocchio_rows(args.run_id, list(cfg["routers"]["pinocchio"]["model"]["setup"]))
+        recs = pinocchio_rows(args.run_id, list(cfg["routers"]["pinocchio"]["model"]["setup"]), cps,
+                              args.split == "test")
         secs = [recs[c]["cpu_seconds"] for c in ids if c in recs]
-        pin_cpu = {"cpu_seconds_per_decision": float(np.mean(secs)) if secs else None,
-                   "cpu_seconds_per_attempt": float(np.sum(secs) / len(attempts)) if secs else None,
-                   "decisions_scored": len(secs)}
+        # Elapsed inference time on the CPU (perf_counter), loading excluded; not priced in the $ totals.
+        pin_cpu = {"elapsed_cpu_s_per_decision": float(np.mean(secs)) if secs else None,
+                   "elapsed_cpu_s_per_attempt": float(np.sum(secs) / len(attempts)) if secs else None,
+                   "decisions_scored": len(secs), "note": "not included in usd_owned / usd_cloud"}
     out = {"runs": args.run_id, "frontier_run": args.frontier_run, "split": args.split, "scores": args.scores,
            "pinocchio_cpu": pin_cpu,
            "routers_version": cfg["version"], "n_attempts": len(attempts), "n_decisions": len(vp_idx),
@@ -308,7 +315,8 @@ def main() -> int:
             fb = cfg["routers"][fb_name]["thresholds"][f"{q:.2f}"]
             frozen = np.array([R.escalate(cheap[j], fb["t"], fb["alpha"], ids[j]) if miss[j] else
                                R.escalate(s[j], th["t"], th["alpha"], ids[j]) for j in range(len(ids))])
-            topk = R.top_k(rank, ids, q, secondary=np.where(miss, cheap, s))
+            # Ties: the router's own scores before cheap-fallback scores, raw scores only within a source.
+            topk = R.top_k(rank, ids, q, secondary=np.where(miss, cheap, s), priority=(~miss).astype(float))
             for view, sel in (("frozen", frozen), ("top-k", topk)):
                 res = R.outcome(attempts, z, esc_mask(sel), f"{name} | {view} | q={q:.2f}")
                 g_r = R.gain_vs_random(attempts, z, res, args.n_boot)

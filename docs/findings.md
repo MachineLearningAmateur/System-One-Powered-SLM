@@ -200,6 +200,35 @@ a descriptive dev result, not an estimate for the test data.
 - At a 25% budget (30% of attempts call the frontier), the routers reach about 0.84-0.85 against 0.88 for always-frontier.
 - Full table: `docs/results/replay_pilot-v1+pilot-v1b_dev-oof.json`.
 
+## 13. Pinocchio-0.8B on dev (October 17)
+
+`pinocchio-uq==0.1.1` (Apache 2.0, CPU), added as a router (configs/routers_v2.json;
+the five v1 routers unchanged). Input pinocchio-input-v1 frozen before any score;
+pinocchio-input-v2 (the executed code as the answer) frozen before it was scored,
+as the one dev-informed sensitivity. Pinned setup: configs/pinocchio_setup_v1.json.
+Scripts: scripts/score_pinocchio.py, scripts/analysis/pinocchio_dev.py. Two rounds of
+code and results review.
+
+| Predictor (470 visible-pass dev checkpoints, 116 fails from 49 tasks) | AUROC (95%) | AUPRC | FNR at 5% FPR |
+|---|---|---|---|
+| cheap LR | 0.796 (0.721-0.864) | 0.510 | 0.828 |
+| cheap + code + thinking (primary) | 0.803 (0.723-0.878) | 0.567 | 0.724 |
+| strong4 mean (sensitivity) | 0.803 (0.719-0.878) | 0.593 | 0.621 |
+| Pinocchio-0.8B, input-v1 (frozen router) | 0.616 (0.520-0.716) | 0.325 | 0.905 |
+| Pinocchio-0.8B, input-v2 (code only, sensitivity) | 0.566 (0.463-0.672) | 0.295 | 0.940 |
+| Logprob comparator (minus thinking tail confidence) | 0.813 (0.740-0.876) | 0.592 | 0.716 |
+
+Prevalence 0.247 (the AUPRC of a random score). Intervals bootstrap tasks over fixed scores.
+
+- Pinocchio is much weaker here: cheap minus Pinocchio +0.180 (+0.105 to +0.252); it adds nothing to the cheap LR (+0.005, -0.010 to +0.020). On all 621 dev checkpoints (visible fails included) it reaches 0.731.
+- The package cuts answers at 800 characters (its training format); in about 30 of the 470 answers the graded code started after the cut. This does not explain the result: uncut answers give 0.570, and the code-only input-v2 is lower still (0.566; v2 minus v1 -0.050, -0.110 to +0.011).
+- Underconfident: mean p_correct 0.499 against an observed pass rate of 0.753 on these rows (calibration, not ranking).
+- Not a controlled replication of the paper's 0.868 vs 0.666: the paper used its 8B calibrator and gave both tools only question-answer pairs on QA and math benchmarks. Distribution shift (code, a 1.7B generator, visible-pass errors) is plausible, not established.
+- The logprob comparator is not shown to beat the cheap LR (+0.017, -0.031 to +0.067; task-weighted -0.018). The primary stays unchanged.
+- Dev replay: Pinocchio beats random at the same rate by about half as much as the other routers (top-K 25%: +2.8 pp, +0.4 to +5.4).
+- Cost: about 1.85 s of elapsed CPU inference per checkpoint; not included in the dollar totals.
+- Two input-v2 checkpoints without code have no score (the package refuses an empty answer); they are visible fails, so no decision uses them.
+
 ## Costs to date
 
 - Jev: about $0.18 of the approved $2 (3.67M input tokens for the full scoring, plus the checks), at the third-party price of $0.042 per million input tokens with free output. The TypeSafe account price is still unconfirmed.
@@ -210,5 +239,5 @@ a descriptive dev result, not an estimate for the test data.
 
 - Frozen on October 17 (plan, "Still to freeze before the replay"): escalation budgets q_VP = 10/25/50% from dev OOF quantiles weighted 1 / attempts of the task, tie rule, cheap-LR fallback for a missing Jev score, deployment view and label-free top-K ranking view, net gain over realized-rate random as the central replay result.
 - Replay evaluator: done and reviewed; dev replay done (section 12).
-- Pinocchio-0.8B baseline (time-boxed install).
+- Pinocchio-0.8B: installed, scored on dev and frozen as a router (section 13).
 - Protocol freeze, then the main run on the 325 test tasks and the test takeover answers (new approval).

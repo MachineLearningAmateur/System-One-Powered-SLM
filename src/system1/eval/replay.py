@@ -66,14 +66,16 @@ def dev_percentile(score: float, dev_scores: np.ndarray, dev_weights: np.ndarray
 
 
 def top_k(scores: np.ndarray, checkpoint_ids: list[str], rate: float,
-          secondary: np.ndarray | None = None) -> np.ndarray:
-    """Boolean mask: exactly floor(rate M + 0.5) rows by descending score. Ties go to the higher
-    secondary key (the raw score when `scores` are dev percentiles, which tie between adjacent
-    dev values), then to tie_u."""
+          secondary: np.ndarray | None = None, priority: np.ndarray | None = None) -> np.ndarray:
+    """Boolean mask: exactly floor(rate M + 0.5) rows by descending score. Ties go first to the
+    higher priority (the router's own score before a cheap-fallback score: a frozen, arbitrary
+    rule), then to the higher secondary key (the raw score, compared only within one source,
+    because `scores` are dev percentiles that tie between adjacent dev values), then to tie_u."""
     m = len(scores)
     k = int(math.floor(rate * m + 0.5))
     sec = np.zeros(m) if secondary is None else np.asarray(secondary, float)
-    order = sorted(range(m), key=lambda i: (-scores[i], -sec[i], tie_u(checkpoint_ids[i])))
+    pri = np.zeros(m) if priority is None else np.asarray(priority, float)
+    order = sorted(range(m), key=lambda i: (-scores[i], -pri[i], -sec[i], tie_u(checkpoint_ids[i])))
     mask = np.zeros(m, bool)
     mask[order[:k]] = True
     return mask

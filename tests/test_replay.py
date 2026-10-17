@@ -162,3 +162,34 @@ def test_external_router_score_and_missing_fallback():
     assert rs.score_final(row, router, {"T/a0/r1": {"score": 0.25}}) == 0.25
     assert rs.score_final(row, router, {}) is None  # missing -> the cheap LR decides
     assert rs.ARMS["pinocchio"] == []  # no Jev cost
+
+
+def test_top_k_cross_source_ties_put_own_scores_first():
+    pct = np.array([0.5, 0.5, 0.5])
+    raw = np.array([0.1, 0.9, 0.2])  # row 1 is a cheap-fallback score on another scale
+    own = np.array([1.0, 0.0, 1.0])
+    m = R.top_k(pct, ["a", "b", "c"], 0.34, secondary=raw, priority=own)  # k = 1
+    assert list(m) == [False, False, True]  # own scores first, then raw order within the source
+
+
+def test_pinocchio_records_must_match_execution_input_and_setup():
+    from system1.features import pinocchio_input as PI
+    tasks = {"T": type("Task", (), {"prompt": "def f():", "shown_tests": "", "task_id": "T"})()}
+    cp_ = {"checkpoint_id": "T/a0/r1", "exec_id": "e1", "task_id": "T", "answer": "x", "code": "def f(): pass\n"}
+    import system1.features.pinocchio_input as mod
+    orig = mod.first_round_messages
+    mod.first_round_messages = lambda task: [{"role": "user", "content": task.prompt}]
+    try:
+        good = {"checkpoint_id": "T/a0/r1", "exec_id": "e1", "input_version": PI.V2,
+                "input_sha256": PI.input_sha(*PI.build_input(cp_, tasks, PI.V2)), **PI.PINNED}
+        stale = {**good, "exec_id": "e0"}
+        legacy = {k: v for k, v in good.items() if k not in ("adapter_revision", "dtype")}
+        recs, counts = PI.select_records([stale, good], [cp_], tasks, PI.V2, require_pinned=True)
+        assert recs["T/a0/r1"] is good and counts["stale"] == 1
+        recs, counts = PI.select_records([legacy], [cp_], tasks, PI.V2, require_pinned=True)
+        assert recs == {} and counts["stale"] == 1
+        assert PI.select_records([legacy], [cp_], tasks, PI.V2, require_pinned=False)[0]
+        with pytest.raises(PI.PinocchioRecordError):
+            PI.select_records([good, dict(good)], [cp_], tasks, PI.V2, require_pinned=True)
+    finally:
+        mod.first_round_messages = orig

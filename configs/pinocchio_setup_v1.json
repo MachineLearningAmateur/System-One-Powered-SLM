@@ -1,0 +1,51 @@
+{
+ "version": "pinocchio-setup-v1",
+ "created": "2026-10-17T07:02:40.456848+00:00",
+ "pinned": {
+  "adapter": "KevinDavidHayes/pinocchio-0.8b",
+  "adapter_revision": "a1410d4c3c74b1cb09c9133bb97c683db9726bf2",
+  "base_model": "Qwen/Qwen3.5-0.8B",
+  "base_revision": "2fc06364715b967f1860aea9cf38778875588b17",
+  "package": "pinocchio-uq==0.1.1",
+  "prompt_variant": "combined",
+  "truncation": [
+   1500,
+   800
+  ],
+  "dtype": "torch.float32",
+  "placeholder_image": true,
+  "device": "cpu"
+ },
+ "input_versions": [
+  "pinocchio-input-v1",
+  "pinocchio-input-v2"
+ ],
+ "files": {
+  "pinocchio-input-v1": "pinocchio_scores.jsonl",
+  "pinocchio-input-v2": "pinocchio_scores_input-v2.jsonl"
+ },
+ "router_input_version": "pinocchio-input-v1",
+ "sensitivity_input_version": "pinocchio-input-v2",
+ "legacy_dev_records": {
+  "input_version": "pinocchio-input-v1",
+  "runs": {
+   "pilot-v1": {
+    "used": 264,
+    "stale": 0,
+    "other_checkpoints": 0,
+    "checkpoints": 264,
+    "records_with_pinned_fields": 0
+   },
+   "pilot-v1b": {
+    "used": 357,
+    "stale": 0,
+    "other_checkpoints": 0,
+    "checkpoints": 357,
+    "records_with_pinned_fields": 0
+   }
+  },
+  "certified": "every record matches the current execution (exec_id) and the rebuilt input (input_sha256); package pinocchio-uq==0.1.1, repos KevinDavidHayes/pinocchio-0.8b and Qwen/Qwen3.5-0.8B",
+  "not_certified": "the model revisions, dtype and placeholder-image use at the time of scoring: these records were made before the setup was pinned (loaded by repo name; the local cache held only the pinned revisions on 2026-10-17, which is consistent with but does not prove identity)"
+ },
+ "test_rule": "test records must carry every pinned field (replay --split test enforces it)"
+}
