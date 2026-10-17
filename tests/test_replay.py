@@ -126,3 +126,26 @@ def test_dev_percentile_puts_scores_on_one_scale():
 def test_the_same_checkpoint_in_two_runs_is_refused():
     with pytest.raises(ValueError):
         R.build_attempts([cp("r1", "A", 0, 1, True, True), cp("r2", "A", 0, 1, True, True)])
+
+
+def test_percentile_ties_keep_the_raw_score_order():
+    dev, w = np.array([0.1, 0.5]), np.ones(2)
+    raw = np.array([0.3, 0.4])
+    pct = np.array([R.dev_percentile(v, dev, w) for v in raw])
+    assert pct[0] == pct[1]  # both fall between the two dev values
+    for ids in (["a", "b"], ["b", "a"]):
+        assert list(R.top_k(pct, ids, 0.5, secondary=raw)) == [False, True]
+
+
+def test_frontier_call_cost_never_assumes_zero_billing():
+    import importlib.util
+    from pathlib import Path
+    spec = importlib.util.spec_from_file_location("replay_script", Path(__file__).resolve().parents[1] / "scripts" / "replay.py")
+    rs = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(rs)
+    assert rs.call_cost([], "absent") == (0.0, False)
+    timeout = {"call_id": "c", "usd_reported": None, "usd_computed": None, "status": "transport:ReadTimeout",
+               "output_tokens": None}
+    ok = {"call_id": "c", "usd_reported": 0.002, "usd_computed": 0.002, "status": "ok", "output_tokens": 10}
+    assert rs.call_cost([timeout, ok], "c") == (0.002, False)
+    assert rs.call_cost([ok], "c") == (0.002, True)

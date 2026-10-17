@@ -76,18 +76,17 @@ def _rows(path, what: str) -> list[dict]:
 
 
 def call_cost(ledger_rows: list[dict], call_id: str) -> tuple[float, bool]:
-    """Dollars of one logical frontier call over all its HTTP attempts; flag False if any attempt
-    that reached the provider has no cost."""
-    usd, complete = 0.0, True
-    for r in ledger_rows:
-        if r["call_id"] != call_id:
-            continue
+    """Dollars of one logical frontier call over all its HTTP attempts. The flag is False when the
+    call has no ledger rows or any attempt has no cost: zero billing is never assumed (a timeout
+    does not prove that the provider did no billable work)."""
+    rows = [r for r in ledger_rows if r["call_id"] == call_id]
+    usd, complete = 0.0, bool(rows)
+    for r in rows:
         v = r["usd_reported"] if r["usd_reported"] is not None else r["usd_computed"]
         if v is None:
-            if r["output_tokens"] is not None or not (r["status"] or "").startswith(("transport:", "http:")):
-                complete = False
-            continue
-        usd += v
+            complete = False
+        else:
+            usd += v
     return usd, complete
 
 
@@ -278,7 +277,7 @@ def main() -> int:
             fb = cfg["routers"][fb_name]["thresholds"][f"{q:.2f}"]
             frozen = np.array([R.escalate(cheap[j], fb["t"], fb["alpha"], ids[j]) if miss[j] else
                                R.escalate(s[j], th["t"], th["alpha"], ids[j]) for j in range(len(ids))])
-            topk = R.top_k(rank, ids, q)
+            topk = R.top_k(rank, ids, q, secondary=np.where(miss, cheap, s))
             for view, sel in (("frozen", frozen), ("top-k", topk)):
                 res = R.outcome(attempts, z, esc_mask(sel), f"{name} | {view} | q={q:.2f}")
                 g_r = R.gain_vs_random(attempts, z, res, args.n_boot)

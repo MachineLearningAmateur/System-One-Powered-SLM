@@ -65,11 +65,15 @@ def dev_percentile(score: float, dev_scores: np.ndarray, dev_weights: np.ndarray
     return float((dev_weights[dev_scores < score].sum() + dev_weights[dev_scores == score].sum() / 2) / total)
 
 
-def top_k(scores: np.ndarray, checkpoint_ids: list[str], rate: float) -> np.ndarray:
-    """Boolean mask: exactly floor(rate M + 0.5) rows by descending score, ties by tie_u."""
+def top_k(scores: np.ndarray, checkpoint_ids: list[str], rate: float,
+          secondary: np.ndarray | None = None) -> np.ndarray:
+    """Boolean mask: exactly floor(rate M + 0.5) rows by descending score. Ties go to the higher
+    secondary key (the raw score when `scores` are dev percentiles, which tie between adjacent
+    dev values), then to tie_u."""
     m = len(scores)
     k = int(math.floor(rate * m + 0.5))
-    order = sorted(range(m), key=lambda i: (-scores[i], tie_u(checkpoint_ids[i])))
+    sec = np.zeros(m) if secondary is None else np.asarray(secondary, float)
+    order = sorted(range(m), key=lambda i: (-scores[i], -sec[i], tie_u(checkpoint_ids[i])))
     mask = np.zeros(m, bool)
     mask[order[:k]] = True
     return mask
