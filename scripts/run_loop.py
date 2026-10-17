@@ -177,7 +177,8 @@ def main() -> int:
     ap.add_argument("--tasks-file", default="", help="JSON file with a 'tasks' list (repo-relative); only these run")
     ap.add_argument("--attempts", type=int, default=1, help="attempt indices run up to (not including) this value")
     ap.add_argument("--first-attempt", type=int, default=0,
-                    help="first attempt index; seeds depend on the index, so attempt k is the same in any run")
+                    help="first attempt index; seeds depend on the index (not on the run), "
+                         "but the same seed does not reproduce the output")
     ap.add_argument("--think-cap", type=int, default=THINK_CAP,
                     help="thinking tokens per round; only for the cap comparison (part of the protocol)")
     ap.add_argument("--concurrency", type=int, default=3)

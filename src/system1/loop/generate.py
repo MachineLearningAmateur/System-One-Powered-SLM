@@ -40,8 +40,11 @@ TOP_LOGPROBS = 5
 CONF_WINDOW = 1_024
 # Qwen's recommended thinking-mode sampling (no greedy decoding).
 SAMPLING = {"temperature": 0.6, "top_p": 0.95, "top_k": 20}
-# Seeds come from (SEED_TAG, task, attempt, round), not from the run id, so two
-# runs that differ only in one setting (e.g. the thinking cap) are paired.
+# Seeds come from (SEED_TAG, task, attempt, round), not from the run id. The
+# same seed does NOT reproduce a trajectory: vLLM batching changes the bf16
+# numerics, and in the pilot the 8K and 12K runs diverged after 78-1,766
+# characters of thinking (33 of 33 tasks). Two runs are paired by task and
+# attempt index only; replay always uses the logged trajectories.
 SEED_TAG = "s1-seed-v1"
 
 
