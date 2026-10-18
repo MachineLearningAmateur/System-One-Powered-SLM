@@ -8,6 +8,7 @@ For review, the files at this commit are authoritative: [docs/research-plan.md](
 
 ## Contents
 
+0. [How the experiment works](#how-the-experiment-works) (start here)
 1. [Glossary](#glossary) (abbreviations and terms)
 2. [Findings in brief](#findings-in-brief)
 3. [Status of each claim](#status-of-each-claim)
@@ -26,6 +27,67 @@ For review, the files at this commit are authoritative: [docs/research-plan.md](
 16. [Closest related work](#closest-related-work)
 17. [Where each number comes from](#where-each-number-comes-from)
 18. [Questions for the reviewer](#questions-for-the-reviewer)
+
+## How the experiment works
+
+This section explains the setup in plain terms, step by step. Exact definitions are in [Protocol](#protocol); words such as AUROC are in the [Glossary](#glossary).
+
+### The problem
+
+A small, cheap model writes code for a programming task and checks it with the few example tests it is given. When those examples pass, it stops. But code can pass the examples and still be wrong: in our test data, **19.2% of the code that passed its visible examples failed the full hidden test suite**. A rule that looks only at the visible tests cannot catch these cases, because by definition they all passed. The question is whether a cheap "router" can spot them, so that only those tasks are sent to an expensive frontier model.
+
+```mermaid
+flowchart LR
+    T[Task + visible examples] --> S[Small model writes code]
+    S --> V{Visible tests pass?}
+    V -- no, round < 3 --> R[Show the failures; model revises] --> S
+    V -- no, round 3 --> F[Forced takeover by frontier model]
+    V -- yes --> D{Router: is this code likely wrong?}
+    D -- accept --> A[Keep the small model's code]
+    D -- escalate --> E[Frontier model answers from scratch]
+```
+
+### Step by step
+
+1. **Tasks.** 542 Python tasks from two standard benchmarks: 164 from HumanEval+ and 378 from MBPP+. Each task has a short description, a few visible examples, and a much larger hidden test suite (EvalPlus). Before anything else, the tasks were split once at random into **dev** (40%, 217 tasks) and **test** (60%, 325 tasks). Dev tasks were used to build and tune everything. Test tasks were used only once, at the end.
+2. **The small model works on each task.** Qwen3-1.7B, a 1.7-billion-parameter model that "thinks" (writes out its reasoning) before it answers, runs on a local RTX 3070 GPU. For each task it makes 5 independent attempts. In each attempt:
+   - Round 1: it gets the task and the visible examples, thinks, and writes code.
+   - The code runs on the visible examples in a locked-down sandbox.
+   - If the examples pass, the attempt stops there. If not, the model gets its previous code and the failure messages (not its previous thinking) and tries again, for at most 3 rounds.
+   - Each round is one **checkpoint**: one piece of code with its test results, its thinking, and loop information (for example "did the pass count go up?").
+3. **Grading (the ground truth).** After all attempts were finished, every checkpoint's code was run on the full hidden test suite, in a separate grader with the model stopped. This gives each checkpoint a **label**: does this code actually fail? The model and the routers never saw these hidden results.
+4. **The decision point.** Every attempt that passes its visible examples reaches one decision: accept the code, or escalate to the frontier model. The test data has 1,457 such visible-pass checkpoints; 280 of them (19.2%) are actually wrong. These 1,457 checkpoints are the population of the main test.
+5. **The signals that a router can use** at that decision:
+   - **Cheap features** (free to compute): the visible test results, the round number, code length, thinking length, whether the thinking hit its length limit, repeat signals, and the model's own confidence in the words it wrote (logprobs).
+   - **Jev** (a commercial judge model; about $0.0001 per question set): we send it the task, the code and the test output, and ask fixed yes/no questions, for example *"Is the current code likely to fail on valid inputs beyond the visible tests?"* It returns a probability for "yes". Each checkpoint gets two Jev requests: one **without** the model's thinking (3 questions about the code) and one **with** the thinking (the same 3 plus 6 questions about the reasoning, for example *"Is the model working on the assigned problem as it is stated?"*). This lets us measure whether reading the reasoning helps.
+   - **Comparison judges:** Pinocchio-0.8B (an open model trained to estimate whether an answer is correct) and a confidence score from the small model's logprobs.
+6. **Building the routers on dev data.** A router turns the signals into one failure score. The main routers are logistic regressions (a weighted sum of the signals turned into a probability): one with the cheap features only, one with cheap features + Jev's code answers, and one with cheap features + Jev's code and thinking answers. Their weights, and the score thresholds for escalation, were learned on the dev tasks only.
+7. **Freeze.** Before the small model saw any test task, the whole protocol was fixed in a git commit (tag `protocol-freeze-v1`): the routers and their weights, the thresholds, the two planned statistical tests, and the analysis rules. After that, nothing was tuned. Two later changes are recorded as amendments, both made before any test code was graded (one of them removes one task with a broken hidden test).
+8. **Run the test tasks once.** The small model made 1,625 attempts on the 325 test tasks; Jev answered all 4,196 requests; Pinocchio scored every checkpoint; the hidden grader labeled every checkpoint except those of the one excluded task. The frontier model (Claude Sonnet 5.5) answered each of the 324 kept test tasks 3 times from scratch, and those answers were graded too.
+9. **Measurement 1: does the router rank wrong code higher?** On the 1,457 visible-pass test checkpoints, each router's score is compared with the labels using **AUROC**: the chance that a randomly chosen wrong checkpoint gets a higher score than a randomly chosen correct one (0.5 = guessing, 1.0 = perfect). The two planned tests, fixed before the test data existed, are:
+   - **Primary:** does adding Jev's answers to the cheap router raise its AUROC?
+   - **Secondary:** does adding Jev's answers about the *thinking* help beyond its answers about the *code*?
+
+   Both use a paired bootstrap over whole tasks (resampling tasks 19,999 times to measure uncertainty) and the Holm correction for running two tests.
+10. **Measurement 2: does it pay off when we actually escalate?** A replay simulates each routing policy on the logged test runs, with no new model calls: at every visible pass, the policy accepts or escalates according to its score and frozen threshold. If it escalates, the outcome is the frontier model's graded answer for that task (the mean over its 3 answers). Each policy is compared with:
+    - **always-small:** never escalate;
+    - **forced-only:** escalate only after 3 failed rounds;
+    - **always-frontier:** the frontier model answers every task;
+    - **random escalation** at the same rate, which shows whether the router's ranking adds value;
+    - **an oracle** that knows the answers, as an upper bound.
+
+    The replay reports the final pass rate, the frontier calls, and the cost in two views: electricity for the local GPU, and a hypothetical cloud GPU price.
+11. **Afterwards: descriptive and exploratory analyses.** The README also reports planned descriptive results (each Jev answer alone, results by benchmark, transfer between the benchmarks) and, clearly labeled, analyses chosen after seeing the results.
+
+### One attempt, as an example
+
+| Round | What happens | Visible tests | What we record |
+| --- | --- | --- | --- |
+| 1 | The model reads the task, thinks for 2,100 tokens, writes code | 1 of 2 examples pass | checkpoint r1: code, test output, thinking, cheap features; label from the hidden grader |
+| 2 | The model gets its code and the failure message, thinks again, writes new code | 2 of 2 pass, so the loop stops | checkpoint r2: same records; this is the **decision point** |
+| — | Router: cheap features + Jev's answers give a failure score of 0.71; the threshold for a 25% budget is 0.66, so it **escalates** | — | the frontier model's 3 graded answers give the outcome for this attempt |
+
+If the hidden tests show that the round-2 code was in fact wrong and the frontier answers pass, this escalation is a **rescue**. If the code was right and a frontier answer fails, it is a **harm**. (The numbers in this example are illustrative, not a specific logged attempt.)
 
 ## Glossary
 
