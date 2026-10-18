@@ -1,10 +1,13 @@
-# Findings so far (as of October 17, 2026)
+# Findings so far (as of October 18, 2026)
 
-Development data only. No test task has been generated or scored. The Claude
-Doc research plan (exported to `docs/research-plan.md`, rev 86) is the source
-of truth; this file collects the pilot results in one place. Numbers come from
-the scripts in `scripts/` and `scripts/analysis/`; the small result files are
-in `docs/results/`.
+Sections 1-13 cover the development phase (October 16-17). The test phase
+(frozen primary test, Table 1, replay, transfer, exploratory diagnostics) is
+summarized with all tables in the top-level [README](../README.md); its result
+files are `docs/results/test_analysis_main-test-v1.json`,
+`docs/results/replay_main-test-v1_final_routers-v2.json` and
+`docs/results/transfer_main-test-v1.json`. The Claude Doc research plan
+(exported to `docs/research-plan.md`) is the source of truth. Numbers come from
+the scripts in `scripts/` and `scripts/analysis/`.
 
 ## Runs
 

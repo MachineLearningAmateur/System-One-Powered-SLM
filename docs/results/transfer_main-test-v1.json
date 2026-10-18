@@ -1,0 +1,219 @@
+{
+ "run": "main-test-v1",
+ "routers": "routers-transfer-v1",
+ "rule_tasks": 30,
+ "directions": [
+  {
+   "source": "humaneval+",
+   "target": "mbpp+",
+   "n": 1007,
+   "positives": 229,
+   "tasks_with_vp_hidden_fail": 71,
+   "tasks_with_vp_hidden_pass": 181,
+   "meets_reporting_rule": true,
+   "label": "meets the 30/30 support rule (descriptive)",
+   "estimand": "fixed fitted models compared on the same rows; training sizes differ; no training-set uncertainty; not a pure domain-shift estimate",
+   "auroc": {
+    "source fit | cheap": 0.6773666662924753,
+    "source fit | cheap+code": 0.7836575700766719,
+    "source fit | cheap+code+thinking": 0.7925932578215332,
+    "source fit | cheap+strong4": 0.7934351881995038,
+    "target fit | cheap": 0.7090456999809163,
+    "target fit | cheap+code": 0.740174672489083,
+    "target fit | cheap+code+thinking": 0.7236896756884184,
+    "target fit | cheap+strong4": 0.7193509278072765
+   },
+   "strong4_mean_auroc": 0.8251338669300973,
+   "gap": {
+    "cheap": {
+     "delta": -0.03167903368844094,
+     "p_two_sided": 0.08535,
+     "n_boot": 19999,
+     "ci95": [
+      -0.06770529294338831,
+      0.004607578068311741
+     ],
+     "dropped_replicates": 0
+    },
+    "cheap+code": {
+     "delta": 0.04348289758758894,
+     "p_two_sided": 0.0835,
+     "n_boot": 19999,
+     "ci95": [
+      -0.005556958710819075,
+      0.09306806276676713
+     ],
+     "dropped_replicates": 0
+    },
+    "cheap+code+thinking": {
+     "delta": 0.06890358213311487,
+     "p_two_sided": 0.0111,
+     "n_boot": 19999,
+     "ci95": [
+      0.016055689346240472,
+      0.12161167990155716
+     ],
+     "dropped_replicates": 0
+    },
+    "cheap+strong4": {
+     "delta": 0.07408426039222726,
+     "p_two_sided": 0.0059,
+     "n_boot": 19999,
+     "ci95": [
+      0.021823569815234402,
+      0.12596935236217377
+     ],
+     "dropped_replicates": 0
+    }
+   },
+   "jev_increment": {
+    "source fit | cheap+code - cheap": {
+     "delta": 0.10629090378419659,
+     "p_two_sided": 5e-05,
+     "n_boot": 19999,
+     "ci95": [
+      0.05953721441004384,
+      0.15463820775357578
+     ],
+     "dropped_replicates": 0
+    },
+    "source fit | cheap+code+thinking - cheap": {
+     "delta": 0.1152265915290579,
+     "p_two_sided": 5e-05,
+     "n_boot": 19999,
+     "ci95": [
+      0.06690724668136452,
+      0.16484065373146595
+     ],
+     "dropped_replicates": 0
+    },
+    "target fit | cheap+code - cheap": {
+     "delta": 0.031128972508166708,
+     "p_two_sided": 0.0021,
+     "n_boot": 19999,
+     "ci95": [
+      0.012368283529835012,
+      0.0503569803606716
+     ],
+     "dropped_replicates": 0
+    },
+    "target fit | cheap+code+thinking - cheap": {
+     "delta": 0.014643975707502088,
+     "p_two_sided": 0.25215,
+     "n_boot": 19999,
+     "ci95": [
+      -0.010552689319806996,
+      0.040316553193548925
+     ],
+     "dropped_replicates": 0
+    }
+   }
+  },
+  {
+   "source": "mbpp+",
+   "target": "humaneval+",
+   "n": 450,
+   "positives": 51,
+   "tasks_with_vp_hidden_fail": 18,
+   "tasks_with_vp_hidden_pass": 86,
+   "meets_reporting_rule": false,
+   "label": "sparse descriptive evidence (below the 30/30 rule)",
+   "estimand": "fixed fitted models compared on the same rows; training sizes differ; no training-set uncertainty; not a pure domain-shift estimate",
+   "auroc": {
+    "source fit | cheap": 0.7384146641112586,
+    "source fit | cheap+code": 0.7444591871836453,
+    "source fit | cheap+code+thinking": 0.7424443461595164,
+    "source fit | cheap+strong4": 0.7418054941274754,
+    "target fit | cheap": 0.7173325470539093,
+    "target fit | cheap+code": 0.8218094255245958,
+    "target fit | cheap+code+thinking": 0.8264779596048946,
+    "target fit | cheap+strong4": 0.8239716939407342
+   },
+   "strong4_mean_auroc": 0.7774092092977543,
+   "gap": {
+    "cheap": {
+     "delta": 0.021082117057349303,
+     "p_two_sided": 0.4963,
+     "n_boot": 19999,
+     "ci95": [
+      -0.036649970377017574,
+      0.08422993882691607
+     ],
+     "dropped_replicates": 0
+    },
+    "cheap+code": {
+     "delta": -0.07735023834095045,
+     "p_two_sided": 0.21135,
+     "n_boot": 19999,
+     "ci95": [
+      -0.21093212637288583,
+      0.02491197963105681
+     ],
+     "dropped_replicates": 0
+    },
+    "cheap+code+thinking": {
+     "delta": -0.08403361344537819,
+     "p_two_sided": 0.2045,
+     "n_boot": 19999,
+     "ci95": [
+      -0.22446788546350482,
+      0.028993242985598126
+     ],
+     "dropped_replicates": 0
+    },
+    "cheap+strong4": {
+     "delta": -0.08216619981325879,
+     "p_two_sided": 0.20705,
+     "n_boot": 19999,
+     "ci95": [
+      -0.220750997080712,
+      0.028025122316582454
+     ],
+     "dropped_replicates": 0
+    }
+   },
+   "jev_increment": {
+    "source fit | cheap+code - cheap": {
+     "delta": 0.006044523072386787,
+     "p_two_sided": 0.54735,
+     "n_boot": 19999,
+     "ci95": [
+      -0.013224813564091876,
+      0.027377432178129872
+     ],
+     "dropped_replicates": 0
+    },
+    "source fit | cheap+code+thinking - cheap": {
+     "delta": 0.004029682048257821,
+     "p_two_sided": 0.73035,
+     "n_boot": 19999,
+     "ci95": [
+      -0.017777812643180523,
+      0.028782247841853566
+     ],
+     "dropped_replicates": 0
+    },
+    "target fit | cheap+code - cheap": {
+     "delta": 0.10447687847068654,
+     "p_two_sided": 0.02935,
+     "n_boot": 19999,
+     "ci95": [
+      0.02082959153687367,
+      0.20792256544658985
+     ],
+     "dropped_replicates": 0
+    },
+    "target fit | cheap+code+thinking - cheap": {
+     "delta": 0.10914541255098531,
+     "p_two_sided": 0.03205,
+     "n_boot": 19999,
+     "ci95": [
+      0.01881267517558365,
+      0.2181273734376552
+     ],
+     "dropped_replicates": 0
+    }
+   }
+  }
+ ]
+}
