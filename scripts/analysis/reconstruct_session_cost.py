@@ -6,7 +6,7 @@
 
 The session's samples are the rows of power.jsonl from its start to the next session's start.
 Energy uses monitor.energy_wh (the runner's trapezoid rule). The elapsed time runs from the
-first to the last sample, so it is a lower bound (the sampler interval is 2 s). The method is
+first to the last sample: an estimate of the sampled window, not a bound. The method is
 first checked on every complete session: its stored energy must match its samples.
 The session keeps its original null values under "reconstruction".
 """
@@ -23,10 +23,22 @@ from system1.eval.ledger import read_jsonl
 from system1.loop import monitor
 
 TOLERANCE_WH = 0.5
+NOTE = ("an estimate of the sampled window, not a bound: the runner's timer starts after the sampler and "
+        "uses perf_counter, and nothing records how long after the last sample the process stopped; "
+        "last_ledger_utc is independent evidence of when the work stopped")
 
 
 def ts(iso: str) -> float:
     return datetime.fromisoformat(iso).timestamp()
+
+
+def last_ledger(run_dir, sessions: list[dict], i: int) -> str | None:
+    """The newest ledger row inside the session's window (independent of the power sampler)."""
+    lo = ts(sessions[i]["started"])
+    hi = ts(sessions[i + 1]["started"]) if i + 1 < len(sessions) else float("inf")
+    rows, _ = read_jsonl(run_dir / "ledger.jsonl")
+    t = [ts(r["ts"]) for r in rows if r.get("ts") and lo <= ts(r["ts"]) < hi]
+    return datetime.fromtimestamp(max(t), timezone.utc).isoformat() if t else None
 
 
 def window(samples: list[dict], sessions: list[dict], i: int) -> list[dict]:
@@ -74,7 +86,8 @@ def main() -> int:
         return 0
     s["reconstruction"] = {
         "source": "power.jsonl", "method": "monitor.energy_wh over the session's samples; elapsed = first to last sample",
-        "elapsed_is_lower_bound": True, "last_sample_utc": last, "largest_gap_s": round(max(gaps), 1),
+        "estimate": NOTE, "last_sample_utc": last, "last_ledger_utc": last_ledger(d, sessions, args.session),
+        "largest_gap_s": round(max(gaps), 1),
         "original": {k: s.get(k) for k in ("ended", "elapsed_s", "energy_wh", "outcome")},
         "reason": "the process was killed before the runner's finally step wrote the session's cost",
         "made_utc": datetime.now(timezone.utc).isoformat()}

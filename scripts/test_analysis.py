@@ -15,8 +15,14 @@ Descriptive (outside Holm): Table 1 (AUROC with task-bootstrap intervals, AUPRC 
 prevalence, Brier for the LR predictors, FNR at 1/5/10% FPR, task-weighted AUROC) for the
 LR predictors, the frozen sensitivities (cheap+strong4, the strong4 mean), Pinocchio input-v1
 (input-v2 as a labeled sensitivity) and the logprob comparator; paired deltas against cheap;
-results by benchmark and by cap hit; the same-question contrast; the per-answer audit; the
-within-task AUROC; the operating points at the frozen thresholds. A missing score is never
+results by benchmark, by cap hit and by round; the same-question contrast (pooled, and
+task-weighted as a sensitivity); the per-answer audit (failure-oriented: on_task and
+stated_fix_matches_change as 1 - p), with its support in every cell; the within-task AUROC
+among a task's visible-pass attempts (tasks with both outcomes there); the operating points at
+the frozen thresholds. AUPRC is sklearn's average precision. A comparator with missing scores
+gets its interval and its paired difference with cheap on its own available rows (reported).
+Intervals in Table 1 are descriptive (2,000 whole-task draws, not stratified); the Holm family
+uses its own 19,999 stratified draws, and those intervals are the ones to report for it. A missing score is never
 filled here: the primary test needs both Jev arms on every row and stops otherwise.
 Writes results/test_analysis_<run-id>.json.
 """
@@ -64,7 +70,14 @@ def metrics(y, s, groups, probability: bool) -> dict:
     return out
 
 
+def support(y, groups) -> dict:
+    return {"rows": int(len(y)), "positives": int(y.sum()), "tasks": len(set(groups)),
+            "positive_tasks": len(set(groups[y == 1])), "pass_tasks": len(set(groups[y == 0]))}
+
+
 def within_task_auroc(y, s, groups) -> dict:
+    """Mean over tasks of the AUROC among the task's visible-pass attempts (only tasks that have
+    both outcomes there; the population is the visible-pass subset, not all five attempts)."""
     vals = []
     for t in np.unique(groups):
         m = groups == t
@@ -147,33 +160,58 @@ def main() -> int:
         if len(set(yy)) == 2:
             res["bootstrap"] = P.task_bootstrap(yy, gg, full, pairs, n_boot=N_BOOT_CI)
             res["delta_vs_cheap"] = {f"{b} - {a}": res[b]["auroc"] - res[a]["auroc"] for a, b in pairs}
+            # A comparator with missing scores: its interval and its difference with cheap on its own rows
+            for k in TABLE:
+                s = scores[k][mask]
+                ok = ~np.isnan(s)
+                if k in full or ok.sum() == 0 or len(set(yy[ok])) < 2:
+                    continue
+                c = scores["cheap"][mask][ok]
+                b = P.task_bootstrap(yy[ok], gg[ok], {"cheap": c, k: s[ok]}, [("cheap", k)], n_boot=N_BOOT_CI)
+                res.setdefault("partial_rows", {})[k] = {
+                    "rows": int(ok.sum()), "cheap_auroc_same_rows": auroc(yy[ok], c),
+                    "delta_vs_cheap": res[k]["auroc"] - auroc(yy[ok], c), "bootstrap": b}
         return res
 
     out["table1"] = table(np.ones(len(y), bool), "all visible-pass")
     out["by_benchmark"] = {b: table(strata == b, b) for b in sorted(set(strata))}
     cap = np.array([bool(d["cp"]["features"].get("cap_hit")) for d in vp])
     out["by_cap_hit"] = {str(v): table(cap == v, f"cap_hit={v}") for v in (False, True) if (cap == v).any()}
+    rnd = np.array([int(d["cp"]["round"]) for d in vp])
+    out["by_round"] = {str(r): table(rnd == r, f"round {r}") for r in sorted(set(rnd))}
     out["within_task"] = {k: within_task_auroc(y, scores[k], groups) for k in LR_SETS + [MEAN]}
 
     # Same-question contrast: each code answer with the thinking (trace arm) vs without (history arm)
     same = {}
-    for q in ("code_likely_fails", "special_cases_visible_tests"):
+    for q in P.CODE_QS:
         rows = [i for i, d in enumerate(vp) if d["history"]["applicability"][q] == "applicable"
                 and d["trace"]["applicability"][q] == "applicable"]
         h = np.array([vp[i]["history"]["features"][q] for i in rows], float)
         t = np.array([vp[i]["trace"]["features"][q] for i in rows], float)
         yy, gg = y[rows], groups[rows]
-        b = P.task_bootstrap(yy, gg, {"history": h, "trace": t}, [("history", "trace")], n_boot=N_BOOT_CI)
-        same[q] = {"n": len(rows), "history_arm": auroc(yy, h), "trace_arm": auroc(yy, t), "bootstrap": b}
+        if not rows or len(set(yy)) < 2:
+            same[q] = {**support(yy, gg), "history_arm": None, "trace_arm": None}
+            continue
+        w = P.task_weights(gg)
+        pr = {"history": h, "trace": t}
+        same[q] = {**support(yy, gg), "history_arm": auroc(yy, h), "trace_arm": auroc(yy, t),
+                   "history_arm_task_weighted": auroc(yy, h, w), "trace_arm_task_weighted": auroc(yy, t, w),
+                   "bootstrap": P.task_bootstrap(yy, gg, pr, [("history", "trace")], n_boot=N_BOOT_CI),
+                   "bootstrap_task_weighted": P.task_bootstrap(yy, gg, pr, [("history", "trace")], n_boot=N_BOOT_CI,
+                                                               weighted=True)}
     swapped = np.array([score_final({**d, "history": {**d["history"], "features": {
         **d["history"]["features"], **{q: d["trace"]["features"][q] for q in P.CODE_QS}},
         "applicability": {**d["history"]["applicability"], **{q: d["trace"]["applicability"][q]
                                                               for q in P.CODE_QS}}}},
         routers["cheap+code"]) for d in vp], float)
-    b = P.task_bootstrap(y, groups, {"history": scores["cheap+code"], "trace": swapped}, [("history", "trace")],
-                         n_boot=N_BOOT_CI)
-    same["cheap+code predictor"] = {"history_arm": auroc(y, scores["cheap+code"]), "trace_arm": auroc(y, swapped),
-                                    "bootstrap": b}
+    pr = {"history": scores["cheap+code"], "trace": swapped}
+    w = P.task_weights(groups)
+    same["cheap+code predictor"] = {
+        **support(y, groups), "history_arm": auroc(y, scores["cheap+code"]), "trace_arm": auroc(y, swapped),
+        "history_arm_task_weighted": auroc(y, scores["cheap+code"], w), "trace_arm_task_weighted": auroc(y, swapped, w),
+        "bootstrap": P.task_bootstrap(y, groups, pr, [("history", "trace")], n_boot=N_BOOT_CI),
+        "bootstrap_task_weighted": P.task_bootstrap(y, groups, pr, [("history", "trace")], n_boot=N_BOOT_CI,
+                                                    weighted=True)}
     out["same_question"] = same
 
     # Per-answer audit: standalone AUROC of each oriented answer on its applicable rows
@@ -189,14 +227,13 @@ def main() -> int:
             v = np.array([vp[i][key]["features"][q] for i in rows], float)
             v = 1 - v if q in P.TRUE_IS_GOOD else v
             rr = np.array(rows)
-            ent = {"applicable_rows": len(rows), "positives": int(y[rr].sum()),
-                   "positive_tasks": len(set(groups[rr][y[rr] == 1])), "auroc": auroc(y[rr], v)}
-            for b in sorted(set(strata)):
-                m = strata[rr] == b
-                ent[f"auroc {b}"] = auroc(y[rr][m], v[m])
-            for c in (False, True):
-                m = cap[rr] == c
-                ent[f"auroc cap_hit={c}"] = auroc(y[rr][m], v[m]) if m.any() else None
+            ent = {"orientation": "failure (1 - p)" if q in P.TRUE_IS_GOOD else "failure (p)",
+                   "applicable_rows": len(rows), **support(y[rr], groups[rr]), "auroc": auroc(y[rr], v), "cells": {}}
+            cells = [(b, strata[rr] == b) for b in sorted(set(strata))]
+            cells += [(f"cap_hit={c}", cap[rr] == c) for c in (False, True)]
+            for name, m in cells:
+                ent["cells"][name] = {**support(y[rr][m], groups[rr][m]),
+                                      "auroc": auroc(y[rr][m], v[m]) if m.any() else None}
             audit[f"{q} [{arm}]"] = ent
     out["audit"] = audit
 
@@ -241,7 +278,12 @@ def main() -> int:
         print(f"\n{b}: n {r['cheap']['n']}, positives {r['cheap']['positives']} from {r['cheap']['positive_tasks']} "
               f"tasks; " + ", ".join(f"{k} {r[k]['auroc']:.3f}" for k in TABLE if r[k]))
     for q, r in same.items():
-        print(f"  same-question {q}: history {r['history_arm']:.3f} vs trace {r['trace_arm']:.3f}")
+        if r["history_arm"] is None:
+            print(f"  same-question {q}: {r['rows']} rows, one class or none (undefined)")
+            continue
+        print(f"  same-question {q}: history {r['history_arm']:.3f} vs trace {r['trace_arm']:.3f} "
+              f"(task-weighted {r['history_arm_task_weighted']:.3f} vs {r['trace_arm_task_weighted']:.3f}); "
+              f"{r['rows']} rows, {r['positive_tasks']} fail tasks")
     path = RESULTS / f"test_analysis_{args.run_id}.json"
     path.write_text(json.dumps(out, indent=1, default=str), encoding="utf-8")
     print(f"\nwritten {path}")

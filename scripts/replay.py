@@ -364,7 +364,7 @@ def main() -> int:
     path = RESULTS / f"replay_{'+'.join(args.run_id)}_{args.scores}_{cfg['version']}.json"
     path.write_text(json.dumps(out, indent=1), encoding="utf-8")
     print(f"{len(attempts)} attempts, {len(vp_idx)} decisions, forced share {out['forced_share']:.3f}; "
-          f"fallback used {fallback_used}; frontier {finfo}; small-model cost complete {cost_complete} (rebuilt sessions {rebuilt}); "
+          f"fallback used {fallback_used}; frontier {finfo}; small-model cost available {cost_complete} (includes rebuilt session totals, estimates: {rebuilt}); "
           f"Jev calls with unknown usage {jev_unknown}")
     print(f"{'policy':42s} {'pass':>6s} {'q_vp':>6s} {'calls':>6s} {'gain vs random (pp)':>24s} {'$ owned':>9s} {'$ cloud':>9s}")
     for p in out["policies"]:
