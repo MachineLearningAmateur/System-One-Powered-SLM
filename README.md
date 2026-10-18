@@ -8,28 +8,104 @@ For review, the files at this commit are authoritative: [docs/research-plan.md](
 
 ## Contents
 
-1. [Findings in brief](#findings-in-brief)
-2. [Status of each claim](#status-of-each-claim)
-3. [Protocol](#protocol)
-4. [Data](#data)
-5. [Planned tests (Holm family)](#planned-tests-holm-family)
-6. [Table 1](#table-1-failure-prediction-on-visible-pass-test-checkpoints)
-7. [Each Jev answer alone](#each-jev-answer-alone-prespecified-audit)
-8. [Operating points at the frozen thresholds](#operating-points-at-the-frozen-thresholds)
-9. [Escalation replay](#escalation-replay-descriptive)
-10. [Cross-benchmark transfer](#cross-benchmark-transfer-amendment-a11-descriptive)
-11. [Exploratory analyses](#exploratory-analyses-after-the-planned-analysis)
-12. [Reporting completeness](#reporting-completeness)
-13. [Deviations and integrity](#deviations-and-integrity)
-14. [Limitations](#limitations)
-15. [Closest related work](#closest-related-work)
-16. [Where each number comes from](#where-each-number-comes-from)
-17. [Questions for the reviewer](#questions-for-the-reviewer)
+1. [Glossary](#glossary) (abbreviations and terms)
+2. [Findings in brief](#findings-in-brief)
+3. [Status of each claim](#status-of-each-claim)
+4. [Protocol](#protocol)
+5. [Data](#data)
+6. [Planned tests (Holm family)](#planned-tests-holm-family)
+7. [Table 1](#table-1-failure-prediction-on-visible-pass-test-checkpoints)
+8. [Each Jev answer alone](#each-jev-answer-alone-prespecified-audit)
+9. [Operating points at the frozen thresholds](#operating-points-at-the-frozen-thresholds)
+10. [Escalation replay](#escalation-replay-descriptive)
+11. [Cross-benchmark transfer](#cross-benchmark-transfer-amendment-a11-descriptive)
+12. [Exploratory analyses](#exploratory-analyses-after-the-planned-analysis)
+13. [Reporting completeness](#reporting-completeness)
+14. [Deviations and integrity](#deviations-and-integrity)
+15. [Limitations](#limitations)
+16. [Closest related work](#closest-related-work)
+17. [Where each number comes from](#where-each-number-comes-from)
+18. [Questions for the reviewer](#questions-for-the-reviewer)
+
+## Glossary
+
+### Abbreviations
+
+| Abbreviation | Stands for | Meaning here |
+| --- | --- | --- |
+| AUROC | Area Under the Receiver Operating Characteristic curve | How well a score ranks failing code above passing code. Take one failing and one passing checkpoint at random: AUROC is the chance that the failing one gets the higher score. 0.5 = coin flip, 1.0 = perfect. |
+| ΔAUROC | difference in AUROC | AUROC of one router minus AUROC of another, on the same rows. Positive = the first router ranks better. |
+| AUPRC | Area Under the Precision–Recall Curve | Another ranking measure that focuses on the failing rows. Here it is computed as "average precision". A random score gets the failure rate (0.192). |
+| ROC | Receiver Operating Characteristic | The curve of true-positive rate against false-positive rate over all thresholds; AUROC is the area under it. |
+| FPR | False-Positive Rate | Share of passing code that a router escalates anyway (an unnecessary frontier call). |
+| FNR | False-Negative Rate | Share of failing code that a router accepts (a missed failure). "FNR at 5% FPR" = the miss rate when at most 5% of passing code is escalated. |
+| CI | Confidence Interval | The range of plausible values for a number. "95% CI +0.020 to +0.068" means the data are consistent with a true value anywhere in that range. |
+| LR | Logistic Regression | A simple statistical model that combines many input numbers (features) into one probability of failure, with one weight per feature. |
+| L2, C = 1 | L2 regularization with strength setting C = 1 | A standard, fixed setting that keeps the LR weights small, so the model does not over-fit a small training set. It was not tuned. |
+| OOF | Out-Of-Fold | A prediction for a row made by a model that was trained without that row's task. It gives honest scores on the training data itself. |
+| ECE | Expected Calibration Error | How far predicted probabilities are from the observed failure rates. Not reported. |
+| LLM | Large Language Model | A model such as GPT or Claude. |
+| SLM | Small Language Model | Here Qwen3-1.7B (1.7 billion parameters). |
+| API | Application Programming Interface | The web service that a program calls (Jev, OpenRouter). |
+| GPU / CPU | Graphics / Central Processing Unit | The graphics card (RTX 3070) runs the small model; the CPU runs Pinocchio and the sandbox. |
+| RTX 3070, A10G | two NVIDIA GPU models | The RTX 3070 is the local card used; the A10G is a cloud card used only to put a price on GPU time. |
+| UTC | Coordinated Universal Time | The time zone of all times in this README. |
+| Wh, kWh | watt-hour, kilowatt-hour | Units of electrical energy (1 kWh = 1,000 Wh). |
+| GiB | gibibyte | 1,073,741,824 bytes (memory size). |
+| pp | percentage points | The difference between two percentages: 85% vs 83% is +2 pp. |
+| HE+ / HumanEval+, MBPP+ | HumanEval Plus, Mostly Basic Python Problems Plus | Two standard Python coding benchmarks; the "+" versions (EvalPlus) add many more hidden tests per task. |
+| VP | Visible Pass | A checkpoint whose code passes the visible tests. |
+| q_VP | the escalation budget | The share of visible-pass checkpoints that a policy sends to the frontier model (10%, 25% or 50%). |
+| NA | Not Applicable | A Jev question that cannot apply to a checkpoint (for example a question about the previous round, in round 1). |
+| A1, A2 | Amendments 1 and 2 | Recorded changes to the plan after the freeze; see [Deviations and integrity](#deviations-and-integrity). |
+| SWE-bench, APPS, CodeContests, LiveCodeBench | other coding benchmarks | Mentioned in related work. |
+
+### Terms
+
+| Term | Meaning here |
+| --- | --- |
+| Small model / frontier model | Qwen3-1.7B, which does the work; Claude Sonnet 5.5, a much larger model that is called only when the router escalates. |
+| Checkpoint | One round of one attempt: the code the small model wrote in that round, with its test results. |
+| Attempt, round | Each task gets 5 independent attempts. In each attempt the model gets up to 3 rounds to write and fix its code. |
+| Visible tests / hidden tests | Visible tests are the examples shown to the model; it can run them. The hidden (grading) tests are the full EvalPlus suite, used only to make the label. |
+| Label | Whether a checkpoint's code fails the hidden tests (1 = fails). |
+| Router | The part that decides, at a visible pass, whether to accept the code or escalate to the frontier model. It does this by comparing a failure score with a threshold. |
+| Escalate, takeover | Send the task to the frontier model, which answers from scratch. |
+| Forced takeover | An attempt that never passed the visible tests after 3 rounds; every policy (except always-small) sends it to the frontier model. |
+| Jev | A commercial "System One" model from TypeSafe that answers typed questions (here yes/no) with probabilities, without writing text. |
+| Typed question, zero-shot | A question with fixed answer options and written true/false criteria; zero-shot = no examples and no training on our data. |
+| History call / trace call | The two Jev requests per checkpoint: without and with the model's thinking. |
+| Thinking, trace | The text the small model writes to reason before its answer. |
+| Cap hit | The thinking reached the 8,192-token limit and was stopped. |
+| Token | A piece of text (about 3/4 of an English word) that language models read and write. |
+| Logprob | The log of the probability that the model gave to the token it wrote; low values mean the model was unsure. |
+| Cheap features | Numbers that cost nothing extra: test results, code length, thinking length, logprob summaries, repeat signals. |
+| Strong4 | Four Jev answers selected on dev data; "strong4 mean" is their plain average. |
+| Pinocchio-0.8B | An open 0.8-billion-parameter model trained to estimate whether an answer is correct; a comparison judge. |
+| Dev / test split | Dev tasks (40%) were used to build and freeze everything; test tasks (60%) were used only once, for the final results. |
+| Freeze, tag | Fixing the protocol in a git commit before the test data exist; the tag `protocol-freeze-v1` marks that commit. |
+| Confirmatory / descriptive / exploratory | See [Status of each claim](#status-of-each-claim): a test planned and frozen in advance / a planned measurement / an analysis chosen after seeing the results. |
+| Bootstrap | Estimating uncertainty by re-sampling the data many times (here whole tasks, 19,999 times) and recomputing the number each time. |
+| p-value | The probability of a difference at least this large if there were truly no difference. Small = unlikely to be luck. |
+| Holm correction | An adjustment of p-values when more than one test is run, so that the chance of any false positive stays at 5% (α = 0.05). |
+| Pooled vs task-weighted | Pooled counts every checkpoint once; task-weighted gives every task the same total weight. |
+| Threshold, quantile | A router escalates when its score is above the threshold; each threshold was set on dev data so that a given share (the quantile) of dev scores is above it. |
+| Top-k view | Escalate exactly the k highest-scoring test checkpoints, so all routers use the same budget. |
+| Random comparator | Escalating the same share of checkpoints at random; the gain over it shows the value of the router's ranking. |
+| Oracle | An impossible ideal policy that knows the hidden outcomes; an upper bound. |
+| Rescue / harm | An escalation that turns failing code into a passing answer / passing code into a failing answer. |
+| Replay | Simulating every policy offline from the logged runs and the stored frontier answers, with no new model calls. |
+| Transfer | Training a router on one benchmark and testing it on the other. |
+| Sampling (temperature, top-p, top-k) | Settings that control how randomly the small model picks each next token. |
+| vLLM | The software that runs the small model on the GPU. |
+| EvalPlus | The test framework that holds the hidden tests and grades the code. |
+| Sandbox | An isolated container without network access where model-written code runs. |
+| atol | Absolute tolerance: the largest allowed numeric error when comparing a result. |
 
 ## Findings in brief
 
 1. **Primary test (confirmatory): Jev's answers add signal to a strong cheap baseline.** On 1,457 visible-pass test checkpoints, the frozen cheap-feature LR reaches AUROC 0.689. With Jev's answers, it reaches 0.732: ΔAUROC +0.044 (unadjusted 95% CI +0.020 to +0.068), Holm p = 0.0006. Descriptively, most of the gain comes from Jev's three code questions (cheap + code: 0.744).
-2. **Trace contrast (confirmatory): adding Jev's answers about the thinking reduced AUROC.** Adding the five applicable thinking answers to cheap + code changed AUROC by −0.012 (−0.021 to −0.004), Holm p = 0.010, in the frozen LR pipeline. This does not establish that the reasoning has no useful information: the two always-applicable thinking answers alone reach 0.72–0.77 (the round-2–3 ones 0.66–0.76 on 111 rows), but they also see the code. Exploratory checks (section 11) did not identify an explanation.
+2. **Trace contrast (confirmatory): adding Jev's answers about the thinking reduced AUROC.** Adding the five applicable thinking answers to cheap + code changed AUROC by −0.012 (−0.021 to −0.004), Holm p = 0.010, in the frozen LR pipeline. This does not establish that the reasoning has no useful information: the two always-applicable thinking answers alone reach 0.72–0.77 (the round-2–3 ones 0.66–0.76 on 111 rows), but they also see the code. Exploratory checks ([section 12](#exploratory-analyses-after-the-planned-analysis)) did not identify an explanation.
 3. **Exploratory: the raw `code_likely_fails` answer has the highest AUROC of all evaluated scores (0.826).** This is the maximum of a prespecified per-answer audit, selected after seeing the test results, so it is an exploratory result that needs confirmation on new tasks. The frozen LRs that contain this answer score lower (0.731–0.744); the small dev set (116 failures) is one possible reason, not an established one.
 4. **Replay (descriptive): routing helps a little.** At the frozen thresholds, the LR and Jev routers beat random escalation at the same realized rate by +1.2 to +3.9 points of final hidden pass; Pinocchio by +0.6 to +1.5 (two intervals at the 10% budget include zero). At about half the frontier calls, the primary Jev LR reaches 88.3% vs 90.3% for always-frontier.
 5. **Cost (descriptive):** one frontier takeover costs about $0.002. Under electricity-only marginal cost, the displayed small-model policies (budgets up to 50%) stay below always-frontier. Under a hypothetical cloud normalization (RTX 3070 runtime priced at an A10G hourly rate), every displayed small-model policy costs more than always-frontier.
