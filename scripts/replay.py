@@ -217,11 +217,14 @@ def main() -> int:
     label_reports = {rid: {} for rid in args.run_id}
     cps = [c for rid in args.run_id for c in load_labelled(RESULTS / "runs" / rid, report=label_reports[rid])]
     attempts = R.build_attempts(cps)
-    totals, cost_complete, run_tokens = {}, True, {}
+    totals, cost_complete, run_tokens, rebuilt = {}, True, {}, {}
     for rid in args.run_id:
         meta = json.loads((RESULTS / "runs" / rid / "run_meta.json").read_text(encoding="utf-8"))
         sess = meta["sessions"]
         cost_complete &= all(s.get("elapsed_s") is not None and s.get("energy_wh") is not None for s in sess)
+        # Sessions killed before they wrote their cost, rebuilt from their power samples
+        # (scripts/analysis/reconstruct_session_cost.py); reported, never hidden.
+        rebuilt[rid] = [s["started"] for s in sess if "reconstruction" in s]
         totals[rid] = (sum(s.get("elapsed_s") or 0.0 for s in sess), sum(s.get("energy_wh") or 0.0 for s in sess))
         # The cost denominator is every complete generated checkpoint of the run, excluded tasks
         # included, so an exclusion does not move its share onto the kept attempts (Amendment A2).
@@ -319,6 +322,7 @@ def main() -> int:
            "routers_version": cfg["version"], "n_attempts": len(attempts), "n_decisions": len(vp_idx),
            "forced_share": float(np.mean([a.forced for a in attempts])), "fallback_used": fallback_used,
            "frontier": finfo, "small_model_cost_complete": cost_complete,
+           "reconstructed_sessions": rebuilt,
            "excluded_checkpoints": {rid: rep["excluded_checkpoints"] for rid, rep in label_reports.items()},
            "excluded_share_of_run_cost": excluded_share, "policies": []}
 
@@ -360,7 +364,7 @@ def main() -> int:
     path = RESULTS / f"replay_{'+'.join(args.run_id)}_{args.scores}_{cfg['version']}.json"
     path.write_text(json.dumps(out, indent=1), encoding="utf-8")
     print(f"{len(attempts)} attempts, {len(vp_idx)} decisions, forced share {out['forced_share']:.3f}; "
-          f"fallback used {fallback_used}; frontier {finfo}; small-model cost complete {cost_complete}; "
+          f"fallback used {fallback_used}; frontier {finfo}; small-model cost complete {cost_complete} (rebuilt sessions {rebuilt}); "
           f"Jev calls with unknown usage {jev_unknown}")
     print(f"{'policy':42s} {'pass':>6s} {'q_vp':>6s} {'calls':>6s} {'gain vs random (pp)':>24s} {'$ owned':>9s} {'$ cloud':>9s}")
     for p in out["policies"]:

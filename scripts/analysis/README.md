@@ -19,6 +19,7 @@ repository root with `uv run python scripts/analysis/<name>.py`. They read
 | `trace_effect.py` | Same-question contrast: code answers with vs without the thinking; thinking answers alone | none (reads the stored scores) |
 | `jev_select.py` | Add-one value of each answer, subgroups, nested forward selection, no-logprob check | none |
 | `jev_strong.py` | The strong-answer heuristic, nested with a matched cheap comparator; the fixed strong4 mean | none |
+| `reconstruct_session_cost.py` | Rebuilt the time and energy of main-test-v1 session 0 (killed before it wrote them) from power.jsonl (already run with --write; refuses a session that has values) | none |
 
 The Jev scripts were run once with the user's approval (cap $2; spent about
 $0.03 on them). `jev_check.py` refuses to run again on the same output
