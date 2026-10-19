@@ -1,0 +1,28 @@
+# Mbpp/113
+
+Benchmark: mbpp+. Run: `main-test-v1`. Back to the [index](../../README.md).
+
+## Attempts
+
+| Attempt | Rounds | End | Thinking tokens per round | Cap hits |
+| --- | --- | --- | --- | --- |
+| [Attempt 0](attempt_0.md) | 1 | visible pass | 1795 | 0 |
+| [Attempt 1](attempt_1.md) | 1 | visible pass | 1490 | 0 |
+| [Attempt 2](attempt_2.md) | 1 | visible pass | 6478 | 0 |
+| [Attempt 3](attempt_3.md) | 1 | visible pass | 3577 | 0 |
+| [Attempt 4](attempt_4.md) | 1 | visible pass | 3853 | 0 |
+
+## Prompt shown to the model (round 1)
+
+```python
+"""
+Write a function to check if a string represents an integer or not.
+assert check_integer("python")==False
+"""
+```
+
+## Visible tests
+
+```python
+assert check_integer("python")==False
+```

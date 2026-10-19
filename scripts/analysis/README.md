@@ -22,6 +22,7 @@ repository root with `uv run python scripts/analysis/<name>.py`. They read
 | `reconstruct_session_cost.py` | Rebuilt the time and energy of main-test-v1 session 0 (killed before it wrote them) from power.jsonl (already run with --write; refuses a session that has values) | none |
 | `nonlr_compare.py` | Exploratory (test, after the planned analysis): raw Jev answers vs the other no-LR judges and the cheap LR | none |
 | `trace_diagnostics.py` | Exploratory (test, after the planned analysis): same-question contrast by thinking length and loop flag; ties | none |
+| `pass_by_benchmark.py` | Test: final hidden pass of always-small, forced-only, always-frontier and the oracle by benchmark (descriptive) | none |
 
 The Jev scripts were run once with the user's approval (cap $2; spent about
 $0.03 on them). `jev_check.py` refuses to run again on the same output

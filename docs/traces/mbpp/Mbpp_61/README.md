@@ -1,0 +1,28 @@
+# Mbpp/61
+
+Benchmark: mbpp+. Run: `main-test-v1`. Back to the [index](../../README.md).
+
+## Attempts
+
+| Attempt | Rounds | End | Thinking tokens per round | Cap hits |
+| --- | --- | --- | --- | --- |
+| [Attempt 0](attempt_0.md) | 1 | visible pass | 2659 | 0 |
+| [Attempt 1](attempt_1.md) | 2 | visible pass | 3007 / 1739 | 0 |
+| [Attempt 2](attempt_2.md) | 1 | visible pass | 5933 | 0 |
+| [Attempt 3](attempt_3.md) | 3 | no visible pass after round 3 | 6256 / 1848 / 999 | 0 |
+| [Attempt 4](attempt_4.md) | 1 | visible pass | 8192 | 1 |
+
+## Prompt shown to the model (round 1)
+
+```python
+"""
+Write a python function to count the number of substrings with the sum of digits equal to their length.
+assert count_Substrings('112112') == 6
+"""
+```
+
+## Visible tests
+
+```python
+assert count_Substrings('112112') == 6
+```

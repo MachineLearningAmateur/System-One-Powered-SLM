@@ -1,0 +1,44 @@
+# HumanEval/99
+
+Benchmark: humaneval+. Run: `main-test-v1`. Back to the [index](../../README.md).
+
+## Attempts
+
+| Attempt | Rounds | End | Thinking tokens per round | Cap hits |
+| --- | --- | --- | --- | --- |
+| [Attempt 0](attempt_0.md) | 1 | visible pass | 8192 | 1 |
+| [Attempt 1](attempt_1.md) | 1 | visible pass | 8192 | 1 |
+| [Attempt 2](attempt_2.md) | 1 | visible pass | 6907 | 0 |
+| [Attempt 3](attempt_3.md) | 1 | visible pass | 6482 | 0 |
+| [Attempt 4](attempt_4.md) | 1 | visible pass | 3553 | 0 |
+
+## Prompt shown to the model (round 1)
+
+```python
+
+def closest_integer(value):
+    '''
+    Create a function that takes a value (string) representing a number
+    and returns the closest integer to it. If the number is equidistant
+    from two integers, round it away from zero.
+
+    Examples
+    >>> closest_integer("10")
+    10
+    >>> closest_integer("15.3")
+    15
+
+    Note:
+    Rounding away from zero means that if the given number is equidistant
+    from two integers, the one you should return is the one that is the
+    farthest from zero. For example closest_integer("14.5") should
+    return 15 and closest_integer("-14.5") should return -15.
+    '''
+```
+
+## Visible tests
+
+```python
+assert closest_integer("10") == 10
+assert closest_integer("15.3") == 15
+```

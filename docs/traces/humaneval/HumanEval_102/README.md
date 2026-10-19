@@ -1,0 +1,41 @@
+# HumanEval/102
+
+Benchmark: humaneval+. Run: `main-test-v1`. Back to the [index](../../README.md).
+
+## Attempts
+
+| Attempt | Rounds | End | Thinking tokens per round | Cap hits |
+| --- | --- | --- | --- | --- |
+| [Attempt 0](attempt_0.md) | 1 | visible pass | 1449 | 0 |
+| [Attempt 1](attempt_1.md) | 1 | visible pass | 4911 | 0 |
+| [Attempt 2](attempt_2.md) | 1 | visible pass | 3745 | 0 |
+| [Attempt 3](attempt_3.md) | 1 | visible pass | 2893 | 0 |
+| [Attempt 4](attempt_4.md) | 1 | visible pass | 1878 | 0 |
+
+## Prompt shown to the model (round 1)
+
+```python
+
+def choose_num(x, y):
+    """This function takes two positive numbers x and y and returns the
+    biggest even integer number that is in the range [x, y] inclusive. If 
+    there's no such number, then the function should return -1.
+
+    For example:
+    choose_num(12, 15) = 14
+    choose_num(13, 12) = -1
+    """
+
+Visible tests:
+assert choose_num(12, 15) == 14
+assert choose_num(13, 12) == -1
+assert choose_num(33, 12354) == 12354
+```
+
+## Visible tests
+
+```python
+assert choose_num(12, 15) == 14
+assert choose_num(13, 12) == -1
+assert choose_num(33, 12354) == 12354
+```

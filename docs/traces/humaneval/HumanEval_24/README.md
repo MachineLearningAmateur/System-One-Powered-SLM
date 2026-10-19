@@ -1,0 +1,31 @@
+# HumanEval/24
+
+Benchmark: humaneval+. Run: `main-test-v1`. Back to the [index](../../README.md).
+
+## Attempts
+
+| Attempt | Rounds | End | Thinking tokens per round | Cap hits |
+| --- | --- | --- | --- | --- |
+| [Attempt 0](attempt_0.md) | 1 | visible pass | 2932 | 0 |
+| [Attempt 1](attempt_1.md) | 1 | visible pass | 3055 | 0 |
+| [Attempt 2](attempt_2.md) | 1 | visible pass | 3343 | 0 |
+| [Attempt 3](attempt_3.md) | 1 | visible pass | 2513 | 0 |
+| [Attempt 4](attempt_4.md) | 1 | visible pass | 3470 | 0 |
+
+## Prompt shown to the model (round 1)
+
+```python
+
+
+def largest_divisor(n: int) -> int:
+    """ For a given number n, find the largest number that divides n evenly, smaller than n
+    >>> largest_divisor(15)
+    5
+    """
+```
+
+## Visible tests
+
+```python
+assert largest_divisor(15) == 5
+```

@@ -1,0 +1,28 @@
+# Mbpp/622
+
+Benchmark: mbpp+. Run: `main-test-v1`. Back to the [index](../../README.md).
+
+## Attempts
+
+| Attempt | Rounds | End | Thinking tokens per round | Cap hits |
+| --- | --- | --- | --- | --- |
+| [Attempt 0](attempt_0.md) | 1 | visible pass | 5181 | 0 |
+| [Attempt 1](attempt_1.md) | 1 | visible pass | 8192 | 1 |
+| [Attempt 2](attempt_2.md) | 3 | no visible pass after round 3 | 8192 / 8192 / 8192 | 3 |
+| [Attempt 3](attempt_3.md) | 1 | visible pass | 4525 | 0 |
+| [Attempt 4](attempt_4.md) | 1 | visible pass | 3723 | 0 |
+
+## Prompt shown to the model (round 1)
+
+```python
+"""
+Write a function to find the median of two sorted lists of same size.
+assert get_median([1, 12, 15, 26, 38], [2, 13, 17, 30, 45], 5) == 16.0
+"""
+```
+
+## Visible tests
+
+```python
+assert get_median([1, 12, 15, 26, 38], [2, 13, 17, 30, 45], 5) == 16.0
+```

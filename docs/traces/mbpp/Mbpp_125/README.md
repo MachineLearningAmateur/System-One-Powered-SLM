@@ -1,0 +1,28 @@
+# Mbpp/125
+
+Benchmark: mbpp+. Run: `main-test-v1`. Back to the [index](../../README.md).
+
+## Attempts
+
+| Attempt | Rounds | End | Thinking tokens per round | Cap hits |
+| --- | --- | --- | --- | --- |
+| [Attempt 0](attempt_0.md) | 1 | visible pass | 3665 | 0 |
+| [Attempt 1](attempt_1.md) | 3 | no visible pass after round 3 | 8192 / 8192 / 8192 | 3 |
+| [Attempt 2](attempt_2.md) | 1 | visible pass | 2124 | 0 |
+| [Attempt 3](attempt_3.md) | 1 | visible pass | 6335 | 0 |
+| [Attempt 4](attempt_4.md) | 1 | visible pass | 5906 | 0 |
+
+## Prompt shown to the model (round 1)
+
+```python
+"""
+Write a function to find the maximum difference between the number of 0s and number of 1s in any sub-string of the given binary string.
+assert find_length("11000010001") == 6
+"""
+```
+
+## Visible tests
+
+```python
+assert find_length("11000010001") == 6
+```
