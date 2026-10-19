@@ -2,7 +2,7 @@
 
 Sections 1-13 cover the development phase (October 16-17). The test phase
 (frozen primary test, Table 1, replay, transfer, exploratory diagnostics) is
-summarized with all tables in the top-level [README](../README.md); its result
+summarized in the top-level [README](../README.md), with all tables in [review-guide.md](review-guide.md); its result
 files are `docs/results/test_analysis_main-test-v1.json`,
 `docs/results/replay_main-test-v1_final_routers-v2.json` and
 `docs/results/transfer_main-test-v1.json`. The Claude Doc research plan
