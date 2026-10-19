@@ -1,10 +1,10 @@
 # Mbpp/603, attempt 0
 
-2 rounds; visible pass. Back to the [task](README.md). The prompt and the visible tests are on the task page; from round 2, the model also got its previous code and its visible-test report (never its previous thinking).
+2 rounds; visible pass; final code on the hidden tests: ❌ fail ⚠️ visible pass. Back to the [task](README.md). The prompt and the visible tests are on the task page; from round 2, the model also got its previous code and its visible-test report (never its previous thinking, and never any hidden-test result).
 
 ## Round 1 (`Mbpp/603/a0/r1`)
 
-Visible tests: **fail**. Thinking tokens: 3228. Answer tokens: 150.
+Visible tests: **fail**. Hidden tests: **❌ fail**. Thinking tokens: 3228. Answer tokens: 150.
 
 <details><summary>Thinking</summary>
 
@@ -172,7 +172,7 @@ NOT_RUN assert get_ludic(10) == [1, 2, 3, 5, 7]
 
 ## Round 2 (`Mbpp/603/a0/r2`)
 
-Visible tests: **pass**. Thinking tokens: 4083. Answer tokens: 153.
+Visible tests: **pass**. Hidden tests: **❌ fail**. Thinking tokens: 4083. Answer tokens: 153.
 
 <details><summary>Thinking</summary>
 

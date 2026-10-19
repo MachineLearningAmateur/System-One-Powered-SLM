@@ -1,10 +1,10 @@
 # Mbpp/751, attempt 4
 
-3 rounds; no visible pass after round 3. Back to the [task](README.md). The prompt and the visible tests are on the task page; from round 2, the model also got its previous code and its visible-test report (never its previous thinking).
+3 rounds; no visible pass after round 3; final code on the hidden tests: ❌ fail. Back to the [task](README.md). The prompt and the visible tests are on the task page; from round 2, the model also got its previous code and its visible-test report (never its previous thinking, and never any hidden-test result).
 
 ## Round 1 (`Mbpp/751/a4/r1`)
 
-Visible tests: **fail**. Thinking tokens: 1844. Answer tokens: 99.
+Visible tests: **fail**. Hidden tests: **❌ fail**. Thinking tokens: 1844. Answer tokens: 99.
 
 <details><summary>Thinking</summary>
 
@@ -145,7 +145,7 @@ NOT_RUN assert check_min_heap([1, 2, 3, 4, 5, 6]) == True
 
 ## Round 2 (`Mbpp/751/a4/r2`)
 
-Visible tests: **fail**. Thinking tokens: 5004. Answer tokens: 629.
+Visible tests: **fail**. Hidden tests: **❌ fail**. Thinking tokens: 5004. Answer tokens: 629.
 
 <details><summary>Thinking</summary>
 
@@ -321,7 +321,7 @@ NOT_RUN assert check_min_heap([1, 2, 3, 4, 5, 6]) == True
 
 ## Round 3 (`Mbpp/751/a4/r3`)
 
-Visible tests: **fail**. Thinking tokens: 5231. Answer tokens: 495.
+Visible tests: **fail**. Hidden tests: **❌ fail**. Thinking tokens: 5231. Answer tokens: 495.
 
 <details><summary>Thinking</summary>
 

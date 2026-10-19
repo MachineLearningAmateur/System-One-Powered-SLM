@@ -1,10 +1,10 @@
 # HumanEval/92, attempt 4
 
-1 round; visible pass. Back to the [task](README.md). The prompt and the visible tests are on the task page; from round 2, the model also got its previous code and its visible-test report (never its previous thinking).
+1 round; visible pass; final code on the hidden tests: ❌ fail ⚠️ visible pass. Back to the [task](README.md). The prompt and the visible tests are on the task page; from round 2, the model also got its previous code and its visible-test report (never its previous thinking, and never any hidden-test result).
 
 ## Round 1 (`HumanEval/92/a4/r1`)
 
-Visible tests: **pass**. Thinking tokens: 6094. Answer tokens: 88.
+Visible tests: **pass**. Hidden tests: **❌ fail**. Thinking tokens: 6094. Answer tokens: 88.
 
 <details><summary>Thinking</summary>
 

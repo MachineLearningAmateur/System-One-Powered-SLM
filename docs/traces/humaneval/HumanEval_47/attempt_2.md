@@ -1,10 +1,10 @@
 # HumanEval/47, attempt 2
 
-3 rounds; visible pass. Back to the [task](README.md). The prompt and the visible tests are on the task page; from round 2, the model also got its previous code and its visible-test report (never its previous thinking).
+3 rounds; visible pass; final code on the hidden tests: ❌ fail ⚠️ visible pass. Back to the [task](README.md). The prompt and the visible tests are on the task page; from round 2, the model also got its previous code and its visible-test report (never its previous thinking, and never any hidden-test result).
 
 ## Round 1 (`HumanEval/47/a2/r1`)
 
-Visible tests: **fail**. Thinking tokens: 4199. Answer tokens: 65.
+Visible tests: **fail**. Hidden tests: **✅ pass**. Thinking tokens: 4199. Answer tokens: 65.
 
 <details><summary>Thinking</summary>
 
@@ -156,7 +156,7 @@ FAIL    assert median([-10, 4, 6, 1000, 10, 20]) == 15.0
 
 ## Round 2 (`HumanEval/47/a2/r2`)
 
-Visible tests: **fail**. Thinking tokens: 8192 (hit the 8,192-token cap). Answer tokens: 536.
+Visible tests: **fail**. Hidden tests: **✅ pass**. Thinking tokens: 8192 (hit the 8,192-token cap). Answer tokens: 536.
 
 <details><summary>Thinking</summary>
 
@@ -555,7 +555,7 @@ FAIL    assert median([-10, 4, 6, 1000, 10, 20]) == 15.0
 
 ## Round 3 (`HumanEval/47/a2/r3`)
 
-Visible tests: **pass**. Thinking tokens: 7276. Answer tokens: 65.
+Visible tests: **pass**. Hidden tests: **❌ fail**. Thinking tokens: 7276. Answer tokens: 65.
 
 <details><summary>Thinking</summary>
 

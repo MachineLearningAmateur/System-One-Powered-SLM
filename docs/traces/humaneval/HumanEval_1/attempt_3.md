@@ -1,10 +1,10 @@
 # HumanEval/1, attempt 3
 
-2 rounds; visible pass. Back to the [task](README.md). The prompt and the visible tests are on the task page; from round 2, the model also got its previous code and its visible-test report (never its previous thinking).
+2 rounds; visible pass; final code on the hidden tests: ✅ pass. Back to the [task](README.md). The prompt and the visible tests are on the task page; from round 2, the model also got its previous code and its visible-test report (never its previous thinking, and never any hidden-test result).
 
 ## Round 1 (`HumanEval/1/a3/r1`)
 
-Visible tests: **fail**. Thinking tokens: 8192 (hit the 8,192-token cap). Answer tokens: 562.
+Visible tests: **fail**. Hidden tests: **❌ fail**. Thinking tokens: 8192 (hit the 8,192-token cap). Answer tokens: 562.
 
 <details><summary>Thinking</summary>
 
@@ -564,7 +564,7 @@ FAIL    assert separate_paren_groups('( ) (( )) (( )( ))') == ['()', '(())', '((
 
 ## Round 2 (`HumanEval/1/a3/r2`)
 
-Visible tests: **pass**. Thinking tokens: 8192 (hit the 8,192-token cap). Answer tokens: 553.
+Visible tests: **pass**. Hidden tests: **✅ pass**. Thinking tokens: 8192 (hit the 8,192-token cap). Answer tokens: 553.
 
 <details><summary>Thinking</summary>
 

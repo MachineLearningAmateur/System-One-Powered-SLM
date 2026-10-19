@@ -1,10 +1,10 @@
 # HumanEval/19, attempt 1
 
-2 rounds; visible pass. Back to the [task](README.md). The prompt and the visible tests are on the task page; from round 2, the model also got its previous code and its visible-test report (never its previous thinking).
+2 rounds; visible pass; final code on the hidden tests: ✅ pass. Back to the [task](README.md). The prompt and the visible tests are on the task page; from round 2, the model also got its previous code and its visible-test report (never its previous thinking, and never any hidden-test result).
 
 ## Round 1 (`HumanEval/19/a1/r1`)
 
-Visible tests: **fail**. Thinking tokens: 1295. Answer tokens: 139.
+Visible tests: **fail**. Hidden tests: **❌ fail**. Thinking tokens: 1295. Answer tokens: 139.
 
 <details><summary>Thinking</summary>
 
@@ -172,7 +172,7 @@ FAIL    assert sort_numbers('three one five') == 'one three five'
 
 ## Round 2 (`HumanEval/19/a1/r2`)
 
-Visible tests: **pass**. Thinking tokens: 1479. Answer tokens: 126.
+Visible tests: **pass**. Hidden tests: **✅ pass**. Thinking tokens: 1479. Answer tokens: 126.
 
 <details><summary>Thinking</summary>
 

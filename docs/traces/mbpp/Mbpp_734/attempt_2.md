@@ -1,10 +1,10 @@
 # Mbpp/734, attempt 2
 
-3 rounds; no visible pass after round 3. Back to the [task](README.md). The prompt and the visible tests are on the task page; from round 2, the model also got its previous code and its visible-test report (never its previous thinking).
+3 rounds; no visible pass after round 3; final code on the hidden tests: ❌ fail. Back to the [task](README.md). The prompt and the visible tests are on the task page; from round 2, the model also got its previous code and its visible-test report (never its previous thinking, and never any hidden-test result).
 
 ## Round 1 (`Mbpp/734/a2/r1`)
 
-Visible tests: **fail**. Thinking tokens: 7160. Answer tokens: 90.
+Visible tests: **fail**. Hidden tests: **❌ fail**. Thinking tokens: 7160. Answer tokens: 90.
 
 <details><summary>Thinking</summary>
 
@@ -435,7 +435,7 @@ ERROR   assert sum_Of_Subarray_Prod([1,2,3]) == 20
 
 ## Round 2 (`Mbpp/734/a2/r2`)
 
-Visible tests: **fail**. Thinking tokens: 356. Answer tokens: 90.
+Visible tests: **fail**. Hidden tests: **❌ fail**. Thinking tokens: 356. Answer tokens: 90.
 
 <details><summary>Thinking</summary>
 
@@ -480,7 +480,7 @@ ERROR   assert sum_Of_Subarray_Prod([1,2,3]) == 20
 
 ## Round 3 (`Mbpp/734/a2/r3`)
 
-Visible tests: **fail**. Thinking tokens: 502. Answer tokens: 85.
+Visible tests: **fail**. Hidden tests: **❌ fail**. Thinking tokens: 502. Answer tokens: 85.
 
 <details><summary>Thinking</summary>
 

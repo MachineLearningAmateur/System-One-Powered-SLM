@@ -1,10 +1,10 @@
 # Mbpp/608, attempt 2
 
-3 rounds; visible pass. Back to the [task](README.md). The prompt and the visible tests are on the task page; from round 2, the model also got its previous code and its visible-test report (never its previous thinking).
+3 rounds; visible pass; final code on the hidden tests: ❌ fail ⚠️ visible pass. Back to the [task](README.md). The prompt and the visible tests are on the task page; from round 2, the model also got its previous code and its visible-test report (never its previous thinking, and never any hidden-test result).
 
 ## Round 1 (`Mbpp/608/a2/r1`)
 
-Visible tests: **fail**. Thinking tokens: 8192 (hit the 8,192-token cap). Answer tokens: 436.
+Visible tests: **fail**. Hidden tests: **❌ fail**. Thinking tokens: 8192 (hit the 8,192-token cap). Answer tokens: 436.
 
 <details><summary>Thinking</summary>
 
@@ -770,7 +770,7 @@ NOT_RUN assert bell_Number(2) == 2
 
 ## Round 2 (`Mbpp/608/a2/r2`)
 
-Visible tests: **fail**. Thinking tokens: 7714. Answer tokens: 416.
+Visible tests: **fail**. Hidden tests: **❌ fail**. Thinking tokens: 7714. Answer tokens: 416.
 
 <details><summary>Thinking</summary>
 
@@ -1280,7 +1280,7 @@ ERROR   assert bell_Number(2) == 2
 
 ## Round 3 (`Mbpp/608/a2/r3`)
 
-Visible tests: **pass**. Thinking tokens: 518. Answer tokens: 140.
+Visible tests: **pass**. Hidden tests: **❌ fail**. Thinking tokens: 518. Answer tokens: 140.
 
 <details><summary>Thinking</summary>
 

@@ -1,10 +1,10 @@
 # Mbpp/104, attempt 0
 
-3 rounds; no visible pass after round 3. Back to the [task](README.md). The prompt and the visible tests are on the task page; from round 2, the model also got its previous code and its visible-test report (never its previous thinking).
+3 rounds; no visible pass after round 3; final code on the hidden tests: ❌ fail. Back to the [task](README.md). The prompt and the visible tests are on the task page; from round 2, the model also got its previous code and its visible-test report (never its previous thinking, and never any hidden-test result).
 
 ## Round 1 (`Mbpp/104/a0/r1`)
 
-Visible tests: **fail**. Thinking tokens: 1331. Answer tokens: 407.
+Visible tests: **fail**. Hidden tests: **❌ fail**. Thinking tokens: 1331. Answer tokens: 407.
 
 <details><summary>Thinking</summary>
 
@@ -136,7 +136,7 @@ FAIL    assert sort_sublists((["green", "orange"], ["black", "white"], ["white",
 
 ## Round 2 (`Mbpp/104/a0/r2`)
 
-Visible tests: **fail**. Thinking tokens: 4246. Answer tokens: 347.
+Visible tests: **fail**. Hidden tests: **❌ fail**. Thinking tokens: 4246. Answer tokens: 347.
 
 <details><summary>Thinking</summary>
 
@@ -290,7 +290,7 @@ FAIL    assert sort_sublists((["green", "orange"], ["black", "white"], ["white",
 
 ## Round 3 (`Mbpp/104/a0/r3`)
 
-Visible tests: **fail**. Thinking tokens: 3470. Answer tokens: 258.
+Visible tests: **fail**. Hidden tests: **❌ fail**. Thinking tokens: 3470. Answer tokens: 258.
 
 <details><summary>Thinking</summary>
 

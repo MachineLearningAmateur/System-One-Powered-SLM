@@ -1,10 +1,10 @@
 # Mbpp/102, attempt 0
 
-2 rounds; visible pass. Back to the [task](README.md). The prompt and the visible tests are on the task page; from round 2, the model also got its previous code and its visible-test report (never its previous thinking).
+2 rounds; visible pass; final code on the hidden tests: ❌ fail ⚠️ visible pass. Back to the [task](README.md). The prompt and the visible tests are on the task page; from round 2, the model also got its previous code and its visible-test report (never its previous thinking, and never any hidden-test result).
 
 ## Round 1 (`Mbpp/102/a0/r1`)
 
-Visible tests: **fail**. Thinking tokens: 2404. Answer tokens: 64.
+Visible tests: **fail**. Hidden tests: **❌ fail**. Thinking tokens: 2404. Answer tokens: 64.
 
 <details><summary>Thinking</summary>
 
@@ -252,7 +252,7 @@ FAIL    assert snake_to_camel('python_program')=='PythonProgram'
 
 ## Round 2 (`Mbpp/102/a0/r2`)
 
-Visible tests: **pass**. Thinking tokens: 2796. Answer tokens: 62.
+Visible tests: **pass**. Hidden tests: **❌ fail**. Thinking tokens: 2796. Answer tokens: 62.
 
 <details><summary>Thinking</summary>
 

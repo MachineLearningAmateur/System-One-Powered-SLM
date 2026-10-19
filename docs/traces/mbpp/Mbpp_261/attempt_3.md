@@ -1,10 +1,10 @@
 # Mbpp/261, attempt 3
 
-2 rounds; visible pass. Back to the [task](README.md). The prompt and the visible tests are on the task page; from round 2, the model also got its previous code and its visible-test report (never its previous thinking).
+2 rounds; visible pass; final code on the hidden tests: ❌ fail ⚠️ visible pass. Back to the [task](README.md). The prompt and the visible tests are on the task page; from round 2, the model also got its previous code and its visible-test report (never its previous thinking, and never any hidden-test result).
 
 ## Round 1 (`Mbpp/261/a3/r1`)
 
-Visible tests: **fail**. Thinking tokens: 957. Answer tokens: 32.
+Visible tests: **fail**. Hidden tests: **❌ fail**. Thinking tokens: 957. Answer tokens: 32.
 
 <details><summary>Thinking</summary>
 
@@ -75,7 +75,7 @@ FAIL    assert division_elements((10, 4, 6, 9),(5, 2, 3, 3)) == (2, 2, 2, 3)
 
 ## Round 2 (`Mbpp/261/a3/r2`)
 
-Visible tests: **pass**. Thinking tokens: 2592. Answer tokens: 297.
+Visible tests: **pass**. Hidden tests: **❌ fail**. Thinking tokens: 2592. Answer tokens: 297.
 
 <details><summary>Thinking</summary>
 

@@ -1,10 +1,10 @@
 # Mbpp/137, attempt 2
 
-3 rounds; visible pass. Back to the [task](README.md). The prompt and the visible tests are on the task page; from round 2, the model also got its previous code and its visible-test report (never its previous thinking).
+3 rounds; visible pass; final code on the hidden tests: ❌ fail ⚠️ visible pass. Back to the [task](README.md). The prompt and the visible tests are on the task page; from round 2, the model also got its previous code and its visible-test report (never its previous thinking, and never any hidden-test result).
 
 ## Round 1 (`Mbpp/137/a2/r1`)
 
-Visible tests: **fail**. Thinking tokens: 3349. Answer tokens: 141.
+Visible tests: **fail**. Hidden tests: **❌ fail**. Thinking tokens: 3349. Answer tokens: 141.
 
 <details><summary>Thinking</summary>
 
@@ -306,7 +306,7 @@ ERROR   assert math.isclose(zero_count([0, 1, 2, -1, -5, 6, 0, -3, -2, 3, 4, 6, 
 
 ## Round 2 (`Mbpp/137/a2/r2`)
 
-Visible tests: **fail**. Thinking tokens: 2549. Answer tokens: 141.
+Visible tests: **fail**. Hidden tests: **❌ fail**. Thinking tokens: 2549. Answer tokens: 141.
 
 <details><summary>Thinking</summary>
 
@@ -487,7 +487,7 @@ ERROR   assert math.isclose(zero_count([0, 1, 2, -1, -5, 6, 0, -3, -2, 3, 4, 6, 
 
 ## Round 3 (`Mbpp/137/a2/r3`)
 
-Visible tests: **pass**. Thinking tokens: 585. Answer tokens: 133.
+Visible tests: **pass**. Hidden tests: **❌ fail**. Thinking tokens: 585. Answer tokens: 133.
 
 <details><summary>Thinking</summary>
 

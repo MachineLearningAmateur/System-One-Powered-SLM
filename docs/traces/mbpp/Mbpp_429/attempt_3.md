@@ -1,10 +1,10 @@
 # Mbpp/429, attempt 3
 
-2 rounds; visible pass. Back to the [task](README.md). The prompt and the visible tests are on the task page; from round 2, the model also got its previous code and its visible-test report (never its previous thinking).
+2 rounds; visible pass; final code on the hidden tests: ❌ fail ⚠️ visible pass. Back to the [task](README.md). The prompt and the visible tests are on the task page; from round 2, the model also got its previous code and its visible-test report (never its previous thinking, and never any hidden-test result).
 
 ## Round 1 (`Mbpp/429/a3/r1`)
 
-Visible tests: **fail**. Thinking tokens: 8192 (hit the 8,192-token cap). Answer tokens: 544.
+Visible tests: **fail**. Hidden tests: **❌ fail**. Thinking tokens: 8192 (hit the 8,192-token cap). Answer tokens: 544.
 
 <details><summary>Thinking</summary>
 
@@ -235,7 +235,7 @@ FAIL    assert and_tuples((10, 4, 6, 9), (5, 2, 3, 3)) == (0, 0, 2, 1)
 
 ## Round 2 (`Mbpp/429/a3/r2`)
 
-Visible tests: **pass**. Thinking tokens: 8192 (hit the 8,192-token cap). Answer tokens: 491.
+Visible tests: **pass**. Hidden tests: **❌ fail**. Thinking tokens: 8192 (hit the 8,192-token cap). Answer tokens: 491.
 
 <details><summary>Thinking</summary>
 

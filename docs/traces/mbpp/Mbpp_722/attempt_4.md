@@ -1,10 +1,10 @@
 # Mbpp/722, attempt 4
 
-2 rounds; visible pass. Back to the [task](README.md). The prompt and the visible tests are on the task page; from round 2, the model also got its previous code and its visible-test report (never its previous thinking).
+2 rounds; visible pass; final code on the hidden tests: ✅ pass. Back to the [task](README.md). The prompt and the visible tests are on the task page; from round 2, the model also got its previous code and its visible-test report (never its previous thinking, and never any hidden-test result).
 
 ## Round 1 (`Mbpp/722/a4/r1`)
 
-Visible tests: **fail**. Thinking tokens: 921. Answer tokens: 61.
+Visible tests: **fail**. Hidden tests: **❌ fail**. Thinking tokens: 921. Answer tokens: 61.
 
 <details><summary>Thinking</summary>
 
@@ -101,7 +101,7 @@ FAIL    assert filter_data({'Cierra Vega': (6.2, 70), 'Alden Cantrell': (5.9, 65
 
 ## Round 2 (`Mbpp/722/a4/r2`)
 
-Visible tests: **pass**. Thinking tokens: 2488. Answer tokens: 535.
+Visible tests: **pass**. Hidden tests: **✅ pass**. Thinking tokens: 2488. Answer tokens: 535.
 
 <details><summary>Thinking</summary>
 

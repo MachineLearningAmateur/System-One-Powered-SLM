@@ -1,10 +1,10 @@
 # Mbpp/297, attempt 4
 
-2 rounds; visible pass. Back to the [task](README.md). The prompt and the visible tests are on the task page; from round 2, the model also got its previous code and its visible-test report (never its previous thinking).
+2 rounds; visible pass; final code on the hidden tests: ✅ pass. Back to the [task](README.md). The prompt and the visible tests are on the task page; from round 2, the model also got its previous code and its visible-test report (never its previous thinking, and never any hidden-test result).
 
 ## Round 1 (`Mbpp/297/a4/r1`)
 
-Visible tests: **fail**. Thinking tokens: 1435. Answer tokens: 156.
+Visible tests: **fail**. Hidden tests: **❌ fail**. Thinking tokens: 1435. Answer tokens: 156.
 
 <details><summary>Thinking</summary>
 
@@ -129,7 +129,7 @@ ERROR   assert flatten_list([0, 10, [20, 30], 40, 50, [60, 70, 80], [90, 100, 11
 
 ## Round 2 (`Mbpp/297/a4/r2`)
 
-Visible tests: **pass**. Thinking tokens: 640. Answer tokens: 159.
+Visible tests: **pass**. Hidden tests: **✅ pass**. Thinking tokens: 640. Answer tokens: 159.
 
 <details><summary>Thinking</summary>
 

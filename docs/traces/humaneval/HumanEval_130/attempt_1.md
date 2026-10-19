@@ -1,10 +1,10 @@
 # HumanEval/130, attempt 1
 
-3 rounds; no visible pass after round 3. Back to the [task](README.md). The prompt and the visible tests are on the task page; from round 2, the model also got its previous code and its visible-test report (never its previous thinking).
+3 rounds; no visible pass after round 3; final code on the hidden tests: ❌ fail. Back to the [task](README.md). The prompt and the visible tests are on the task page; from round 2, the model also got its previous code and its visible-test report (never its previous thinking, and never any hidden-test result).
 
 ## Round 1 (`HumanEval/130/a1/r1`)
 
-Visible tests: **fail**. Thinking tokens: 8192 (hit the 8,192-token cap). Answer tokens: 2048.
+Visible tests: **fail**. Hidden tests: **❌ fail**. Thinking tokens: 8192 (hit the 8,192-token cap). Answer tokens: 2048.
 
 <details><summary>Thinking</summary>
 
@@ -324,7 +324,7 @@ ERROR   assert tri(5) == [1, 3, 2.0, 8.0, 3.0, 15.0]
 
 ## Round 2 (`HumanEval/130/a1/r2`)
 
-Visible tests: **fail**. Thinking tokens: 8192 (hit the 8,192-token cap). Answer tokens: 1278.
+Visible tests: **fail**. Hidden tests: **❌ fail**. Thinking tokens: 8192 (hit the 8,192-token cap). Answer tokens: 1278.
 
 <details><summary>Thinking</summary>
 
@@ -730,7 +730,7 @@ ERROR   assert tri(5) == [1, 3, 2.0, 8.0, 3.0, 15.0]
 
 ## Round 3 (`HumanEval/130/a1/r3`)
 
-Visible tests: **fail**. Thinking tokens: 8192 (hit the 8,192-token cap). Answer tokens: 1174.
+Visible tests: **fail**. Hidden tests: **❌ fail**. Thinking tokens: 8192 (hit the 8,192-token cap). Answer tokens: 1174.
 
 <details><summary>Thinking</summary>
 

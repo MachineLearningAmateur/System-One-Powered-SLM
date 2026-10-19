@@ -1,10 +1,10 @@
 # Mbpp/64, attempt 1
 
-3 rounds; no visible pass after round 3. Back to the [task](README.md). The prompt and the visible tests are on the task page; from round 2, the model also got its previous code and its visible-test report (never its previous thinking).
+3 rounds; no visible pass after round 3; final code on the hidden tests: ❌ fail. Back to the [task](README.md). The prompt and the visible tests are on the task page; from round 2, the model also got its previous code and its visible-test report (never its previous thinking, and never any hidden-test result).
 
 ## Round 1 (`Mbpp/64/a1/r1`)
 
-Visible tests: **fail**. Thinking tokens: 867. Answer tokens: 27.
+Visible tests: **fail**. Hidden tests: **❌ fail**. Thinking tokens: 867. Answer tokens: 27.
 
 <details><summary>Thinking</summary>
 
@@ -96,7 +96,7 @@ ERROR   assert subject_marks([('English', 88), ('Science', 90), ('Maths', 97), (
 
 ## Round 2 (`Mbpp/64/a1/r2`)
 
-Visible tests: **fail**. Thinking tokens: 1354. Answer tokens: 93.
+Visible tests: **fail**. Hidden tests: **❌ fail**. Thinking tokens: 1354. Answer tokens: 93.
 
 <details><summary>Thinking</summary>
 
@@ -179,7 +179,7 @@ ERROR   assert subject_marks([('English', 88), ('Science', 90), ('Maths', 97), (
 
 ## Round 3 (`Mbpp/64/a1/r3`)
 
-Visible tests: **fail**. Thinking tokens: 2951. Answer tokens: 288.
+Visible tests: **fail**. Hidden tests: **❌ fail**. Thinking tokens: 2951. Answer tokens: 288.
 
 <details><summary>Thinking</summary>
 

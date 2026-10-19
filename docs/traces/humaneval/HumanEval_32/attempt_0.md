@@ -1,10 +1,10 @@
 # HumanEval/32, attempt 0
 
-2 rounds; visible pass. Back to the [task](README.md). The prompt and the visible tests are on the task page; from round 2, the model also got its previous code and its visible-test report (never its previous thinking).
+2 rounds; visible pass; final code on the hidden tests: not graded (A2). Back to the [task](README.md). The prompt and the visible tests are on the task page; from round 2, the model also got its previous code and its visible-test report (never its previous thinking, and never any hidden-test result).
 
 ## Round 1 (`HumanEval/32/a0/r1`)
 
-Visible tests: **fail**. Thinking tokens: 8192 (hit the 8,192-token cap). Answer tokens: 349.
+Visible tests: **fail**. Hidden tests: **not graded (A2)**. Thinking tokens: 8192 (hit the 8,192-token cap). Answer tokens: 349.
 
 <details><summary>Thinking</summary>
 
@@ -419,7 +419,7 @@ PASS    assert round(find_zero([-6, 11, -6, 1]), 2) # (x - 1) * (x - 2) * (x - 3
 
 ## Round 2 (`HumanEval/32/a0/r2`)
 
-Visible tests: **pass**. Thinking tokens: 2138. Answer tokens: 361.
+Visible tests: **pass**. Hidden tests: **not graded (A2)**. Thinking tokens: 2138. Answer tokens: 361.
 
 <details><summary>Thinking</summary>
 

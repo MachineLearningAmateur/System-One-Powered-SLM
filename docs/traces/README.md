@@ -1,331 +1,343 @@
 # Thinking traces of the test run
 
-Every checkpoint of run `main-test-v1`: 325 test tasks, 2,098 checkpoints. Each task page shows the prompt the small model (Qwen3-1.7B) saw and the visible tests, and links to one page per attempt with the thinking, the code and the visible-test report of each round. Hidden-test results, Jev and Pinocchio scores are not included. Made by `scripts/export_traces.py`; machine-readable copy: [main-test-v1_traces.jsonl.gz](main-test-v1_traces.jsonl.gz). Back to the [README](../../README.md).
+Every checkpoint of run `main-test-v1`: 325 test tasks, 2,098 checkpoints. Each task page shows the prompt the small model (Qwen3-1.7B) saw and the visible tests, and links to one page per attempt with the thinking, the code, the visible-test report and the hidden-test result of each round. Jev and Pinocchio scores are not included. Made by `scripts/export_traces.py`; machine-readable copy: [main-test-v1_traces.jsonl.gz](main-test-v1_traces.jsonl.gz). Back to the [README](../../README.md).
 
-| Task | Benchmark | Attempts | Checkpoints | Attempts with a visible pass | Cap hits |
-| --- | --- | --- | --- | --- | --- |
-| [HumanEval/0](humaneval/HumanEval_0/README.md) | humaneval+ | 5 | 5 | 5 | 0 |
-| [HumanEval/1](humaneval/HumanEval_1/README.md) | humaneval+ | 5 | 7 | 5 | 7 |
-| [HumanEval/3](humaneval/HumanEval_3/README.md) | humaneval+ | 5 | 5 | 5 | 0 |
-| [HumanEval/7](humaneval/HumanEval_7/README.md) | humaneval+ | 5 | 5 | 5 | 0 |
-| [HumanEval/8](humaneval/HumanEval_8/README.md) | humaneval+ | 5 | 5 | 5 | 0 |
-| [HumanEval/9](humaneval/HumanEval_9/README.md) | humaneval+ | 5 | 5 | 5 | 0 |
-| [HumanEval/10](humaneval/HumanEval_10/README.md) | humaneval+ | 5 | 7 | 4 | 3 |
-| [HumanEval/11](humaneval/HumanEval_11/README.md) | humaneval+ | 5 | 5 | 5 | 0 |
-| [HumanEval/14](humaneval/HumanEval_14/README.md) | humaneval+ | 5 | 5 | 5 | 0 |
-| [HumanEval/15](humaneval/HumanEval_15/README.md) | humaneval+ | 5 | 5 | 5 | 0 |
-| [HumanEval/16](humaneval/HumanEval_16/README.md) | humaneval+ | 5 | 5 | 5 | 0 |
-| [HumanEval/18](humaneval/HumanEval_18/README.md) | humaneval+ | 5 | 5 | 5 | 0 |
-| [HumanEval/19](humaneval/HumanEval_19/README.md) | humaneval+ | 5 | 6 | 5 | 0 |
-| [HumanEval/21](humaneval/HumanEval_21/README.md) | humaneval+ | 5 | 5 | 5 | 0 |
-| [HumanEval/22](humaneval/HumanEval_22/README.md) | humaneval+ | 5 | 5 | 5 | 0 |
-| [HumanEval/23](humaneval/HumanEval_23/README.md) | humaneval+ | 5 | 5 | 5 | 0 |
-| [HumanEval/24](humaneval/HumanEval_24/README.md) | humaneval+ | 5 | 5 | 5 | 0 |
-| [HumanEval/27](humaneval/HumanEval_27/README.md) | humaneval+ | 5 | 5 | 5 | 0 |
-| [HumanEval/29](humaneval/HumanEval_29/README.md) | humaneval+ | 5 | 5 | 5 | 0 |
-| [HumanEval/31](humaneval/HumanEval_31/README.md) | humaneval+ | 5 | 5 | 5 | 0 |
-| [HumanEval/32](humaneval/HumanEval_32/README.md) (excluded, A2) | humaneval+ | 5 | 12 | 4 | 10 |
-| [HumanEval/34](humaneval/HumanEval_34/README.md) | humaneval+ | 5 | 5 | 5 | 0 |
-| [HumanEval/35](humaneval/HumanEval_35/README.md) | humaneval+ | 5 | 5 | 5 | 0 |
-| [HumanEval/39](humaneval/HumanEval_39/README.md) | humaneval+ | 5 | 7 | 4 | 4 |
-| [HumanEval/41](humaneval/HumanEval_41/README.md) | humaneval+ | 5 | 5 | 5 | 0 |
-| [HumanEval/45](humaneval/HumanEval_45/README.md) | humaneval+ | 5 | 5 | 5 | 0 |
-| [HumanEval/47](humaneval/HumanEval_47/README.md) | humaneval+ | 5 | 11 | 5 | 2 |
-| [HumanEval/48](humaneval/HumanEval_48/README.md) | humaneval+ | 5 | 5 | 5 | 0 |
-| [HumanEval/50](humaneval/HumanEval_50/README.md) | humaneval+ | 5 | 5 | 5 | 0 |
-| [HumanEval/51](humaneval/HumanEval_51/README.md) | humaneval+ | 5 | 5 | 5 | 0 |
-| [HumanEval/53](humaneval/HumanEval_53/README.md) | humaneval+ | 5 | 5 | 5 | 0 |
-| [HumanEval/56](humaneval/HumanEval_56/README.md) | humaneval+ | 5 | 5 | 5 | 0 |
-| [HumanEval/57](humaneval/HumanEval_57/README.md) | humaneval+ | 5 | 5 | 5 | 0 |
-| [HumanEval/61](humaneval/HumanEval_61/README.md) | humaneval+ | 5 | 5 | 5 | 0 |
-| [HumanEval/62](humaneval/HumanEval_62/README.md) | humaneval+ | 5 | 5 | 5 | 0 |
-| [HumanEval/64](humaneval/HumanEval_64/README.md) | humaneval+ | 5 | 15 | 0 | 0 |
-| [HumanEval/66](humaneval/HumanEval_66/README.md) | humaneval+ | 5 | 5 | 5 | 0 |
-| [HumanEval/67](humaneval/HumanEval_67/README.md) | humaneval+ | 5 | 5 | 5 | 0 |
-| [HumanEval/68](humaneval/HumanEval_68/README.md) | humaneval+ | 5 | 5 | 5 | 0 |
-| [HumanEval/69](humaneval/HumanEval_69/README.md) | humaneval+ | 5 | 5 | 5 | 0 |
-| [HumanEval/70](humaneval/HumanEval_70/README.md) | humaneval+ | 5 | 7 | 4 | 0 |
-| [HumanEval/72](humaneval/HumanEval_72/README.md) | humaneval+ | 5 | 5 | 5 | 0 |
-| [HumanEval/73](humaneval/HumanEval_73/README.md) | humaneval+ | 5 | 5 | 5 | 0 |
-| [HumanEval/74](humaneval/HumanEval_74/README.md) | humaneval+ | 5 | 5 | 5 | 0 |
-| [HumanEval/78](humaneval/HumanEval_78/README.md) | humaneval+ | 5 | 5 | 5 | 0 |
-| [HumanEval/79](humaneval/HumanEval_79/README.md) | humaneval+ | 5 | 5 | 5 | 0 |
-| [HumanEval/81](humaneval/HumanEval_81/README.md) | humaneval+ | 5 | 9 | 3 | 9 |
-| [HumanEval/82](humaneval/HumanEval_82/README.md) | humaneval+ | 5 | 5 | 5 | 0 |
-| [HumanEval/84](humaneval/HumanEval_84/README.md) | humaneval+ | 5 | 7 | 5 | 2 |
-| [HumanEval/85](humaneval/HumanEval_85/README.md) | humaneval+ | 5 | 5 | 5 | 0 |
-| [HumanEval/87](humaneval/HumanEval_87/README.md) | humaneval+ | 5 | 5 | 5 | 0 |
-| [HumanEval/91](humaneval/HumanEval_91/README.md) | humaneval+ | 5 | 13 | 1 | 3 |
-| [HumanEval/92](humaneval/HumanEval_92/README.md) | humaneval+ | 5 | 5 | 5 | 0 |
-| [HumanEval/94](humaneval/HumanEval_94/README.md) | humaneval+ | 5 | 6 | 5 | 1 |
-| [HumanEval/95](humaneval/HumanEval_95/README.md) | humaneval+ | 5 | 5 | 5 | 1 |
-| [HumanEval/96](humaneval/HumanEval_96/README.md) | humaneval+ | 5 | 5 | 5 | 0 |
-| [HumanEval/97](humaneval/HumanEval_97/README.md) | humaneval+ | 5 | 5 | 5 | 0 |
-| [HumanEval/98](humaneval/HumanEval_98/README.md) | humaneval+ | 5 | 5 | 5 | 0 |
-| [HumanEval/99](humaneval/HumanEval_99/README.md) | humaneval+ | 5 | 5 | 5 | 2 |
-| [HumanEval/100](humaneval/HumanEval_100/README.md) | humaneval+ | 5 | 5 | 5 | 0 |
-| [HumanEval/102](humaneval/HumanEval_102/README.md) | humaneval+ | 5 | 5 | 5 | 0 |
-| [HumanEval/103](humaneval/HumanEval_103/README.md) | humaneval+ | 5 | 11 | 5 | 2 |
-| [HumanEval/104](humaneval/HumanEval_104/README.md) | humaneval+ | 5 | 5 | 5 | 0 |
-| [HumanEval/105](humaneval/HumanEval_105/README.md) | humaneval+ | 5 | 5 | 5 | 0 |
-| [HumanEval/108](humaneval/HumanEval_108/README.md) | humaneval+ | 5 | 7 | 4 | 2 |
-| [HumanEval/109](humaneval/HumanEval_109/README.md) | humaneval+ | 5 | 5 | 5 | 0 |
-| [HumanEval/111](humaneval/HumanEval_111/README.md) | humaneval+ | 5 | 5 | 5 | 0 |
-| [HumanEval/113](humaneval/HumanEval_113/README.md) | humaneval+ | 5 | 7 | 4 | 3 |
-| [HumanEval/115](humaneval/HumanEval_115/README.md) | humaneval+ | 5 | 5 | 5 | 0 |
-| [HumanEval/116](humaneval/HumanEval_116/README.md) | humaneval+ | 5 | 15 | 0 | 15 |
-| [HumanEval/121](humaneval/HumanEval_121/README.md) | humaneval+ | 5 | 5 | 5 | 0 |
-| [HumanEval/125](humaneval/HumanEval_125/README.md) | humaneval+ | 5 | 6 | 5 | 0 |
-| [HumanEval/126](humaneval/HumanEval_126/README.md) | humaneval+ | 5 | 5 | 5 | 3 |
-| [HumanEval/127](humaneval/HumanEval_127/README.md) | humaneval+ | 5 | 5 | 5 | 0 |
-| [HumanEval/128](humaneval/HumanEval_128/README.md) | humaneval+ | 5 | 5 | 5 | 0 |
-| [HumanEval/129](humaneval/HumanEval_129/README.md) | humaneval+ | 5 | 6 | 5 | 3 |
-| [HumanEval/130](humaneval/HumanEval_130/README.md) | humaneval+ | 5 | 15 | 0 | 15 |
-| [HumanEval/133](humaneval/HumanEval_133/README.md) | humaneval+ | 5 | 5 | 5 | 0 |
-| [HumanEval/134](humaneval/HumanEval_134/README.md) | humaneval+ | 5 | 13 | 2 | 12 |
-| [HumanEval/135](humaneval/HumanEval_135/README.md) | humaneval+ | 5 | 5 | 5 | 0 |
-| [HumanEval/137](humaneval/HumanEval_137/README.md) | humaneval+ | 5 | 5 | 5 | 1 |
-| [HumanEval/138](humaneval/HumanEval_138/README.md) | humaneval+ | 5 | 5 | 5 | 0 |
-| [HumanEval/139](humaneval/HumanEval_139/README.md) | humaneval+ | 5 | 5 | 5 | 0 |
-| [HumanEval/141](humaneval/HumanEval_141/README.md) | humaneval+ | 5 | 5 | 5 | 0 |
-| [HumanEval/142](humaneval/HumanEval_142/README.md) | humaneval+ | 5 | 5 | 5 | 1 |
-| [HumanEval/144](humaneval/HumanEval_144/README.md) | humaneval+ | 5 | 5 | 5 | 0 |
-| [HumanEval/145](humaneval/HumanEval_145/README.md) | humaneval+ | 5 | 15 | 0 | 13 |
-| [HumanEval/146](humaneval/HumanEval_146/README.md) | humaneval+ | 5 | 5 | 5 | 0 |
-| [HumanEval/149](humaneval/HumanEval_149/README.md) | humaneval+ | 5 | 5 | 5 | 0 |
-| [HumanEval/150](humaneval/HumanEval_150/README.md) | humaneval+ | 5 | 5 | 5 | 0 |
-| [HumanEval/152](humaneval/HumanEval_152/README.md) | humaneval+ | 5 | 5 | 5 | 0 |
-| [HumanEval/153](humaneval/HumanEval_153/README.md) | humaneval+ | 5 | 5 | 5 | 3 |
-| [HumanEval/155](humaneval/HumanEval_155/README.md) | humaneval+ | 5 | 5 | 5 | 0 |
-| [HumanEval/157](humaneval/HumanEval_157/README.md) | humaneval+ | 5 | 5 | 5 | 0 |
-| [HumanEval/158](humaneval/HumanEval_158/README.md) | humaneval+ | 5 | 5 | 5 | 1 |
-| [HumanEval/160](humaneval/HumanEval_160/README.md) | humaneval+ | 5 | 7 | 4 | 2 |
-| [HumanEval/161](humaneval/HumanEval_161/README.md) | humaneval+ | 5 | 5 | 5 | 0 |
-| [HumanEval/162](humaneval/HumanEval_162/README.md) | humaneval+ | 5 | 5 | 5 | 0 |
-| [Mbpp/3](mbpp/Mbpp_3/README.md) | mbpp+ | 5 | 5 | 5 | 0 |
-| [Mbpp/6](mbpp/Mbpp_6/README.md) | mbpp+ | 5 | 5 | 5 | 0 |
-| [Mbpp/7](mbpp/Mbpp_7/README.md) | mbpp+ | 5 | 5 | 5 | 0 |
-| [Mbpp/8](mbpp/Mbpp_8/README.md) | mbpp+ | 5 | 5 | 5 | 0 |
-| [Mbpp/9](mbpp/Mbpp_9/README.md) | mbpp+ | 5 | 5 | 5 | 0 |
-| [Mbpp/11](mbpp/Mbpp_11/README.md) | mbpp+ | 5 | 7 | 4 | 1 |
-| [Mbpp/12](mbpp/Mbpp_12/README.md) | mbpp+ | 5 | 7 | 4 | 0 |
-| [Mbpp/17](mbpp/Mbpp_17/README.md) | mbpp+ | 5 | 5 | 5 | 0 |
-| [Mbpp/18](mbpp/Mbpp_18/README.md) | mbpp+ | 5 | 5 | 5 | 0 |
-| [Mbpp/56](mbpp/Mbpp_56/README.md) | mbpp+ | 5 | 5 | 5 | 1 |
-| [Mbpp/57](mbpp/Mbpp_57/README.md) | mbpp+ | 5 | 7 | 4 | 0 |
-| [Mbpp/58](mbpp/Mbpp_58/README.md) | mbpp+ | 5 | 5 | 5 | 0 |
-| [Mbpp/59](mbpp/Mbpp_59/README.md) | mbpp+ | 5 | 5 | 5 | 0 |
-| [Mbpp/61](mbpp/Mbpp_61/README.md) | mbpp+ | 5 | 8 | 4 | 1 |
-| [Mbpp/62](mbpp/Mbpp_62/README.md) | mbpp+ | 5 | 5 | 5 | 0 |
-| [Mbpp/64](mbpp/Mbpp_64/README.md) | mbpp+ | 5 | 11 | 3 | 0 |
-| [Mbpp/67](mbpp/Mbpp_67/README.md) | mbpp+ | 5 | 11 | 3 | 7 |
-| [Mbpp/71](mbpp/Mbpp_71/README.md) | mbpp+ | 5 | 14 | 1 | 10 |
-| [Mbpp/72](mbpp/Mbpp_72/README.md) | mbpp+ | 5 | 5 | 5 | 0 |
-| [Mbpp/75](mbpp/Mbpp_75/README.md) | mbpp+ | 5 | 5 | 5 | 0 |
-| [Mbpp/77](mbpp/Mbpp_77/README.md) | mbpp+ | 5 | 5 | 5 | 0 |
-| [Mbpp/79](mbpp/Mbpp_79/README.md) | mbpp+ | 5 | 8 | 5 | 0 |
-| [Mbpp/80](mbpp/Mbpp_80/README.md) | mbpp+ | 5 | 5 | 5 | 0 |
-| [Mbpp/82](mbpp/Mbpp_82/README.md) | mbpp+ | 5 | 5 | 5 | 0 |
-| [Mbpp/84](mbpp/Mbpp_84/README.md) | mbpp+ | 5 | 13 | 2 | 7 |
-| [Mbpp/85](mbpp/Mbpp_85/README.md) | mbpp+ | 5 | 5 | 5 | 0 |
-| [Mbpp/91](mbpp/Mbpp_91/README.md) | mbpp+ | 5 | 5 | 5 | 0 |
-| [Mbpp/93](mbpp/Mbpp_93/README.md) | mbpp+ | 5 | 5 | 5 | 0 |
-| [Mbpp/94](mbpp/Mbpp_94/README.md) | mbpp+ | 5 | 6 | 5 | 0 |
-| [Mbpp/95](mbpp/Mbpp_95/README.md) | mbpp+ | 5 | 5 | 5 | 0 |
-| [Mbpp/98](mbpp/Mbpp_98/README.md) | mbpp+ | 5 | 5 | 5 | 0 |
-| [Mbpp/99](mbpp/Mbpp_99/README.md) | mbpp+ | 5 | 5 | 5 | 0 |
-| [Mbpp/100](mbpp/Mbpp_100/README.md) | mbpp+ | 5 | 15 | 0 | 13 |
-| [Mbpp/101](mbpp/Mbpp_101/README.md) | mbpp+ | 5 | 5 | 5 | 0 |
-| [Mbpp/102](mbpp/Mbpp_102/README.md) | mbpp+ | 5 | 8 | 5 | 0 |
-| [Mbpp/103](mbpp/Mbpp_103/README.md) | mbpp+ | 5 | 7 | 4 | 3 |
-| [Mbpp/104](mbpp/Mbpp_104/README.md) | mbpp+ | 5 | 8 | 4 | 0 |
-| [Mbpp/105](mbpp/Mbpp_105/README.md) | mbpp+ | 5 | 5 | 5 | 0 |
-| [Mbpp/106](mbpp/Mbpp_106/README.md) | mbpp+ | 5 | 11 | 4 | 0 |
-| [Mbpp/108](mbpp/Mbpp_108/README.md) | mbpp+ | 5 | 5 | 5 | 0 |
-| [Mbpp/113](mbpp/Mbpp_113/README.md) | mbpp+ | 5 | 5 | 5 | 0 |
-| [Mbpp/116](mbpp/Mbpp_116/README.md) | mbpp+ | 5 | 5 | 5 | 0 |
-| [Mbpp/118](mbpp/Mbpp_118/README.md) | mbpp+ | 5 | 5 | 5 | 0 |
-| [Mbpp/119](mbpp/Mbpp_119/README.md) | mbpp+ | 5 | 13 | 1 | 10 |
-| [Mbpp/123](mbpp/Mbpp_123/README.md) | mbpp+ | 5 | 12 | 2 | 6 |
-| [Mbpp/124](mbpp/Mbpp_124/README.md) | mbpp+ | 5 | 15 | 0 | 2 |
-| [Mbpp/125](mbpp/Mbpp_125/README.md) | mbpp+ | 5 | 7 | 4 | 3 |
-| [Mbpp/127](mbpp/Mbpp_127/README.md) | mbpp+ | 5 | 5 | 5 | 0 |
-| [Mbpp/131](mbpp/Mbpp_131/README.md) | mbpp+ | 5 | 5 | 5 | 0 |
-| [Mbpp/132](mbpp/Mbpp_132/README.md) | mbpp+ | 5 | 8 | 4 | 0 |
-| [Mbpp/135](mbpp/Mbpp_135/README.md) | mbpp+ | 5 | 5 | 5 | 0 |
-| [Mbpp/137](mbpp/Mbpp_137/README.md) | mbpp+ | 5 | 9 | 5 | 0 |
-| [Mbpp/138](mbpp/Mbpp_138/README.md) | mbpp+ | 5 | 5 | 5 | 2 |
-| [Mbpp/139](mbpp/Mbpp_139/README.md) | mbpp+ | 5 | 5 | 5 | 0 |
-| [Mbpp/141](mbpp/Mbpp_141/README.md) | mbpp+ | 5 | 15 | 0 | 12 |
-| [Mbpp/160](mbpp/Mbpp_160/README.md) | mbpp+ | 5 | 15 | 0 | 14 |
-| [Mbpp/161](mbpp/Mbpp_161/README.md) | mbpp+ | 5 | 5 | 5 | 0 |
-| [Mbpp/162](mbpp/Mbpp_162/README.md) | mbpp+ | 5 | 5 | 5 | 0 |
-| [Mbpp/166](mbpp/Mbpp_166/README.md) | mbpp+ | 5 | 5 | 5 | 0 |
-| [Mbpp/168](mbpp/Mbpp_168/README.md) | mbpp+ | 5 | 5 | 5 | 0 |
-| [Mbpp/170](mbpp/Mbpp_170/README.md) | mbpp+ | 5 | 5 | 5 | 0 |
-| [Mbpp/171](mbpp/Mbpp_171/README.md) | mbpp+ | 5 | 5 | 5 | 0 |
-| [Mbpp/172](mbpp/Mbpp_172/README.md) | mbpp+ | 5 | 5 | 5 | 0 |
-| [Mbpp/222](mbpp/Mbpp_222/README.md) | mbpp+ | 5 | 5 | 5 | 0 |
-| [Mbpp/223](mbpp/Mbpp_223/README.md) | mbpp+ | 5 | 5 | 5 | 1 |
-| [Mbpp/224](mbpp/Mbpp_224/README.md) | mbpp+ | 5 | 5 | 5 | 0 |
-| [Mbpp/226](mbpp/Mbpp_226/README.md) | mbpp+ | 5 | 5 | 5 | 0 |
-| [Mbpp/230](mbpp/Mbpp_230/README.md) | mbpp+ | 5 | 5 | 5 | 0 |
-| [Mbpp/234](mbpp/Mbpp_234/README.md) | mbpp+ | 5 | 5 | 5 | 0 |
-| [Mbpp/237](mbpp/Mbpp_237/README.md) | mbpp+ | 5 | 15 | 0 | 1 |
-| [Mbpp/238](mbpp/Mbpp_238/README.md) | mbpp+ | 5 | 5 | 5 | 0 |
-| [Mbpp/239](mbpp/Mbpp_239/README.md) | mbpp+ | 5 | 5 | 5 | 5 |
-| [Mbpp/240](mbpp/Mbpp_240/README.md) | mbpp+ | 5 | 5 | 5 | 0 |
-| [Mbpp/242](mbpp/Mbpp_242/README.md) | mbpp+ | 5 | 5 | 5 | 0 |
-| [Mbpp/244](mbpp/Mbpp_244/README.md) | mbpp+ | 5 | 5 | 5 | 0 |
-| [Mbpp/250](mbpp/Mbpp_250/README.md) | mbpp+ | 5 | 5 | 5 | 0 |
-| [Mbpp/253](mbpp/Mbpp_253/README.md) | mbpp+ | 5 | 5 | 5 | 0 |
-| [Mbpp/255](mbpp/Mbpp_255/README.md) | mbpp+ | 5 | 5 | 5 | 0 |
-| [Mbpp/261](mbpp/Mbpp_261/README.md) | mbpp+ | 5 | 6 | 5 | 0 |
-| [Mbpp/262](mbpp/Mbpp_262/README.md) | mbpp+ | 5 | 5 | 5 | 0 |
-| [Mbpp/268](mbpp/Mbpp_268/README.md) | mbpp+ | 5 | 9 | 5 | 6 |
-| [Mbpp/269](mbpp/Mbpp_269/README.md) | mbpp+ | 5 | 5 | 5 | 0 |
-| [Mbpp/270](mbpp/Mbpp_270/README.md) | mbpp+ | 5 | 5 | 5 | 0 |
-| [Mbpp/271](mbpp/Mbpp_271/README.md) | mbpp+ | 5 | 5 | 5 | 0 |
-| [Mbpp/272](mbpp/Mbpp_272/README.md) | mbpp+ | 5 | 5 | 5 | 0 |
-| [Mbpp/278](mbpp/Mbpp_278/README.md) | mbpp+ | 5 | 5 | 5 | 0 |
-| [Mbpp/280](mbpp/Mbpp_280/README.md) | mbpp+ | 5 | 5 | 5 | 0 |
-| [Mbpp/282](mbpp/Mbpp_282/README.md) | mbpp+ | 5 | 5 | 5 | 0 |
-| [Mbpp/284](mbpp/Mbpp_284/README.md) | mbpp+ | 5 | 5 | 5 | 0 |
-| [Mbpp/290](mbpp/Mbpp_290/README.md) | mbpp+ | 5 | 5 | 5 | 0 |
-| [Mbpp/292](mbpp/Mbpp_292/README.md) | mbpp+ | 5 | 5 | 5 | 0 |
-| [Mbpp/294](mbpp/Mbpp_294/README.md) | mbpp+ | 5 | 10 | 4 | 0 |
-| [Mbpp/296](mbpp/Mbpp_296/README.md) | mbpp+ | 5 | 5 | 5 | 0 |
-| [Mbpp/297](mbpp/Mbpp_297/README.md) | mbpp+ | 5 | 6 | 5 | 0 |
-| [Mbpp/300](mbpp/Mbpp_300/README.md) | mbpp+ | 5 | 5 | 5 | 0 |
-| [Mbpp/305](mbpp/Mbpp_305/README.md) | mbpp+ | 5 | 15 | 1 | 0 |
-| [Mbpp/306](mbpp/Mbpp_306/README.md) | mbpp+ | 5 | 15 | 0 | 10 |
-| [Mbpp/310](mbpp/Mbpp_310/README.md) | mbpp+ | 5 | 12 | 4 | 0 |
-| [Mbpp/311](mbpp/Mbpp_311/README.md) | mbpp+ | 5 | 15 | 0 | 12 |
-| [Mbpp/388](mbpp/Mbpp_388/README.md) | mbpp+ | 5 | 5 | 5 | 0 |
-| [Mbpp/389](mbpp/Mbpp_389/README.md) | mbpp+ | 5 | 5 | 5 | 0 |
-| [Mbpp/390](mbpp/Mbpp_390/README.md) | mbpp+ | 5 | 5 | 5 | 0 |
-| [Mbpp/394](mbpp/Mbpp_394/README.md) | mbpp+ | 5 | 5 | 5 | 0 |
-| [Mbpp/397](mbpp/Mbpp_397/README.md) | mbpp+ | 5 | 5 | 5 | 0 |
-| [Mbpp/404](mbpp/Mbpp_404/README.md) | mbpp+ | 5 | 5 | 5 | 0 |
-| [Mbpp/409](mbpp/Mbpp_409/README.md) | mbpp+ | 5 | 5 | 5 | 0 |
-| [Mbpp/410](mbpp/Mbpp_410/README.md) | mbpp+ | 5 | 9 | 5 | 0 |
-| [Mbpp/412](mbpp/Mbpp_412/README.md) | mbpp+ | 5 | 5 | 5 | 0 |
-| [Mbpp/413](mbpp/Mbpp_413/README.md) | mbpp+ | 5 | 5 | 5 | 0 |
-| [Mbpp/415](mbpp/Mbpp_415/README.md) | mbpp+ | 5 | 10 | 4 | 4 |
-| [Mbpp/418](mbpp/Mbpp_418/README.md) | mbpp+ | 5 | 5 | 5 | 0 |
-| [Mbpp/421](mbpp/Mbpp_421/README.md) | mbpp+ | 5 | 10 | 5 | 0 |
-| [Mbpp/422](mbpp/Mbpp_422/README.md) | mbpp+ | 5 | 5 | 5 | 0 |
-| [Mbpp/426](mbpp/Mbpp_426/README.md) | mbpp+ | 5 | 5 | 5 | 0 |
-| [Mbpp/427](mbpp/Mbpp_427/README.md) | mbpp+ | 5 | 5 | 5 | 0 |
-| [Mbpp/429](mbpp/Mbpp_429/README.md) | mbpp+ | 5 | 10 | 5 | 8 |
-| [Mbpp/430](mbpp/Mbpp_430/README.md) | mbpp+ | 5 | 15 | 1 | 14 |
-| [Mbpp/433](mbpp/Mbpp_433/README.md) | mbpp+ | 5 | 5 | 5 | 0 |
-| [Mbpp/436](mbpp/Mbpp_436/README.md) | mbpp+ | 5 | 5 | 5 | 0 |
-| [Mbpp/437](mbpp/Mbpp_437/README.md) | mbpp+ | 5 | 5 | 5 | 0 |
-| [Mbpp/445](mbpp/Mbpp_445/README.md) | mbpp+ | 5 | 6 | 5 | 0 |
-| [Mbpp/446](mbpp/Mbpp_446/README.md) | mbpp+ | 5 | 6 | 5 | 0 |
-| [Mbpp/447](mbpp/Mbpp_447/README.md) | mbpp+ | 5 | 5 | 5 | 0 |
-| [Mbpp/450](mbpp/Mbpp_450/README.md) | mbpp+ | 5 | 5 | 5 | 0 |
-| [Mbpp/451](mbpp/Mbpp_451/README.md) | mbpp+ | 5 | 6 | 5 | 0 |
-| [Mbpp/454](mbpp/Mbpp_454/README.md) | mbpp+ | 5 | 5 | 5 | 0 |
-| [Mbpp/457](mbpp/Mbpp_457/README.md) | mbpp+ | 5 | 5 | 5 | 0 |
-| [Mbpp/458](mbpp/Mbpp_458/README.md) | mbpp+ | 5 | 5 | 5 | 0 |
-| [Mbpp/459](mbpp/Mbpp_459/README.md) | mbpp+ | 5 | 5 | 5 | 0 |
-| [Mbpp/462](mbpp/Mbpp_462/README.md) | mbpp+ | 5 | 15 | 0 | 13 |
-| [Mbpp/463](mbpp/Mbpp_463/README.md) | mbpp+ | 5 | 11 | 2 | 7 |
-| [Mbpp/468](mbpp/Mbpp_468/README.md) | mbpp+ | 5 | 15 | 0 | 15 |
-| [Mbpp/470](mbpp/Mbpp_470/README.md) | mbpp+ | 5 | 5 | 5 | 0 |
-| [Mbpp/471](mbpp/Mbpp_471/README.md) | mbpp+ | 5 | 5 | 5 | 0 |
-| [Mbpp/472](mbpp/Mbpp_472/README.md) | mbpp+ | 5 | 5 | 5 | 0 |
-| [Mbpp/473](mbpp/Mbpp_473/README.md) | mbpp+ | 5 | 13 | 2 | 5 |
-| [Mbpp/474](mbpp/Mbpp_474/README.md) | mbpp+ | 5 | 5 | 5 | 0 |
-| [Mbpp/475](mbpp/Mbpp_475/README.md) | mbpp+ | 5 | 7 | 4 | 0 |
-| [Mbpp/476](mbpp/Mbpp_476/README.md) | mbpp+ | 5 | 5 | 5 | 0 |
-| [Mbpp/478](mbpp/Mbpp_478/README.md) | mbpp+ | 5 | 5 | 5 | 0 |
-| [Mbpp/479](mbpp/Mbpp_479/README.md) | mbpp+ | 5 | 6 | 5 | 0 |
-| [Mbpp/558](mbpp/Mbpp_558/README.md) | mbpp+ | 5 | 5 | 5 | 0 |
-| [Mbpp/559](mbpp/Mbpp_559/README.md) | mbpp+ | 5 | 14 | 4 | 1 |
-| [Mbpp/560](mbpp/Mbpp_560/README.md) | mbpp+ | 5 | 5 | 5 | 0 |
-| [Mbpp/562](mbpp/Mbpp_562/README.md) | mbpp+ | 5 | 5 | 5 | 0 |
-| [Mbpp/564](mbpp/Mbpp_564/README.md) | mbpp+ | 5 | 9 | 4 | 0 |
-| [Mbpp/565](mbpp/Mbpp_565/README.md) | mbpp+ | 5 | 10 | 3 | 0 |
-| [Mbpp/566](mbpp/Mbpp_566/README.md) | mbpp+ | 5 | 5 | 5 | 0 |
-| [Mbpp/568](mbpp/Mbpp_568/README.md) | mbpp+ | 5 | 5 | 5 | 0 |
-| [Mbpp/573](mbpp/Mbpp_573/README.md) | mbpp+ | 5 | 5 | 5 | 0 |
-| [Mbpp/577](mbpp/Mbpp_577/README.md) | mbpp+ | 5 | 6 | 5 | 0 |
-| [Mbpp/579](mbpp/Mbpp_579/README.md) | mbpp+ | 5 | 5 | 5 | 0 |
-| [Mbpp/583](mbpp/Mbpp_583/README.md) | mbpp+ | 5 | 5 | 5 | 0 |
-| [Mbpp/585](mbpp/Mbpp_585/README.md) | mbpp+ | 5 | 5 | 5 | 0 |
-| [Mbpp/586](mbpp/Mbpp_586/README.md) | mbpp+ | 5 | 5 | 5 | 0 |
-| [Mbpp/587](mbpp/Mbpp_587/README.md) | mbpp+ | 5 | 5 | 5 | 0 |
-| [Mbpp/588](mbpp/Mbpp_588/README.md) | mbpp+ | 5 | 5 | 5 | 0 |
-| [Mbpp/590](mbpp/Mbpp_590/README.md) | mbpp+ | 5 | 15 | 0 | 5 |
-| [Mbpp/592](mbpp/Mbpp_592/README.md) | mbpp+ | 5 | 7 | 5 | 0 |
-| [Mbpp/593](mbpp/Mbpp_593/README.md) | mbpp+ | 5 | 5 | 5 | 0 |
-| [Mbpp/596](mbpp/Mbpp_596/README.md) | mbpp+ | 5 | 5 | 5 | 0 |
-| [Mbpp/599](mbpp/Mbpp_599/README.md) | mbpp+ | 5 | 5 | 5 | 0 |
-| [Mbpp/602](mbpp/Mbpp_602/README.md) | mbpp+ | 5 | 5 | 5 | 0 |
-| [Mbpp/603](mbpp/Mbpp_603/README.md) | mbpp+ | 5 | 6 | 5 | 0 |
-| [Mbpp/605](mbpp/Mbpp_605/README.md) | mbpp+ | 5 | 5 | 5 | 0 |
-| [Mbpp/606](mbpp/Mbpp_606/README.md) | mbpp+ | 5 | 5 | 5 | 0 |
-| [Mbpp/607](mbpp/Mbpp_607/README.md) | mbpp+ | 5 | 6 | 5 | 1 |
-| [Mbpp/608](mbpp/Mbpp_608/README.md) | mbpp+ | 5 | 12 | 4 | 2 |
-| [Mbpp/612](mbpp/Mbpp_612/README.md) | mbpp+ | 5 | 5 | 5 | 0 |
-| [Mbpp/619](mbpp/Mbpp_619/README.md) | mbpp+ | 5 | 5 | 5 | 0 |
-| [Mbpp/620](mbpp/Mbpp_620/README.md) | mbpp+ | 5 | 5 | 5 | 1 |
-| [Mbpp/622](mbpp/Mbpp_622/README.md) | mbpp+ | 5 | 7 | 4 | 4 |
-| [Mbpp/623](mbpp/Mbpp_623/README.md) | mbpp+ | 5 | 7 | 5 | 0 |
-| [Mbpp/626](mbpp/Mbpp_626/README.md) | mbpp+ | 5 | 5 | 5 | 0 |
-| [Mbpp/629](mbpp/Mbpp_629/README.md) | mbpp+ | 5 | 5 | 5 | 0 |
-| [Mbpp/630](mbpp/Mbpp_630/README.md) | mbpp+ | 5 | 14 | 1 | 11 |
-| [Mbpp/631](mbpp/Mbpp_631/README.md) | mbpp+ | 5 | 5 | 5 | 0 |
-| [Mbpp/632](mbpp/Mbpp_632/README.md) | mbpp+ | 5 | 5 | 5 | 0 |
-| [Mbpp/633](mbpp/Mbpp_633/README.md) | mbpp+ | 5 | 11 | 4 | 0 |
-| [Mbpp/638](mbpp/Mbpp_638/README.md) | mbpp+ | 5 | 14 | 1 | 13 |
-| [Mbpp/639](mbpp/Mbpp_639/README.md) | mbpp+ | 5 | 5 | 5 | 0 |
-| [Mbpp/641](mbpp/Mbpp_641/README.md) | mbpp+ | 5 | 15 | 1 | 7 |
-| [Mbpp/643](mbpp/Mbpp_643/README.md) | mbpp+ | 5 | 5 | 5 | 0 |
-| [Mbpp/720](mbpp/Mbpp_720/README.md) | mbpp+ | 5 | 7 | 5 | 0 |
-| [Mbpp/722](mbpp/Mbpp_722/README.md) | mbpp+ | 5 | 6 | 5 | 0 |
-| [Mbpp/723](mbpp/Mbpp_723/README.md) | mbpp+ | 5 | 5 | 5 | 0 |
-| [Mbpp/724](mbpp/Mbpp_724/README.md) | mbpp+ | 5 | 5 | 5 | 0 |
-| [Mbpp/725](mbpp/Mbpp_725/README.md) | mbpp+ | 5 | 5 | 5 | 0 |
-| [Mbpp/733](mbpp/Mbpp_733/README.md) | mbpp+ | 5 | 5 | 5 | 0 |
-| [Mbpp/734](mbpp/Mbpp_734/README.md) | mbpp+ | 5 | 12 | 4 | 2 |
-| [Mbpp/737](mbpp/Mbpp_737/README.md) | mbpp+ | 5 | 7 | 5 | 2 |
-| [Mbpp/739](mbpp/Mbpp_739/README.md) | mbpp+ | 5 | 5 | 5 | 0 |
-| [Mbpp/741](mbpp/Mbpp_741/README.md) | mbpp+ | 5 | 5 | 5 | 0 |
-| [Mbpp/742](mbpp/Mbpp_742/README.md) | mbpp+ | 5 | 5 | 5 | 0 |
-| [Mbpp/743](mbpp/Mbpp_743/README.md) | mbpp+ | 5 | 5 | 5 | 0 |
-| [Mbpp/748](mbpp/Mbpp_748/README.md) | mbpp+ | 5 | 6 | 5 | 0 |
-| [Mbpp/749](mbpp/Mbpp_749/README.md) | mbpp+ | 5 | 6 | 5 | 0 |
-| [Mbpp/751](mbpp/Mbpp_751/README.md) | mbpp+ | 5 | 10 | 4 | 0 |
-| [Mbpp/754](mbpp/Mbpp_754/README.md) | mbpp+ | 5 | 5 | 5 | 0 |
-| [Mbpp/755](mbpp/Mbpp_755/README.md) | mbpp+ | 5 | 5 | 5 | 0 |
-| [Mbpp/757](mbpp/Mbpp_757/README.md) | mbpp+ | 5 | 5 | 5 | 0 |
-| [Mbpp/762](mbpp/Mbpp_762/README.md) | mbpp+ | 5 | 5 | 5 | 0 |
-| [Mbpp/764](mbpp/Mbpp_764/README.md) | mbpp+ | 5 | 5 | 5 | 0 |
-| [Mbpp/765](mbpp/Mbpp_765/README.md) | mbpp+ | 5 | 13 | 2 | 8 |
-| [Mbpp/766](mbpp/Mbpp_766/README.md) | mbpp+ | 5 | 5 | 5 | 0 |
-| [Mbpp/767](mbpp/Mbpp_767/README.md) | mbpp+ | 5 | 5 | 5 | 0 |
-| [Mbpp/769](mbpp/Mbpp_769/README.md) | mbpp+ | 5 | 15 | 0 | 12 |
-| [Mbpp/773](mbpp/Mbpp_773/README.md) | mbpp+ | 5 | 5 | 5 | 0 |
-| [Mbpp/775](mbpp/Mbpp_775/README.md) | mbpp+ | 5 | 5 | 5 | 0 |
-| [Mbpp/778](mbpp/Mbpp_778/README.md) | mbpp+ | 5 | 6 | 5 | 1 |
-| [Mbpp/781](mbpp/Mbpp_781/README.md) | mbpp+ | 5 | 5 | 5 | 0 |
-| [Mbpp/782](mbpp/Mbpp_782/README.md) | mbpp+ | 5 | 5 | 5 | 3 |
-| [Mbpp/784](mbpp/Mbpp_784/README.md) | mbpp+ | 5 | 7 | 4 | 0 |
-| [Mbpp/785](mbpp/Mbpp_785/README.md) | mbpp+ | 5 | 5 | 5 | 0 |
-| [Mbpp/786](mbpp/Mbpp_786/README.md) | mbpp+ | 5 | 5 | 5 | 0 |
-| [Mbpp/787](mbpp/Mbpp_787/README.md) | mbpp+ | 5 | 5 | 5 | 0 |
-| [Mbpp/788](mbpp/Mbpp_788/README.md) | mbpp+ | 5 | 6 | 5 | 0 |
-| [Mbpp/791](mbpp/Mbpp_791/README.md) | mbpp+ | 5 | 13 | 2 | 12 |
-| [Mbpp/792](mbpp/Mbpp_792/README.md) | mbpp+ | 5 | 5 | 5 | 0 |
-| [Mbpp/793](mbpp/Mbpp_793/README.md) | mbpp+ | 5 | 5 | 5 | 0 |
-| [Mbpp/797](mbpp/Mbpp_797/README.md) | mbpp+ | 5 | 5 | 5 | 0 |
-| [Mbpp/798](mbpp/Mbpp_798/README.md) | mbpp+ | 5 | 5 | 5 | 0 |
-| [Mbpp/799](mbpp/Mbpp_799/README.md) | mbpp+ | 5 | 5 | 5 | 1 |
-| [Mbpp/801](mbpp/Mbpp_801/README.md) | mbpp+ | 5 | 5 | 5 | 0 |
-| [Mbpp/804](mbpp/Mbpp_804/README.md) | mbpp+ | 5 | 5 | 5 | 0 |
-| [Mbpp/805](mbpp/Mbpp_805/README.md) | mbpp+ | 5 | 5 | 5 | 0 |
-| [Mbpp/808](mbpp/Mbpp_808/README.md) | mbpp+ | 5 | 5 | 5 | 0 |
+## How to read the indicator
+
+The indicator shows how the small model did **alone, without frontier help**: the final code of each attempt (after up to 3 rounds) on the full hidden EvalPlus suite.
+
+- 🟢 every attempt's final code passes the hidden tests
+- 🟡 some attempts fail the hidden tests
+- 🔴 every attempt fails the hidden tests
+- ⚪ not graded (HumanEval/32, excluded by Amendment A2)
+- ⚠️ in "Visible pass, hidden fail": attempts whose code passed the visible tests but fails the hidden tests. These are the cases the routers try to catch.
+
+Tasks: HumanEval+ 71 🟢 / 16 🟡 / 10 🔴; MBPP+ 126 🟢 / 55 🟡 / 46 🔴; both 197 🟢 / 71 🟡 / 56 🔴.
+
+| | Task | Benchmark | Attempts that fail hidden tests | Visible pass, hidden fail | Checkpoints | Cap hits |
+| --- | --- | --- | --- | --- | --- | --- |
+| 🟢 | [HumanEval/0](humaneval/HumanEval_0/README.md) | humaneval+ | 0 / 5 | 0 | 5 | 0 |
+| 🟢 | [HumanEval/1](humaneval/HumanEval_1/README.md) | humaneval+ | 0 / 5 | 0 | 7 | 7 |
+| 🟢 | [HumanEval/3](humaneval/HumanEval_3/README.md) | humaneval+ | 0 / 5 | 0 | 5 | 0 |
+| 🟢 | [HumanEval/7](humaneval/HumanEval_7/README.md) | humaneval+ | 0 / 5 | 0 | 5 | 0 |
+| 🟢 | [HumanEval/8](humaneval/HumanEval_8/README.md) | humaneval+ | 0 / 5 | 0 | 5 | 0 |
+| 🟢 | [HumanEval/9](humaneval/HumanEval_9/README.md) | humaneval+ | 0 / 5 | 0 | 5 | 0 |
+| 🟡 | [HumanEval/10](humaneval/HumanEval_10/README.md) | humaneval+ | 1 / 5 | 0 | 7 | 3 |
+| 🟢 | [HumanEval/11](humaneval/HumanEval_11/README.md) | humaneval+ | 0 / 5 | 0 | 5 | 0 |
+| 🟢 | [HumanEval/14](humaneval/HumanEval_14/README.md) | humaneval+ | 0 / 5 | 0 | 5 | 0 |
+| 🟢 | [HumanEval/15](humaneval/HumanEval_15/README.md) | humaneval+ | 0 / 5 | 0 | 5 | 0 |
+| 🟢 | [HumanEval/16](humaneval/HumanEval_16/README.md) | humaneval+ | 0 / 5 | 0 | 5 | 0 |
+| 🟢 | [HumanEval/18](humaneval/HumanEval_18/README.md) | humaneval+ | 0 / 5 | 0 | 5 | 0 |
+| 🟢 | [HumanEval/19](humaneval/HumanEval_19/README.md) | humaneval+ | 0 / 5 | 0 | 6 | 0 |
+| 🟢 | [HumanEval/21](humaneval/HumanEval_21/README.md) | humaneval+ | 0 / 5 | 0 | 5 | 0 |
+| 🔴 | [HumanEval/22](humaneval/HumanEval_22/README.md) | humaneval+ | 5 / 5 | **5** ⚠️ | 5 | 0 |
+| 🟢 | [HumanEval/23](humaneval/HumanEval_23/README.md) | humaneval+ | 0 / 5 | 0 | 5 | 0 |
+| 🟢 | [HumanEval/24](humaneval/HumanEval_24/README.md) | humaneval+ | 0 / 5 | 0 | 5 | 0 |
+| 🟢 | [HumanEval/27](humaneval/HumanEval_27/README.md) | humaneval+ | 0 / 5 | 0 | 5 | 0 |
+| 🟢 | [HumanEval/29](humaneval/HumanEval_29/README.md) | humaneval+ | 0 / 5 | 0 | 5 | 0 |
+| 🟢 | [HumanEval/31](humaneval/HumanEval_31/README.md) | humaneval+ | 0 / 5 | 0 | 5 | 0 |
+| ⚪ | [HumanEval/32](humaneval/HumanEval_32/README.md) | humaneval+ | — | — | 12 | 10 |
+| 🟢 | [HumanEval/34](humaneval/HumanEval_34/README.md) | humaneval+ | 0 / 5 | 0 | 5 | 0 |
+| 🟢 | [HumanEval/35](humaneval/HumanEval_35/README.md) | humaneval+ | 0 / 5 | 0 | 5 | 0 |
+| 🔴 | [HumanEval/39](humaneval/HumanEval_39/README.md) | humaneval+ | 5 / 5 | **4** ⚠️ | 7 | 4 |
+| 🟢 | [HumanEval/41](humaneval/HumanEval_41/README.md) | humaneval+ | 0 / 5 | 0 | 5 | 0 |
+| 🟢 | [HumanEval/45](humaneval/HumanEval_45/README.md) | humaneval+ | 0 / 5 | 0 | 5 | 0 |
+| 🔴 | [HumanEval/47](humaneval/HumanEval_47/README.md) | humaneval+ | 5 / 5 | **5** ⚠️ | 11 | 2 |
+| 🟢 | [HumanEval/48](humaneval/HumanEval_48/README.md) | humaneval+ | 0 / 5 | 0 | 5 | 0 |
+| 🟢 | [HumanEval/50](humaneval/HumanEval_50/README.md) | humaneval+ | 0 / 5 | 0 | 5 | 0 |
+| 🟢 | [HumanEval/51](humaneval/HumanEval_51/README.md) | humaneval+ | 0 / 5 | 0 | 5 | 0 |
+| 🟢 | [HumanEval/53](humaneval/HumanEval_53/README.md) | humaneval+ | 0 / 5 | 0 | 5 | 0 |
+| 🟢 | [HumanEval/56](humaneval/HumanEval_56/README.md) | humaneval+ | 0 / 5 | 0 | 5 | 0 |
+| 🟢 | [HumanEval/57](humaneval/HumanEval_57/README.md) | humaneval+ | 0 / 5 | 0 | 5 | 0 |
+| 🟢 | [HumanEval/61](humaneval/HumanEval_61/README.md) | humaneval+ | 0 / 5 | 0 | 5 | 0 |
+| 🟡 | [HumanEval/62](humaneval/HumanEval_62/README.md) | humaneval+ | 4 / 5 | **4** ⚠️ | 5 | 0 |
+| 🔴 | [HumanEval/64](humaneval/HumanEval_64/README.md) | humaneval+ | 5 / 5 | 0 | 15 | 0 |
+| 🟢 | [HumanEval/66](humaneval/HumanEval_66/README.md) | humaneval+ | 0 / 5 | 0 | 5 | 0 |
+| 🟢 | [HumanEval/67](humaneval/HumanEval_67/README.md) | humaneval+ | 0 / 5 | 0 | 5 | 0 |
+| 🟢 | [HumanEval/68](humaneval/HumanEval_68/README.md) | humaneval+ | 0 / 5 | 0 | 5 | 0 |
+| 🟢 | [HumanEval/69](humaneval/HumanEval_69/README.md) | humaneval+ | 0 / 5 | 0 | 5 | 0 |
+| 🟡 | [HumanEval/70](humaneval/HumanEval_70/README.md) | humaneval+ | 1 / 5 | 0 | 7 | 0 |
+| 🟢 | [HumanEval/72](humaneval/HumanEval_72/README.md) | humaneval+ | 0 / 5 | 0 | 5 | 0 |
+| 🟢 | [HumanEval/73](humaneval/HumanEval_73/README.md) | humaneval+ | 0 / 5 | 0 | 5 | 0 |
+| 🟢 | [HumanEval/74](humaneval/HumanEval_74/README.md) | humaneval+ | 0 / 5 | 0 | 5 | 0 |
+| 🟢 | [HumanEval/78](humaneval/HumanEval_78/README.md) | humaneval+ | 0 / 5 | 0 | 5 | 0 |
+| 🟢 | [HumanEval/79](humaneval/HumanEval_79/README.md) | humaneval+ | 0 / 5 | 0 | 5 | 0 |
+| 🟡 | [HumanEval/81](humaneval/HumanEval_81/README.md) | humaneval+ | 2 / 5 | 0 | 9 | 9 |
+| 🟢 | [HumanEval/82](humaneval/HumanEval_82/README.md) | humaneval+ | 0 / 5 | 0 | 5 | 0 |
+| 🟢 | [HumanEval/84](humaneval/HumanEval_84/README.md) | humaneval+ | 0 / 5 | 0 | 7 | 2 |
+| 🟢 | [HumanEval/85](humaneval/HumanEval_85/README.md) | humaneval+ | 0 / 5 | 0 | 5 | 0 |
+| 🟢 | [HumanEval/87](humaneval/HumanEval_87/README.md) | humaneval+ | 0 / 5 | 0 | 5 | 0 |
+| 🔴 | [HumanEval/91](humaneval/HumanEval_91/README.md) | humaneval+ | 5 / 5 | **1** ⚠️ | 13 | 3 |
+| 🟡 | [HumanEval/92](humaneval/HumanEval_92/README.md) | humaneval+ | 4 / 5 | **4** ⚠️ | 5 | 0 |
+| 🟢 | [HumanEval/94](humaneval/HumanEval_94/README.md) | humaneval+ | 0 / 5 | 0 | 6 | 1 |
+| 🟡 | [HumanEval/95](humaneval/HumanEval_95/README.md) | humaneval+ | 2 / 5 | **2** ⚠️ | 5 | 1 |
+| 🟢 | [HumanEval/96](humaneval/HumanEval_96/README.md) | humaneval+ | 0 / 5 | 0 | 5 | 0 |
+| 🔴 | [HumanEval/97](humaneval/HumanEval_97/README.md) | humaneval+ | 5 / 5 | **5** ⚠️ | 5 | 0 |
+| 🟢 | [HumanEval/98](humaneval/HumanEval_98/README.md) | humaneval+ | 0 / 5 | 0 | 5 | 0 |
+| 🟡 | [HumanEval/99](humaneval/HumanEval_99/README.md) | humaneval+ | 2 / 5 | **2** ⚠️ | 5 | 2 |
+| 🟢 | [HumanEval/100](humaneval/HumanEval_100/README.md) | humaneval+ | 0 / 5 | 0 | 5 | 0 |
+| 🟡 | [HumanEval/102](humaneval/HumanEval_102/README.md) | humaneval+ | 4 / 5 | **4** ⚠️ | 5 | 0 |
+| 🟢 | [HumanEval/103](humaneval/HumanEval_103/README.md) | humaneval+ | 0 / 5 | 0 | 11 | 2 |
+| 🟢 | [HumanEval/104](humaneval/HumanEval_104/README.md) | humaneval+ | 0 / 5 | 0 | 5 | 0 |
+| 🟢 | [HumanEval/105](humaneval/HumanEval_105/README.md) | humaneval+ | 0 / 5 | 0 | 5 | 0 |
+| 🟡 | [HumanEval/108](humaneval/HumanEval_108/README.md) | humaneval+ | 2 / 5 | **1** ⚠️ | 7 | 2 |
+| 🟢 | [HumanEval/109](humaneval/HumanEval_109/README.md) | humaneval+ | 0 / 5 | 0 | 5 | 0 |
+| 🟢 | [HumanEval/111](humaneval/HumanEval_111/README.md) | humaneval+ | 0 / 5 | 0 | 5 | 0 |
+| 🟡 | [HumanEval/113](humaneval/HumanEval_113/README.md) | humaneval+ | 1 / 5 | 0 | 7 | 3 |
+| 🟡 | [HumanEval/115](humaneval/HumanEval_115/README.md) | humaneval+ | 1 / 5 | **1** ⚠️ | 5 | 0 |
+| 🟢 | [HumanEval/116](humaneval/HumanEval_116/README.md) | humaneval+ | 0 / 5 | 0 | 15 | 15 |
+| 🟢 | [HumanEval/121](humaneval/HumanEval_121/README.md) | humaneval+ | 0 / 5 | 0 | 5 | 0 |
+| 🟡 | [HumanEval/125](humaneval/HumanEval_125/README.md) | humaneval+ | 1 / 5 | **1** ⚠️ | 6 | 0 |
+| 🔴 | [HumanEval/126](humaneval/HumanEval_126/README.md) | humaneval+ | 5 / 5 | **5** ⚠️ | 5 | 3 |
+| 🟢 | [HumanEval/127](humaneval/HumanEval_127/README.md) | humaneval+ | 0 / 5 | 0 | 5 | 0 |
+| 🟢 | [HumanEval/128](humaneval/HumanEval_128/README.md) | humaneval+ | 0 / 5 | 0 | 5 | 0 |
+| 🟢 | [HumanEval/129](humaneval/HumanEval_129/README.md) | humaneval+ | 0 / 5 | 0 | 6 | 3 |
+| 🔴 | [HumanEval/130](humaneval/HumanEval_130/README.md) | humaneval+ | 5 / 5 | 0 | 15 | 15 |
+| 🟢 | [HumanEval/133](humaneval/HumanEval_133/README.md) | humaneval+ | 0 / 5 | 0 | 5 | 0 |
+| 🔴 | [HumanEval/134](humaneval/HumanEval_134/README.md) | humaneval+ | 5 / 5 | **2** ⚠️ | 13 | 12 |
+| 🟢 | [HumanEval/135](humaneval/HumanEval_135/README.md) | humaneval+ | 0 / 5 | 0 | 5 | 0 |
+| 🟢 | [HumanEval/137](humaneval/HumanEval_137/README.md) | humaneval+ | 0 / 5 | 0 | 5 | 1 |
+| 🟢 | [HumanEval/138](humaneval/HumanEval_138/README.md) | humaneval+ | 0 / 5 | 0 | 5 | 0 |
+| 🟢 | [HumanEval/139](humaneval/HumanEval_139/README.md) | humaneval+ | 0 / 5 | 0 | 5 | 0 |
+| 🟡 | [HumanEval/141](humaneval/HumanEval_141/README.md) | humaneval+ | 1 / 5 | **1** ⚠️ | 5 | 0 |
+| 🟢 | [HumanEval/142](humaneval/HumanEval_142/README.md) | humaneval+ | 0 / 5 | 0 | 5 | 1 |
+| 🟢 | [HumanEval/144](humaneval/HumanEval_144/README.md) | humaneval+ | 0 / 5 | 0 | 5 | 0 |
+| 🔴 | [HumanEval/145](humaneval/HumanEval_145/README.md) | humaneval+ | 5 / 5 | 0 | 15 | 13 |
+| 🟢 | [HumanEval/146](humaneval/HumanEval_146/README.md) | humaneval+ | 0 / 5 | 0 | 5 | 0 |
+| 🟡 | [HumanEval/149](humaneval/HumanEval_149/README.md) | humaneval+ | 1 / 5 | **1** ⚠️ | 5 | 0 |
+| 🟢 | [HumanEval/150](humaneval/HumanEval_150/README.md) | humaneval+ | 0 / 5 | 0 | 5 | 0 |
+| 🟢 | [HumanEval/152](humaneval/HumanEval_152/README.md) | humaneval+ | 0 / 5 | 0 | 5 | 0 |
+| 🟡 | [HumanEval/153](humaneval/HumanEval_153/README.md) | humaneval+ | 3 / 5 | **3** ⚠️ | 5 | 3 |
+| 🟢 | [HumanEval/155](humaneval/HumanEval_155/README.md) | humaneval+ | 0 / 5 | 0 | 5 | 0 |
+| 🟢 | [HumanEval/157](humaneval/HumanEval_157/README.md) | humaneval+ | 0 / 5 | 0 | 5 | 0 |
+| 🟢 | [HumanEval/158](humaneval/HumanEval_158/README.md) | humaneval+ | 0 / 5 | 0 | 5 | 1 |
+| 🟡 | [HumanEval/160](humaneval/HumanEval_160/README.md) | humaneval+ | 1 / 5 | 0 | 7 | 2 |
+| 🟢 | [HumanEval/161](humaneval/HumanEval_161/README.md) | humaneval+ | 0 / 5 | 0 | 5 | 0 |
+| 🟢 | [HumanEval/162](humaneval/HumanEval_162/README.md) | humaneval+ | 0 / 5 | 0 | 5 | 0 |
+| 🟢 | [Mbpp/3](mbpp/Mbpp_3/README.md) | mbpp+ | 0 / 5 | 0 | 5 | 0 |
+| 🟢 | [Mbpp/6](mbpp/Mbpp_6/README.md) | mbpp+ | 0 / 5 | 0 | 5 | 0 |
+| 🔴 | [Mbpp/7](mbpp/Mbpp_7/README.md) | mbpp+ | 5 / 5 | **5** ⚠️ | 5 | 0 |
+| 🟢 | [Mbpp/8](mbpp/Mbpp_8/README.md) | mbpp+ | 0 / 5 | 0 | 5 | 0 |
+| 🟢 | [Mbpp/9](mbpp/Mbpp_9/README.md) | mbpp+ | 0 / 5 | 0 | 5 | 0 |
+| 🟡 | [Mbpp/11](mbpp/Mbpp_11/README.md) | mbpp+ | 2 / 5 | **1** ⚠️ | 7 | 1 |
+| 🟡 | [Mbpp/12](mbpp/Mbpp_12/README.md) | mbpp+ | 1 / 5 | 0 | 7 | 0 |
+| 🟢 | [Mbpp/17](mbpp/Mbpp_17/README.md) | mbpp+ | 0 / 5 | 0 | 5 | 0 |
+| 🟢 | [Mbpp/18](mbpp/Mbpp_18/README.md) | mbpp+ | 0 / 5 | 0 | 5 | 0 |
+| 🟢 | [Mbpp/56](mbpp/Mbpp_56/README.md) | mbpp+ | 0 / 5 | 0 | 5 | 1 |
+| 🟡 | [Mbpp/57](mbpp/Mbpp_57/README.md) | mbpp+ | 1 / 5 | 0 | 7 | 0 |
+| 🟢 | [Mbpp/58](mbpp/Mbpp_58/README.md) | mbpp+ | 0 / 5 | 0 | 5 | 0 |
+| 🟢 | [Mbpp/59](mbpp/Mbpp_59/README.md) | mbpp+ | 0 / 5 | 0 | 5 | 0 |
+| 🟡 | [Mbpp/61](mbpp/Mbpp_61/README.md) | mbpp+ | 1 / 5 | 0 | 8 | 1 |
+| 🟢 | [Mbpp/62](mbpp/Mbpp_62/README.md) | mbpp+ | 0 / 5 | 0 | 5 | 0 |
+| 🟡 | [Mbpp/64](mbpp/Mbpp_64/README.md) | mbpp+ | 2 / 5 | 0 | 11 | 0 |
+| 🟡 | [Mbpp/67](mbpp/Mbpp_67/README.md) | mbpp+ | 3 / 5 | **1** ⚠️ | 11 | 7 |
+| 🔴 | [Mbpp/71](mbpp/Mbpp_71/README.md) | mbpp+ | 5 / 5 | **1** ⚠️ | 14 | 10 |
+| 🟢 | [Mbpp/72](mbpp/Mbpp_72/README.md) | mbpp+ | 0 / 5 | 0 | 5 | 0 |
+| 🟢 | [Mbpp/75](mbpp/Mbpp_75/README.md) | mbpp+ | 0 / 5 | 0 | 5 | 0 |
+| 🟡 | [Mbpp/77](mbpp/Mbpp_77/README.md) | mbpp+ | 2 / 5 | **2** ⚠️ | 5 | 0 |
+| 🟢 | [Mbpp/79](mbpp/Mbpp_79/README.md) | mbpp+ | 0 / 5 | 0 | 8 | 0 |
+| 🟢 | [Mbpp/80](mbpp/Mbpp_80/README.md) | mbpp+ | 0 / 5 | 0 | 5 | 0 |
+| 🟢 | [Mbpp/82](mbpp/Mbpp_82/README.md) | mbpp+ | 0 / 5 | 0 | 5 | 0 |
+| 🟡 | [Mbpp/84](mbpp/Mbpp_84/README.md) | mbpp+ | 4 / 5 | **1** ⚠️ | 13 | 7 |
+| 🟢 | [Mbpp/85](mbpp/Mbpp_85/README.md) | mbpp+ | 0 / 5 | 0 | 5 | 0 |
+| 🟢 | [Mbpp/91](mbpp/Mbpp_91/README.md) | mbpp+ | 0 / 5 | 0 | 5 | 0 |
+| 🟢 | [Mbpp/93](mbpp/Mbpp_93/README.md) | mbpp+ | 0 / 5 | 0 | 5 | 0 |
+| 🟢 | [Mbpp/94](mbpp/Mbpp_94/README.md) | mbpp+ | 0 / 5 | 0 | 6 | 0 |
+| 🟢 | [Mbpp/95](mbpp/Mbpp_95/README.md) | mbpp+ | 0 / 5 | 0 | 5 | 0 |
+| 🟢 | [Mbpp/98](mbpp/Mbpp_98/README.md) | mbpp+ | 0 / 5 | 0 | 5 | 0 |
+| 🔴 | [Mbpp/99](mbpp/Mbpp_99/README.md) | mbpp+ | 5 / 5 | **5** ⚠️ | 5 | 0 |
+| 🔴 | [Mbpp/100](mbpp/Mbpp_100/README.md) | mbpp+ | 5 / 5 | 0 | 15 | 13 |
+| 🟢 | [Mbpp/101](mbpp/Mbpp_101/README.md) | mbpp+ | 0 / 5 | 0 | 5 | 0 |
+| 🔴 | [Mbpp/102](mbpp/Mbpp_102/README.md) | mbpp+ | 5 / 5 | **5** ⚠️ | 8 | 0 |
+| 🟡 | [Mbpp/103](mbpp/Mbpp_103/README.md) | mbpp+ | 3 / 5 | **2** ⚠️ | 7 | 3 |
+| 🟡 | [Mbpp/104](mbpp/Mbpp_104/README.md) | mbpp+ | 1 / 5 | 0 | 8 | 0 |
+| 🟢 | [Mbpp/105](mbpp/Mbpp_105/README.md) | mbpp+ | 0 / 5 | 0 | 5 | 0 |
+| 🟡 | [Mbpp/106](mbpp/Mbpp_106/README.md) | mbpp+ | 1 / 5 | 0 | 11 | 0 |
+| 🟢 | [Mbpp/108](mbpp/Mbpp_108/README.md) | mbpp+ | 0 / 5 | 0 | 5 | 0 |
+| 🔴 | [Mbpp/113](mbpp/Mbpp_113/README.md) | mbpp+ | 5 / 5 | **5** ⚠️ | 5 | 0 |
+| 🟡 | [Mbpp/116](mbpp/Mbpp_116/README.md) | mbpp+ | 2 / 5 | **2** ⚠️ | 5 | 0 |
+| 🟡 | [Mbpp/118](mbpp/Mbpp_118/README.md) | mbpp+ | 3 / 5 | **3** ⚠️ | 5 | 0 |
+| 🟡 | [Mbpp/119](mbpp/Mbpp_119/README.md) | mbpp+ | 4 / 5 | 0 | 13 | 10 |
+| 🟡 | [Mbpp/123](mbpp/Mbpp_123/README.md) | mbpp+ | 3 / 5 | 0 | 12 | 6 |
+| 🔴 | [Mbpp/124](mbpp/Mbpp_124/README.md) | mbpp+ | 5 / 5 | 0 | 15 | 2 |
+| 🔴 | [Mbpp/125](mbpp/Mbpp_125/README.md) | mbpp+ | 5 / 5 | **4** ⚠️ | 7 | 3 |
+| 🟢 | [Mbpp/127](mbpp/Mbpp_127/README.md) | mbpp+ | 0 / 5 | 0 | 5 | 0 |
+| 🔴 | [Mbpp/131](mbpp/Mbpp_131/README.md) | mbpp+ | 5 / 5 | **5** ⚠️ | 5 | 0 |
+| 🟡 | [Mbpp/132](mbpp/Mbpp_132/README.md) | mbpp+ | 1 / 5 | 0 | 8 | 0 |
+| 🟢 | [Mbpp/135](mbpp/Mbpp_135/README.md) | mbpp+ | 0 / 5 | 0 | 5 | 0 |
+| 🔴 | [Mbpp/137](mbpp/Mbpp_137/README.md) | mbpp+ | 5 / 5 | **5** ⚠️ | 9 | 0 |
+| 🔴 | [Mbpp/138](mbpp/Mbpp_138/README.md) | mbpp+ | 5 / 5 | **5** ⚠️ | 5 | 2 |
+| 🟢 | [Mbpp/139](mbpp/Mbpp_139/README.md) | mbpp+ | 0 / 5 | 0 | 5 | 0 |
+| 🔴 | [Mbpp/141](mbpp/Mbpp_141/README.md) | mbpp+ | 5 / 5 | 0 | 15 | 12 |
+| 🔴 | [Mbpp/160](mbpp/Mbpp_160/README.md) | mbpp+ | 5 / 5 | 0 | 15 | 14 |
+| 🟡 | [Mbpp/161](mbpp/Mbpp_161/README.md) | mbpp+ | 1 / 5 | **1** ⚠️ | 5 | 0 |
+| 🟡 | [Mbpp/162](mbpp/Mbpp_162/README.md) | mbpp+ | 3 / 5 | **3** ⚠️ | 5 | 0 |
+| 🟢 | [Mbpp/166](mbpp/Mbpp_166/README.md) | mbpp+ | 0 / 5 | 0 | 5 | 0 |
+| 🟢 | [Mbpp/168](mbpp/Mbpp_168/README.md) | mbpp+ | 0 / 5 | 0 | 5 | 0 |
+| 🟢 | [Mbpp/170](mbpp/Mbpp_170/README.md) | mbpp+ | 0 / 5 | 0 | 5 | 0 |
+| 🟢 | [Mbpp/171](mbpp/Mbpp_171/README.md) | mbpp+ | 0 / 5 | 0 | 5 | 0 |
+| 🟢 | [Mbpp/172](mbpp/Mbpp_172/README.md) | mbpp+ | 0 / 5 | 0 | 5 | 0 |
+| 🟢 | [Mbpp/222](mbpp/Mbpp_222/README.md) | mbpp+ | 0 / 5 | 0 | 5 | 0 |
+| 🟡 | [Mbpp/223](mbpp/Mbpp_223/README.md) | mbpp+ | 3 / 5 | **3** ⚠️ | 5 | 1 |
+| 🟢 | [Mbpp/224](mbpp/Mbpp_224/README.md) | mbpp+ | 0 / 5 | 0 | 5 | 0 |
+| 🟢 | [Mbpp/226](mbpp/Mbpp_226/README.md) | mbpp+ | 0 / 5 | 0 | 5 | 0 |
+| 🟢 | [Mbpp/230](mbpp/Mbpp_230/README.md) | mbpp+ | 0 / 5 | 0 | 5 | 0 |
+| 🟢 | [Mbpp/234](mbpp/Mbpp_234/README.md) | mbpp+ | 0 / 5 | 0 | 5 | 0 |
+| 🔴 | [Mbpp/237](mbpp/Mbpp_237/README.md) | mbpp+ | 5 / 5 | 0 | 15 | 1 |
+| 🟢 | [Mbpp/238](mbpp/Mbpp_238/README.md) | mbpp+ | 0 / 5 | 0 | 5 | 0 |
+| 🟢 | [Mbpp/239](mbpp/Mbpp_239/README.md) | mbpp+ | 0 / 5 | 0 | 5 | 5 |
+| 🟢 | [Mbpp/240](mbpp/Mbpp_240/README.md) | mbpp+ | 0 / 5 | 0 | 5 | 0 |
+| 🟢 | [Mbpp/242](mbpp/Mbpp_242/README.md) | mbpp+ | 0 / 5 | 0 | 5 | 0 |
+| 🔴 | [Mbpp/244](mbpp/Mbpp_244/README.md) | mbpp+ | 5 / 5 | **5** ⚠️ | 5 | 0 |
+| 🟢 | [Mbpp/250](mbpp/Mbpp_250/README.md) | mbpp+ | 0 / 5 | 0 | 5 | 0 |
+| 🟢 | [Mbpp/253](mbpp/Mbpp_253/README.md) | mbpp+ | 0 / 5 | 0 | 5 | 0 |
+| 🟢 | [Mbpp/255](mbpp/Mbpp_255/README.md) | mbpp+ | 0 / 5 | 0 | 5 | 0 |
+| 🟡 | [Mbpp/261](mbpp/Mbpp_261/README.md) | mbpp+ | 4 / 5 | **4** ⚠️ | 6 | 0 |
+| 🟢 | [Mbpp/262](mbpp/Mbpp_262/README.md) | mbpp+ | 0 / 5 | 0 | 5 | 0 |
+| 🟡 | [Mbpp/268](mbpp/Mbpp_268/README.md) | mbpp+ | 3 / 5 | **3** ⚠️ | 9 | 6 |
+| 🟢 | [Mbpp/269](mbpp/Mbpp_269/README.md) | mbpp+ | 0 / 5 | 0 | 5 | 0 |
+| 🟢 | [Mbpp/270](mbpp/Mbpp_270/README.md) | mbpp+ | 0 / 5 | 0 | 5 | 0 |
+| 🟢 | [Mbpp/271](mbpp/Mbpp_271/README.md) | mbpp+ | 0 / 5 | 0 | 5 | 0 |
+| 🟡 | [Mbpp/272](mbpp/Mbpp_272/README.md) | mbpp+ | 3 / 5 | **3** ⚠️ | 5 | 0 |
+| 🔴 | [Mbpp/278](mbpp/Mbpp_278/README.md) | mbpp+ | 5 / 5 | **5** ⚠️ | 5 | 0 |
+| 🟢 | [Mbpp/280](mbpp/Mbpp_280/README.md) | mbpp+ | 0 / 5 | 0 | 5 | 0 |
+| 🟢 | [Mbpp/282](mbpp/Mbpp_282/README.md) | mbpp+ | 0 / 5 | 0 | 5 | 0 |
+| 🟢 | [Mbpp/284](mbpp/Mbpp_284/README.md) | mbpp+ | 0 / 5 | 0 | 5 | 0 |
+| 🔴 | [Mbpp/290](mbpp/Mbpp_290/README.md) | mbpp+ | 5 / 5 | **5** ⚠️ | 5 | 0 |
+| 🟢 | [Mbpp/292](mbpp/Mbpp_292/README.md) | mbpp+ | 0 / 5 | 0 | 5 | 0 |
+| 🟡 | [Mbpp/294](mbpp/Mbpp_294/README.md) | mbpp+ | 2 / 5 | **1** ⚠️ | 10 | 0 |
+| 🟢 | [Mbpp/296](mbpp/Mbpp_296/README.md) | mbpp+ | 0 / 5 | 0 | 5 | 0 |
+| 🟢 | [Mbpp/297](mbpp/Mbpp_297/README.md) | mbpp+ | 0 / 5 | 0 | 6 | 0 |
+| 🔴 | [Mbpp/300](mbpp/Mbpp_300/README.md) | mbpp+ | 5 / 5 | **5** ⚠️ | 5 | 0 |
+| 🟡 | [Mbpp/305](mbpp/Mbpp_305/README.md) | mbpp+ | 4 / 5 | 0 | 15 | 0 |
+| 🔴 | [Mbpp/306](mbpp/Mbpp_306/README.md) | mbpp+ | 5 / 5 | 0 | 15 | 10 |
+| 🔴 | [Mbpp/310](mbpp/Mbpp_310/README.md) | mbpp+ | 5 / 5 | **4** ⚠️ | 12 | 0 |
+| 🔴 | [Mbpp/311](mbpp/Mbpp_311/README.md) | mbpp+ | 5 / 5 | 0 | 15 | 12 |
+| 🟢 | [Mbpp/388](mbpp/Mbpp_388/README.md) | mbpp+ | 0 / 5 | 0 | 5 | 0 |
+| 🟢 | [Mbpp/389](mbpp/Mbpp_389/README.md) | mbpp+ | 0 / 5 | 0 | 5 | 0 |
+| 🟢 | [Mbpp/390](mbpp/Mbpp_390/README.md) | mbpp+ | 0 / 5 | 0 | 5 | 0 |
+| 🟢 | [Mbpp/394](mbpp/Mbpp_394/README.md) | mbpp+ | 0 / 5 | 0 | 5 | 0 |
+| 🟢 | [Mbpp/397](mbpp/Mbpp_397/README.md) | mbpp+ | 0 / 5 | 0 | 5 | 0 |
+| 🟢 | [Mbpp/404](mbpp/Mbpp_404/README.md) | mbpp+ | 0 / 5 | 0 | 5 | 0 |
+| 🟢 | [Mbpp/409](mbpp/Mbpp_409/README.md) | mbpp+ | 0 / 5 | 0 | 5 | 0 |
+| 🟢 | [Mbpp/410](mbpp/Mbpp_410/README.md) | mbpp+ | 0 / 5 | 0 | 9 | 0 |
+| 🟢 | [Mbpp/412](mbpp/Mbpp_412/README.md) | mbpp+ | 0 / 5 | 0 | 5 | 0 |
+| 🟢 | [Mbpp/413](mbpp/Mbpp_413/README.md) | mbpp+ | 0 / 5 | 0 | 5 | 0 |
+| 🔴 | [Mbpp/415](mbpp/Mbpp_415/README.md) | mbpp+ | 5 / 5 | **4** ⚠️ | 10 | 4 |
+| 🟡 | [Mbpp/418](mbpp/Mbpp_418/README.md) | mbpp+ | 1 / 5 | **1** ⚠️ | 5 | 0 |
+| 🟢 | [Mbpp/421](mbpp/Mbpp_421/README.md) | mbpp+ | 0 / 5 | 0 | 10 | 0 |
+| 🟢 | [Mbpp/422](mbpp/Mbpp_422/README.md) | mbpp+ | 0 / 5 | 0 | 5 | 0 |
+| 🟢 | [Mbpp/426](mbpp/Mbpp_426/README.md) | mbpp+ | 0 / 5 | 0 | 5 | 0 |
+| 🔴 | [Mbpp/427](mbpp/Mbpp_427/README.md) | mbpp+ | 5 / 5 | **5** ⚠️ | 5 | 0 |
+| 🔴 | [Mbpp/429](mbpp/Mbpp_429/README.md) | mbpp+ | 5 / 5 | **5** ⚠️ | 10 | 8 |
+| 🔴 | [Mbpp/430](mbpp/Mbpp_430/README.md) | mbpp+ | 5 / 5 | **1** ⚠️ | 15 | 14 |
+| 🟡 | [Mbpp/433](mbpp/Mbpp_433/README.md) | mbpp+ | 4 / 5 | **4** ⚠️ | 5 | 0 |
+| 🟢 | [Mbpp/436](mbpp/Mbpp_436/README.md) | mbpp+ | 0 / 5 | 0 | 5 | 0 |
+| 🟢 | [Mbpp/437](mbpp/Mbpp_437/README.md) | mbpp+ | 0 / 5 | 0 | 5 | 0 |
+| 🟡 | [Mbpp/445](mbpp/Mbpp_445/README.md) | mbpp+ | 4 / 5 | **4** ⚠️ | 6 | 0 |
+| 🟢 | [Mbpp/446](mbpp/Mbpp_446/README.md) | mbpp+ | 0 / 5 | 0 | 6 | 0 |
+| 🟢 | [Mbpp/447](mbpp/Mbpp_447/README.md) | mbpp+ | 0 / 5 | 0 | 5 | 0 |
+| 🟢 | [Mbpp/450](mbpp/Mbpp_450/README.md) | mbpp+ | 0 / 5 | 0 | 5 | 0 |
+| 🟡 | [Mbpp/451](mbpp/Mbpp_451/README.md) | mbpp+ | 3 / 5 | **3** ⚠️ | 6 | 0 |
+| 🟢 | [Mbpp/454](mbpp/Mbpp_454/README.md) | mbpp+ | 0 / 5 | 0 | 5 | 0 |
+| 🟢 | [Mbpp/457](mbpp/Mbpp_457/README.md) | mbpp+ | 0 / 5 | 0 | 5 | 0 |
+| 🟢 | [Mbpp/458](mbpp/Mbpp_458/README.md) | mbpp+ | 0 / 5 | 0 | 5 | 0 |
+| 🔴 | [Mbpp/459](mbpp/Mbpp_459/README.md) | mbpp+ | 5 / 5 | **5** ⚠️ | 5 | 0 |
+| 🔴 | [Mbpp/462](mbpp/Mbpp_462/README.md) | mbpp+ | 5 / 5 | 0 | 15 | 13 |
+| 🟡 | [Mbpp/463](mbpp/Mbpp_463/README.md) | mbpp+ | 3 / 5 | 0 | 11 | 7 |
+| 🔴 | [Mbpp/468](mbpp/Mbpp_468/README.md) | mbpp+ | 5 / 5 | 0 | 15 | 15 |
+| 🟢 | [Mbpp/470](mbpp/Mbpp_470/README.md) | mbpp+ | 0 / 5 | 0 | 5 | 0 |
+| 🟢 | [Mbpp/471](mbpp/Mbpp_471/README.md) | mbpp+ | 0 / 5 | 0 | 5 | 0 |
+| 🟢 | [Mbpp/472](mbpp/Mbpp_472/README.md) | mbpp+ | 0 / 5 | 0 | 5 | 0 |
+| 🟡 | [Mbpp/473](mbpp/Mbpp_473/README.md) | mbpp+ | 3 / 5 | 0 | 13 | 5 |
+| 🟢 | [Mbpp/474](mbpp/Mbpp_474/README.md) | mbpp+ | 0 / 5 | 0 | 5 | 0 |
+| 🟡 | [Mbpp/475](mbpp/Mbpp_475/README.md) | mbpp+ | 1 / 5 | 0 | 7 | 0 |
+| 🟢 | [Mbpp/476](mbpp/Mbpp_476/README.md) | mbpp+ | 0 / 5 | 0 | 5 | 0 |
+| 🟢 | [Mbpp/478](mbpp/Mbpp_478/README.md) | mbpp+ | 0 / 5 | 0 | 5 | 0 |
+| 🟢 | [Mbpp/479](mbpp/Mbpp_479/README.md) | mbpp+ | 0 / 5 | 0 | 6 | 0 |
+| 🟡 | [Mbpp/558](mbpp/Mbpp_558/README.md) | mbpp+ | 4 / 5 | **4** ⚠️ | 5 | 0 |
+| 🔴 | [Mbpp/559](mbpp/Mbpp_559/README.md) | mbpp+ | 5 / 5 | **4** ⚠️ | 14 | 1 |
+| 🟢 | [Mbpp/560](mbpp/Mbpp_560/README.md) | mbpp+ | 0 / 5 | 0 | 5 | 0 |
+| 🟢 | [Mbpp/562](mbpp/Mbpp_562/README.md) | mbpp+ | 0 / 5 | 0 | 5 | 0 |
+| 🟡 | [Mbpp/564](mbpp/Mbpp_564/README.md) | mbpp+ | 1 / 5 | 0 | 9 | 0 |
+| 🟡 | [Mbpp/565](mbpp/Mbpp_565/README.md) | mbpp+ | 2 / 5 | 0 | 10 | 0 |
+| 🟢 | [Mbpp/566](mbpp/Mbpp_566/README.md) | mbpp+ | 0 / 5 | 0 | 5 | 0 |
+| 🟢 | [Mbpp/568](mbpp/Mbpp_568/README.md) | mbpp+ | 0 / 5 | 0 | 5 | 0 |
+| 🟢 | [Mbpp/573](mbpp/Mbpp_573/README.md) | mbpp+ | 0 / 5 | 0 | 5 | 0 |
+| 🔴 | [Mbpp/577](mbpp/Mbpp_577/README.md) | mbpp+ | 5 / 5 | **5** ⚠️ | 6 | 0 |
+| 🟡 | [Mbpp/579](mbpp/Mbpp_579/README.md) | mbpp+ | 1 / 5 | **1** ⚠️ | 5 | 0 |
+| 🟢 | [Mbpp/583](mbpp/Mbpp_583/README.md) | mbpp+ | 0 / 5 | 0 | 5 | 0 |
+| 🟢 | [Mbpp/585](mbpp/Mbpp_585/README.md) | mbpp+ | 0 / 5 | 0 | 5 | 0 |
+| 🟢 | [Mbpp/586](mbpp/Mbpp_586/README.md) | mbpp+ | 0 / 5 | 0 | 5 | 0 |
+| 🟢 | [Mbpp/587](mbpp/Mbpp_587/README.md) | mbpp+ | 0 / 5 | 0 | 5 | 0 |
+| 🟢 | [Mbpp/588](mbpp/Mbpp_588/README.md) | mbpp+ | 0 / 5 | 0 | 5 | 0 |
+| 🔴 | [Mbpp/590](mbpp/Mbpp_590/README.md) | mbpp+ | 5 / 5 | 0 | 15 | 5 |
+| 🟢 | [Mbpp/592](mbpp/Mbpp_592/README.md) | mbpp+ | 0 / 5 | 0 | 7 | 0 |
+| 🔴 | [Mbpp/593](mbpp/Mbpp_593/README.md) | mbpp+ | 5 / 5 | **5** ⚠️ | 5 | 0 |
+| 🟢 | [Mbpp/596](mbpp/Mbpp_596/README.md) | mbpp+ | 0 / 5 | 0 | 5 | 0 |
+| 🟢 | [Mbpp/599](mbpp/Mbpp_599/README.md) | mbpp+ | 0 / 5 | 0 | 5 | 0 |
+| 🟢 | [Mbpp/602](mbpp/Mbpp_602/README.md) | mbpp+ | 0 / 5 | 0 | 5 | 0 |
+| 🔴 | [Mbpp/603](mbpp/Mbpp_603/README.md) | mbpp+ | 5 / 5 | **5** ⚠️ | 6 | 0 |
+| 🟢 | [Mbpp/605](mbpp/Mbpp_605/README.md) | mbpp+ | 0 / 5 | 0 | 5 | 0 |
+| 🟢 | [Mbpp/606](mbpp/Mbpp_606/README.md) | mbpp+ | 0 / 5 | 0 | 5 | 0 |
+| 🟡 | [Mbpp/607](mbpp/Mbpp_607/README.md) | mbpp+ | 4 / 5 | **4** ⚠️ | 6 | 1 |
+| 🟡 | [Mbpp/608](mbpp/Mbpp_608/README.md) | mbpp+ | 2 / 5 | **1** ⚠️ | 12 | 2 |
+| 🟢 | [Mbpp/612](mbpp/Mbpp_612/README.md) | mbpp+ | 0 / 5 | 0 | 5 | 0 |
+| 🟢 | [Mbpp/619](mbpp/Mbpp_619/README.md) | mbpp+ | 0 / 5 | 0 | 5 | 0 |
+| 🔴 | [Mbpp/620](mbpp/Mbpp_620/README.md) | mbpp+ | 5 / 5 | **5** ⚠️ | 5 | 1 |
+| 🔴 | [Mbpp/622](mbpp/Mbpp_622/README.md) | mbpp+ | 5 / 5 | **4** ⚠️ | 7 | 4 |
+| 🟢 | [Mbpp/623](mbpp/Mbpp_623/README.md) | mbpp+ | 0 / 5 | 0 | 7 | 0 |
+| 🟢 | [Mbpp/626](mbpp/Mbpp_626/README.md) | mbpp+ | 0 / 5 | 0 | 5 | 0 |
+| 🟢 | [Mbpp/629](mbpp/Mbpp_629/README.md) | mbpp+ | 0 / 5 | 0 | 5 | 0 |
+| 🔴 | [Mbpp/630](mbpp/Mbpp_630/README.md) | mbpp+ | 5 / 5 | **1** ⚠️ | 14 | 11 |
+| 🟢 | [Mbpp/631](mbpp/Mbpp_631/README.md) | mbpp+ | 0 / 5 | 0 | 5 | 0 |
+| 🟢 | [Mbpp/632](mbpp/Mbpp_632/README.md) | mbpp+ | 0 / 5 | 0 | 5 | 0 |
+| 🟡 | [Mbpp/633](mbpp/Mbpp_633/README.md) | mbpp+ | 1 / 5 | 0 | 11 | 0 |
+| 🔴 | [Mbpp/638](mbpp/Mbpp_638/README.md) | mbpp+ | 5 / 5 | **1** ⚠️ | 14 | 13 |
+| 🔴 | [Mbpp/639](mbpp/Mbpp_639/README.md) | mbpp+ | 5 / 5 | **5** ⚠️ | 5 | 0 |
+| 🔴 | [Mbpp/641](mbpp/Mbpp_641/README.md) | mbpp+ | 5 / 5 | **1** ⚠️ | 15 | 7 |
+| 🟡 | [Mbpp/643](mbpp/Mbpp_643/README.md) | mbpp+ | 4 / 5 | **4** ⚠️ | 5 | 0 |
+| 🟢 | [Mbpp/720](mbpp/Mbpp_720/README.md) | mbpp+ | 0 / 5 | 0 | 7 | 0 |
+| 🟢 | [Mbpp/722](mbpp/Mbpp_722/README.md) | mbpp+ | 0 / 5 | 0 | 6 | 0 |
+| 🟢 | [Mbpp/723](mbpp/Mbpp_723/README.md) | mbpp+ | 0 / 5 | 0 | 5 | 0 |
+| 🟢 | [Mbpp/724](mbpp/Mbpp_724/README.md) | mbpp+ | 0 / 5 | 0 | 5 | 0 |
+| 🟡 | [Mbpp/725](mbpp/Mbpp_725/README.md) | mbpp+ | 2 / 5 | **2** ⚠️ | 5 | 0 |
+| 🟢 | [Mbpp/733](mbpp/Mbpp_733/README.md) | mbpp+ | 0 / 5 | 0 | 5 | 0 |
+| 🟡 | [Mbpp/734](mbpp/Mbpp_734/README.md) | mbpp+ | 1 / 5 | 0 | 12 | 2 |
+| 🟡 | [Mbpp/737](mbpp/Mbpp_737/README.md) | mbpp+ | 3 / 5 | **3** ⚠️ | 7 | 2 |
+| 🔴 | [Mbpp/739](mbpp/Mbpp_739/README.md) | mbpp+ | 5 / 5 | **5** ⚠️ | 5 | 0 |
+| 🟡 | [Mbpp/741](mbpp/Mbpp_741/README.md) | mbpp+ | 1 / 5 | **1** ⚠️ | 5 | 0 |
+| 🟢 | [Mbpp/742](mbpp/Mbpp_742/README.md) | mbpp+ | 0 / 5 | 0 | 5 | 0 |
+| 🟡 | [Mbpp/743](mbpp/Mbpp_743/README.md) | mbpp+ | 2 / 5 | **2** ⚠️ | 5 | 0 |
+| 🔴 | [Mbpp/748](mbpp/Mbpp_748/README.md) | mbpp+ | 5 / 5 | **5** ⚠️ | 6 | 0 |
+| 🟢 | [Mbpp/749](mbpp/Mbpp_749/README.md) | mbpp+ | 0 / 5 | 0 | 6 | 0 |
+| 🟡 | [Mbpp/751](mbpp/Mbpp_751/README.md) | mbpp+ | 2 / 5 | **1** ⚠️ | 10 | 0 |
+| 🟡 | [Mbpp/754](mbpp/Mbpp_754/README.md) | mbpp+ | 1 / 5 | **1** ⚠️ | 5 | 0 |
+| 🔴 | [Mbpp/755](mbpp/Mbpp_755/README.md) | mbpp+ | 5 / 5 | **5** ⚠️ | 5 | 0 |
+| 🟢 | [Mbpp/757](mbpp/Mbpp_757/README.md) | mbpp+ | 0 / 5 | 0 | 5 | 0 |
+| 🟢 | [Mbpp/762](mbpp/Mbpp_762/README.md) | mbpp+ | 0 / 5 | 0 | 5 | 0 |
+| 🟢 | [Mbpp/764](mbpp/Mbpp_764/README.md) | mbpp+ | 0 / 5 | 0 | 5 | 0 |
+| 🔴 | [Mbpp/765](mbpp/Mbpp_765/README.md) | mbpp+ | 5 / 5 | **2** ⚠️ | 13 | 8 |
+| 🟢 | [Mbpp/766](mbpp/Mbpp_766/README.md) | mbpp+ | 0 / 5 | 0 | 5 | 0 |
+| 🟢 | [Mbpp/767](mbpp/Mbpp_767/README.md) | mbpp+ | 0 / 5 | 0 | 5 | 0 |
+| 🔴 | [Mbpp/769](mbpp/Mbpp_769/README.md) | mbpp+ | 5 / 5 | 0 | 15 | 12 |
+| 🔴 | [Mbpp/773](mbpp/Mbpp_773/README.md) | mbpp+ | 5 / 5 | **5** ⚠️ | 5 | 0 |
+| 🟢 | [Mbpp/775](mbpp/Mbpp_775/README.md) | mbpp+ | 0 / 5 | 0 | 5 | 0 |
+| 🟢 | [Mbpp/778](mbpp/Mbpp_778/README.md) | mbpp+ | 0 / 5 | 0 | 6 | 1 |
+| 🟡 | [Mbpp/781](mbpp/Mbpp_781/README.md) | mbpp+ | 1 / 5 | **1** ⚠️ | 5 | 0 |
+| 🟡 | [Mbpp/782](mbpp/Mbpp_782/README.md) | mbpp+ | 1 / 5 | **1** ⚠️ | 5 | 3 |
+| 🟡 | [Mbpp/784](mbpp/Mbpp_784/README.md) | mbpp+ | 1 / 5 | 0 | 7 | 0 |
+| 🟡 | [Mbpp/785](mbpp/Mbpp_785/README.md) | mbpp+ | 3 / 5 | **3** ⚠️ | 5 | 0 |
+| 🟡 | [Mbpp/786](mbpp/Mbpp_786/README.md) | mbpp+ | 3 / 5 | **3** ⚠️ | 5 | 0 |
+| 🔴 | [Mbpp/787](mbpp/Mbpp_787/README.md) | mbpp+ | 5 / 5 | **5** ⚠️ | 5 | 0 |
+| 🟢 | [Mbpp/788](mbpp/Mbpp_788/README.md) | mbpp+ | 0 / 5 | 0 | 6 | 0 |
+| 🟡 | [Mbpp/791](mbpp/Mbpp_791/README.md) | mbpp+ | 3 / 5 | 0 | 13 | 12 |
+| 🟡 | [Mbpp/792](mbpp/Mbpp_792/README.md) | mbpp+ | 3 / 5 | **3** ⚠️ | 5 | 0 |
+| 🟢 | [Mbpp/793](mbpp/Mbpp_793/README.md) | mbpp+ | 0 / 5 | 0 | 5 | 0 |
+| 🟢 | [Mbpp/797](mbpp/Mbpp_797/README.md) | mbpp+ | 0 / 5 | 0 | 5 | 0 |
+| 🟢 | [Mbpp/798](mbpp/Mbpp_798/README.md) | mbpp+ | 0 / 5 | 0 | 5 | 0 |
+| 🟢 | [Mbpp/799](mbpp/Mbpp_799/README.md) | mbpp+ | 0 / 5 | 0 | 5 | 1 |
+| 🟡 | [Mbpp/801](mbpp/Mbpp_801/README.md) | mbpp+ | 2 / 5 | **2** ⚠️ | 5 | 0 |
+| 🟢 | [Mbpp/804](mbpp/Mbpp_804/README.md) | mbpp+ | 0 / 5 | 0 | 5 | 0 |
+| 🟡 | [Mbpp/805](mbpp/Mbpp_805/README.md) | mbpp+ | 3 / 5 | **3** ⚠️ | 5 | 0 |
+| 🟢 | [Mbpp/808](mbpp/Mbpp_808/README.md) | mbpp+ | 0 / 5 | 0 | 5 | 0 |

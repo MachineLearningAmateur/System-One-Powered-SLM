@@ -1,10 +1,10 @@
 # Mbpp/132, attempt 0
 
-3 rounds; no visible pass after round 3. Back to the [task](README.md). The prompt and the visible tests are on the task page; from round 2, the model also got its previous code and its visible-test report (never its previous thinking).
+3 rounds; no visible pass after round 3; final code on the hidden tests: ❌ fail. Back to the [task](README.md). The prompt and the visible tests are on the task page; from round 2, the model also got its previous code and its visible-test report (never its previous thinking, and never any hidden-test result).
 
 ## Round 1 (`Mbpp/132/a0/r1`)
 
-Visible tests: **fail**. Thinking tokens: 574. Answer tokens: 339.
+Visible tests: **fail**. Hidden tests: **❌ fail**. Thinking tokens: 574. Answer tokens: 339.
 
 <details><summary>Thinking</summary>
 
@@ -69,7 +69,7 @@ ERROR   assert tup_string(('e', 'x', 'e', 'r', 'c', 'i', 's', 'e', 's'))==("exer
 
 ## Round 2 (`Mbpp/132/a0/r2`)
 
-Visible tests: **fail**. Thinking tokens: 1810. Answer tokens: 59.
+Visible tests: **fail**. Hidden tests: **❌ fail**. Thinking tokens: 1810. Answer tokens: 59.
 
 <details><summary>Thinking</summary>
 
@@ -223,7 +223,7 @@ ERROR   assert tup_string(('e', 'x', 'e', 'r', 'c', 'i', 's', 'e', 's'))==("exer
 
 ## Round 3 (`Mbpp/132/a0/r3`)
 
-Visible tests: **fail**. Thinking tokens: 3613. Answer tokens: 59.
+Visible tests: **fail**. Hidden tests: **❌ fail**. Thinking tokens: 3613. Answer tokens: 59.
 
 <details><summary>Thinking</summary>
 

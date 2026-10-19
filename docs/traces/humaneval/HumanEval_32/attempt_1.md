@@ -1,10 +1,10 @@
 # HumanEval/32, attempt 1
 
-3 rounds; no visible pass after round 3. Back to the [task](README.md). The prompt and the visible tests are on the task page; from round 2, the model also got its previous code and its visible-test report (never its previous thinking).
+3 rounds; no visible pass after round 3; final code on the hidden tests: not graded (A2). Back to the [task](README.md). The prompt and the visible tests are on the task page; from round 2, the model also got its previous code and its visible-test report (never its previous thinking, and never any hidden-test result).
 
 ## Round 1 (`HumanEval/32/a1/r1`)
 
-Visible tests: **fail**. Thinking tokens: 8192 (hit the 8,192-token cap). Answer tokens: 572.
+Visible tests: **fail**. Hidden tests: **not graded (A2)**. Thinking tokens: 8192 (hit the 8,192-token cap). Answer tokens: 572.
 
 <details><summary>Thinking</summary>
 
@@ -460,7 +460,7 @@ FAIL    assert round(find_zero([-6, 11, -6, 1]), 2) # (x - 1) * (x - 2) * (x - 3
 
 ## Round 2 (`HumanEval/32/a1/r2`)
 
-Visible tests: **fail**. Thinking tokens: 8192 (hit the 8,192-token cap). Answer tokens: 1206.
+Visible tests: **fail**. Hidden tests: **not graded (A2)**. Thinking tokens: 8192 (hit the 8,192-token cap). Answer tokens: 1206.
 
 <details><summary>Thinking</summary>
 
@@ -861,7 +861,7 @@ FAIL    assert round(find_zero([-6, 11, -6, 1]), 2) # (x - 1) * (x - 2) * (x - 3
 
 ## Round 3 (`HumanEval/32/a1/r3`)
 
-Visible tests: **fail**. Thinking tokens: 8192 (hit the 8,192-token cap). Answer tokens: 1383.
+Visible tests: **fail**. Hidden tests: **not graded (A2)**. Thinking tokens: 8192 (hit the 8,192-token cap). Answer tokens: 1383.
 
 <details><summary>Thinking</summary>
 

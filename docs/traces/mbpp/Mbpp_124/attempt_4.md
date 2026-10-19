@@ -1,10 +1,10 @@
 # Mbpp/124, attempt 4
 
-3 rounds; no visible pass after round 3. Back to the [task](README.md). The prompt and the visible tests are on the task page; from round 2, the model also got its previous code and its visible-test report (never its previous thinking).
+3 rounds; no visible pass after round 3; final code on the hidden tests: ❌ fail. Back to the [task](README.md). The prompt and the visible tests are on the task page; from round 2, the model also got its previous code and its visible-test report (never its previous thinking, and never any hidden-test result).
 
 ## Round 1 (`Mbpp/124/a4/r1`)
 
-Visible tests: **fail**. Thinking tokens: 7905. Answer tokens: 66.
+Visible tests: **fail**. Hidden tests: **❌ fail**. Thinking tokens: 7905. Answer tokens: 66.
 
 <details><summary>Thinking</summary>
 
@@ -543,7 +543,7 @@ ERROR   assert math.isclose(angle_complex(0,1j), 1.5707963267948966, rel_tol=0.0
 
 ## Round 2 (`Mbpp/124/a4/r2`)
 
-Visible tests: **fail**. Thinking tokens: 1570. Answer tokens: 66.
+Visible tests: **fail**. Hidden tests: **❌ fail**. Thinking tokens: 1570. Answer tokens: 66.
 
 <details><summary>Thinking</summary>
 
@@ -632,7 +632,7 @@ ERROR   assert math.isclose(angle_complex(0,1j), 1.5707963267948966, rel_tol=0.0
 
 ## Round 3 (`Mbpp/124/a4/r3`)
 
-Visible tests: **fail**. Thinking tokens: 1455. Answer tokens: 66.
+Visible tests: **fail**. Hidden tests: **❌ fail**. Thinking tokens: 1455. Answer tokens: 66.
 
 <details><summary>Thinking</summary>
 

@@ -1,10 +1,10 @@
 # Mbpp/565, attempt 1
 
-2 rounds; visible pass. Back to the [task](README.md). The prompt and the visible tests are on the task page; from round 2, the model also got its previous code and its visible-test report (never its previous thinking).
+2 rounds; visible pass; final code on the hidden tests: ✅ pass. Back to the [task](README.md). The prompt and the visible tests are on the task page; from round 2, the model also got its previous code and its visible-test report (never its previous thinking, and never any hidden-test result).
 
 ## Round 1 (`Mbpp/565/a1/r1`)
 
-Visible tests: **fail**. Thinking tokens: 593. Answer tokens: 40.
+Visible tests: **fail**. Hidden tests: **❌ fail**. Thinking tokens: 593. Answer tokens: 40.
 
 <details><summary>Thinking</summary>
 
@@ -64,7 +64,7 @@ NOT_RUN assert split('python') == ['p','y','t','h','o','n']
 
 ## Round 2 (`Mbpp/565/a1/r2`)
 
-Visible tests: **pass**. Thinking tokens: 5822. Answer tokens: 361.
+Visible tests: **pass**. Hidden tests: **✅ pass**. Thinking tokens: 5822. Answer tokens: 361.
 
 <details><summary>Thinking</summary>
 

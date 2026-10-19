@@ -1,10 +1,10 @@
 # Mbpp/415, attempt 3
 
-2 rounds; visible pass. Back to the [task](README.md). The prompt and the visible tests are on the task page; from round 2, the model also got its previous code and its visible-test report (never its previous thinking).
+2 rounds; visible pass; final code on the hidden tests: ❌ fail ⚠️ visible pass. Back to the [task](README.md). The prompt and the visible tests are on the task page; from round 2, the model also got its previous code and its visible-test report (never its previous thinking, and never any hidden-test result).
 
 ## Round 1 (`Mbpp/415/a3/r1`)
 
-Visible tests: **fail**. Thinking tokens: 3453. Answer tokens: 133.
+Visible tests: **fail**. Hidden tests: **❌ fail**. Thinking tokens: 3453. Answer tokens: 133.
 
 <details><summary>Thinking</summary>
 
@@ -260,7 +260,7 @@ NOT_RUN assert max_Product([1,2,3,4,7,0,8,4]) == (7,8)
 
 ## Round 2 (`Mbpp/415/a3/r2`)
 
-Visible tests: **pass**. Thinking tokens: 4071. Answer tokens: 133.
+Visible tests: **pass**. Hidden tests: **❌ fail**. Thinking tokens: 4071. Answer tokens: 133.
 
 <details><summary>Thinking</summary>
 

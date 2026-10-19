@@ -1,6 +1,6 @@
 # When Should a Small Model Ask for Help? Typed Judges for Hidden-Test Failure in a Small Model's Repair Loop
 
-**Status:** the study is complete and all numbers are final (October 18, 2026). This README is written as the paper draft. The full protocol, every table, the glossary, the timeline and the reporting checklist are in [docs/review-guide.md](docs/review-guide.md). The frozen plan is [docs/research-plan.md](docs/research-plan.md); the development-phase results are in [docs/findings.md](docs/findings.md). **Every thinking trace of the test run**, with the code and the visible-test report of each round, is in [docs/traces/](docs/traces/README.md).
+**Status:** the study is complete and all numbers are final (October 18, 2026). This README is written as the paper draft. The full protocol, every table, the glossary, the timeline and the reporting checklist are in [docs/review-guide.md](docs/review-guide.md). The frozen plan is [docs/research-plan.md](docs/research-plan.md); the development-phase results are in [docs/findings.md](docs/findings.md). **Every thinking trace of the test run**, with the code, the visible-test report and the hidden-test result of each round, is in [docs/traces/](docs/traces/README.md); its index marks each task by how the small model did alone.
 
 ## Abstract
 
@@ -178,7 +178,7 @@ All routers were fit or selected on dev data only.
 | Jev scoring (test) | 2 calls per checkpoint | 4,196 calls, all valid on the first try |
 | `frontier-test-v1` | 324 tasks × 3 frontier answers | 972 answers: 878 pass, 94 fail |
 
-**Thinking traces:** all 2,098 test checkpoints can be read in [docs/traces/](docs/traces/README.md): one page per task (the prompt and the visible tests) and one page per attempt (the thinking, the code and the visible-test report of each round). A machine-readable copy is [docs/traces/main-test-v1_traces.jsonl.gz](docs/traces/main-test-v1_traces.jsonl.gz). Hidden-test results and judge scores are not in these files.
+**Thinking traces:** all 2,098 test checkpoints can be read in [docs/traces/](docs/traces/README.md): one page per task (the prompt and the visible tests) and one page per attempt (the thinking, the code, the visible-test report and the hidden-test result of each round). The index marks each task 🟢 (every attempt's final code passes the hidden tests), 🟡 (some fail) or 🔴 (all fail), and counts the attempts that pass the visible tests but fail the hidden ones. A machine-readable copy is [docs/traces/main-test-v1_traces.jsonl.gz](docs/traces/main-test-v1_traces.jsonl.gz). Jev and Pinocchio scores are not in these files.
 
 **Test population for H1 and H2:** 1,457 visible-pass checkpoints from 309 tasks. 280 of them (19.2%) fail the hidden tests, from 89 tasks. A task can have both outcomes.
 
@@ -378,7 +378,7 @@ These hypotheses come from exploratory results of this study, so this data set c
 
 **Recorded frontier charges and estimated Jev charges** (the scoring and takeover runs; these totals may not include every smoke test). Frontier, from OpenRouter usage records: $1.30 for the dev takeover answers and $1.90 for the 972 test answers. Jev, estimated at the third-party price of $0.042 per million input tokens: about $0.18 for dev scoring and its checks, and $0.47 for test scoring. The TypeSafe account price is unconfirmed.
 
-**Data.** The test run's thinking traces, code and visible-test reports are in [docs/traces/](docs/traces/README.md) (made by `uv run python scripts/export_traces.py --run-id main-test-v1`). The other raw runs (dev trajectories, hidden labels, Jev and Pinocchio records, ledgers, power samples, logprob arrays) are not in git; they are available from the authors on request. The aggregate result files are in [docs/results/](docs/results/); they hold the planned results, but the analyses cannot be recomputed from them without the raw runs. The exploratory comparisons and the pass rates by benchmark come from scripts that print their results.
+**Data.** The test run's thinking traces, code, visible-test reports and hidden-test results are in [docs/traces/](docs/traces/README.md) (made by `uv run python scripts/export_traces.py --run-id main-test-v1`). The other raw runs (dev trajectories and labels, the detailed hidden grades, Jev and Pinocchio records, ledgers, power samples, logprob arrays) are not in git; they are available from the authors on request. The aggregate result files are in [docs/results/](docs/results/); they hold the planned results, but the analyses cannot be recomputed from them without the raw runs. The exploratory comparisons and the pass rates by benchmark come from scripts that print their results.
 
 **Commands.** With the raw runs in `results/runs/` and the environment installed (`uv sync`, plus `uv sync --group pinocchio`):
 

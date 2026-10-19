@@ -1,10 +1,10 @@
 # Mbpp/468, attempt 4
 
-3 rounds; no visible pass after round 3. Back to the [task](README.md). The prompt and the visible tests are on the task page; from round 2, the model also got its previous code and its visible-test report (never its previous thinking).
+3 rounds; no visible pass after round 3; final code on the hidden tests: ❌ fail. Back to the [task](README.md). The prompt and the visible tests are on the task page; from round 2, the model also got its previous code and its visible-test report (never its previous thinking, and never any hidden-test result).
 
 ## Round 1 (`Mbpp/468/a4/r1`)
 
-Visible tests: **fail**. Thinking tokens: 8192 (hit the 8,192-token cap). Answer tokens: 681.
+Visible tests: **fail**. Hidden tests: **❌ fail**. Thinking tokens: 8192 (hit the 8,192-token cap). Answer tokens: 681.
 
 <details><summary>Thinking</summary>
 
@@ -492,7 +492,7 @@ NOT_RUN assert max_product([3, 100, 4, 5, 150, 6]) == 3000
 
 ## Round 2 (`Mbpp/468/a4/r2`)
 
-Visible tests: **fail**. Thinking tokens: 8192 (hit the 8,192-token cap). Answer tokens: 709.
+Visible tests: **fail**. Hidden tests: **❌ fail**. Thinking tokens: 8192 (hit the 8,192-token cap). Answer tokens: 709.
 
 <details><summary>Thinking</summary>
 
@@ -766,7 +766,7 @@ FAIL    assert max_product([3, 100, 4, 5, 150, 6]) == 3000
 
 ## Round 3 (`Mbpp/468/a4/r3`)
 
-Visible tests: **fail**. Thinking tokens: 8192 (hit the 8,192-token cap). Answer tokens: 623.
+Visible tests: **fail**. Hidden tests: **❌ fail**. Thinking tokens: 8192 (hit the 8,192-token cap). Answer tokens: 623.
 
 <details><summary>Thinking</summary>
 

@@ -1,10 +1,10 @@
 # Mbpp/421, attempt 4
 
-3 rounds; visible pass. Back to the [task](README.md). The prompt and the visible tests are on the task page; from round 2, the model also got its previous code and its visible-test report (never its previous thinking).
+3 rounds; visible pass; final code on the hidden tests: ✅ pass. Back to the [task](README.md). The prompt and the visible tests are on the task page; from round 2, the model also got its previous code and its visible-test report (never its previous thinking, and never any hidden-test result).
 
 ## Round 1 (`Mbpp/421/a4/r1`)
 
-Visible tests: **fail**. Thinking tokens: 2234. Answer tokens: 43.
+Visible tests: **fail**. Hidden tests: **❌ fail**. Thinking tokens: 2234. Answer tokens: 43.
 
 <details><summary>Thinking</summary>
 
@@ -145,7 +145,7 @@ NOT_RUN assert concatenate_tuple(("ID", "is", 4, "UTS") ) == 'ID-is-4-UTS'
 
 ## Round 2 (`Mbpp/421/a4/r2`)
 
-Visible tests: **fail**. Thinking tokens: 2360. Answer tokens: 43.
+Visible tests: **fail**. Hidden tests: **❌ fail**. Thinking tokens: 2360. Answer tokens: 43.
 
 <details><summary>Thinking</summary>
 
@@ -272,7 +272,7 @@ NOT_RUN assert concatenate_tuple(("ID", "is", 4, "UTS") ) == 'ID-is-4-UTS'
 
 ## Round 3 (`Mbpp/421/a4/r3`)
 
-Visible tests: **pass**. Thinking tokens: 2297. Answer tokens: 49.
+Visible tests: **pass**. Hidden tests: **✅ pass**. Thinking tokens: 2297. Answer tokens: 49.
 
 <details><summary>Thinking</summary>
 

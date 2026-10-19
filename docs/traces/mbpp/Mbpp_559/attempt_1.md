@@ -1,10 +1,10 @@
 # Mbpp/559, attempt 1
 
-3 rounds; visible pass. Back to the [task](README.md). The prompt and the visible tests are on the task page; from round 2, the model also got its previous code and its visible-test report (never its previous thinking).
+3 rounds; visible pass; final code on the hidden tests: ❌ fail ⚠️ visible pass. Back to the [task](README.md). The prompt and the visible tests are on the task page; from round 2, the model also got its previous code and its visible-test report (never its previous thinking, and never any hidden-test result).
 
 ## Round 1 (`Mbpp/559/a1/r1`)
 
-Visible tests: **fail**. Thinking tokens: 1238. Answer tokens: 106.
+Visible tests: **fail**. Hidden tests: **❌ fail**. Thinking tokens: 1238. Answer tokens: 106.
 
 <details><summary>Thinking</summary>
 
@@ -112,7 +112,7 @@ ERROR   assert max_sub_array_sum([-2, -3, 4, -1, -2, 1, 5, -3], 8) == 7
 
 ## Round 2 (`Mbpp/559/a1/r2`)
 
-Visible tests: **fail**. Thinking tokens: 6056. Answer tokens: 106.
+Visible tests: **fail**. Hidden tests: **❌ fail**. Thinking tokens: 6056. Answer tokens: 106.
 
 <details><summary>Thinking</summary>
 
@@ -349,7 +349,7 @@ ERROR   assert max_sub_array_sum([-2, -3, 4, -1, -2, 1, 5, -3], 8) == 7
 
 ## Round 3 (`Mbpp/559/a1/r3`)
 
-Visible tests: **pass**. Thinking tokens: 4473. Answer tokens: 669.
+Visible tests: **pass**. Hidden tests: **❌ fail**. Thinking tokens: 4473. Answer tokens: 669.
 
 <details><summary>Thinking</summary>
 

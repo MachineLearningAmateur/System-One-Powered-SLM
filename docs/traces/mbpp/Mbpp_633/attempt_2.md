@@ -1,10 +1,10 @@
 # Mbpp/633, attempt 2
 
-3 rounds; visible pass. Back to the [task](README.md). The prompt and the visible tests are on the task page; from round 2, the model also got its previous code and its visible-test report (never its previous thinking).
+3 rounds; visible pass; final code on the hidden tests: ✅ pass. Back to the [task](README.md). The prompt and the visible tests are on the task page; from round 2, the model also got its previous code and its visible-test report (never its previous thinking, and never any hidden-test result).
 
 ## Round 1 (`Mbpp/633/a2/r1`)
 
-Visible tests: **fail**. Thinking tokens: 3568. Answer tokens: 80.
+Visible tests: **fail**. Hidden tests: **❌ fail**. Thinking tokens: 3568. Answer tokens: 80.
 
 <details><summary>Thinking</summary>
 
@@ -294,7 +294,7 @@ ERROR   assert pair_xor_Sum([5,9,7,6],4) == 47
 
 ## Round 2 (`Mbpp/633/a2/r2`)
 
-Visible tests: **fail**. Thinking tokens: 3555. Answer tokens: 342.
+Visible tests: **fail**. Hidden tests: **❌ fail**. Thinking tokens: 3555. Answer tokens: 342.
 
 <details><summary>Thinking</summary>
 
@@ -466,7 +466,7 @@ ERROR   assert pair_xor_Sum([5,9,7,6],4) == 47
 
 ## Round 3 (`Mbpp/633/a2/r3`)
 
-Visible tests: **pass**. Thinking tokens: 497. Answer tokens: 82.
+Visible tests: **pass**. Hidden tests: **✅ pass**. Thinking tokens: 497. Answer tokens: 82.
 
 <details><summary>Thinking</summary>
 

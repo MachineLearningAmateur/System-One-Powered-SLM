@@ -1,10 +1,10 @@
 # Mbpp/305, attempt 1
 
-3 rounds; visible pass. Back to the [task](README.md). The prompt and the visible tests are on the task page; from round 2, the model also got its previous code and its visible-test report (never its previous thinking).
+3 rounds; visible pass; final code on the hidden tests: ✅ pass. Back to the [task](README.md). The prompt and the visible tests are on the task page; from round 2, the model also got its previous code and its visible-test report (never its previous thinking, and never any hidden-test result).
 
 ## Round 1 (`Mbpp/305/a1/r1`)
 
-Visible tests: **fail**. Thinking tokens: 2708. Answer tokens: 66.
+Visible tests: **fail**. Hidden tests: **❌ fail**. Thinking tokens: 2708. Answer tokens: 66.
 
 <details><summary>Thinking</summary>
 
@@ -183,7 +183,7 @@ FAIL    assert start_withp(["Python PHP", "Java JavaScript", "c c++"])==('Python
 
 ## Round 2 (`Mbpp/305/a1/r2`)
 
-Visible tests: **fail**. Thinking tokens: 4314. Answer tokens: 149.
+Visible tests: **fail**. Hidden tests: **❌ fail**. Thinking tokens: 4314. Answer tokens: 149.
 
 <details><summary>Thinking</summary>
 
@@ -383,7 +383,7 @@ FAIL    assert start_withp(["Python PHP", "Java JavaScript", "c c++"])==('Python
 
 ## Round 3 (`Mbpp/305/a1/r3`)
 
-Visible tests: **pass**. Thinking tokens: 3193. Answer tokens: 66.
+Visible tests: **pass**. Hidden tests: **✅ pass**. Thinking tokens: 3193. Answer tokens: 66.
 
 <details><summary>Thinking</summary>
 

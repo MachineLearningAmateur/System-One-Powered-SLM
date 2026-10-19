@@ -1,10 +1,10 @@
 # Mbpp/61, attempt 1
 
-2 rounds; visible pass. Back to the [task](README.md). The prompt and the visible tests are on the task page; from round 2, the model also got its previous code and its visible-test report (never its previous thinking).
+2 rounds; visible pass; final code on the hidden tests: ✅ pass. Back to the [task](README.md). The prompt and the visible tests are on the task page; from round 2, the model also got its previous code and its visible-test report (never its previous thinking, and never any hidden-test result).
 
 ## Round 1 (`Mbpp/61/a1/r1`)
 
-Visible tests: **fail**. Thinking tokens: 3007. Answer tokens: 124.
+Visible tests: **fail**. Hidden tests: **❌ fail**. Thinking tokens: 3007. Answer tokens: 124.
 
 <details><summary>Thinking</summary>
 
@@ -229,7 +229,7 @@ ERROR   assert count_Substrings('112112') == 6
 
 ## Round 2 (`Mbpp/61/a1/r2`)
 
-Visible tests: **pass**. Thinking tokens: 1739. Answer tokens: 360.
+Visible tests: **pass**. Hidden tests: **✅ pass**. Thinking tokens: 1739. Answer tokens: 360.
 
 <details><summary>Thinking</summary>
 

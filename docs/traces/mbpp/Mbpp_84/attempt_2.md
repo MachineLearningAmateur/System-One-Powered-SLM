@@ -1,10 +1,10 @@
 # Mbpp/84, attempt 2
 
-3 rounds; no visible pass after round 3. Back to the [task](README.md). The prompt and the visible tests are on the task page; from round 2, the model also got its previous code and its visible-test report (never its previous thinking).
+3 rounds; no visible pass after round 3; final code on the hidden tests: ❌ fail. Back to the [task](README.md). The prompt and the visible tests are on the task page; from round 2, the model also got its previous code and its visible-test report (never its previous thinking, and never any hidden-test result).
 
 ## Round 1 (`Mbpp/84/a2/r1`)
 
-Visible tests: **fail**. Thinking tokens: 8192 (hit the 8,192-token cap). Answer tokens: 621.
+Visible tests: **fail**. Hidden tests: **❌ fail**. Thinking tokens: 8192 (hit the 8,192-token cap). Answer tokens: 621.
 
 <details><summary>Thinking</summary>
 
@@ -592,7 +592,7 @@ FAIL    assert sequence(10) == 6
 
 ## Round 2 (`Mbpp/84/a2/r2`)
 
-Visible tests: **fail**. Thinking tokens: 8192 (hit the 8,192-token cap). Answer tokens: 734.
+Visible tests: **fail**. Hidden tests: **❌ fail**. Thinking tokens: 8192 (hit the 8,192-token cap). Answer tokens: 734.
 
 <details><summary>Thinking</summary>
 
@@ -1075,7 +1075,7 @@ FAIL    assert sequence(10) == 6
 
 ## Round 3 (`Mbpp/84/a2/r3`)
 
-Visible tests: **fail**. Thinking tokens: 5909. Answer tokens: 546.
+Visible tests: **fail**. Hidden tests: **❌ fail**. Thinking tokens: 5909. Answer tokens: 546.
 
 <details><summary>Thinking</summary>
 

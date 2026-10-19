@@ -1,10 +1,10 @@
 # Mbpp/12, attempt 0
 
-3 rounds; no visible pass after round 3. Back to the [task](README.md). The prompt and the visible tests are on the task page; from round 2, the model also got its previous code and its visible-test report (never its previous thinking).
+3 rounds; no visible pass after round 3; final code on the hidden tests: ❌ fail. Back to the [task](README.md). The prompt and the visible tests are on the task page; from round 2, the model also got its previous code and its visible-test report (never its previous thinking, and never any hidden-test result).
 
 ## Round 1 (`Mbpp/12/a0/r1`)
 
-Visible tests: **fail**. Thinking tokens: 2039. Answer tokens: 37.
+Visible tests: **fail**. Hidden tests: **❌ fail**. Thinking tokens: 2039. Answer tokens: 37.
 
 <details><summary>Thinking</summary>
 
@@ -170,7 +170,7 @@ ERROR   assert sort_matrix([[1, 2, 3], [2, 4, 5], [1, 1, 1]])==[[1, 1, 1], [1, 2
 
 ## Round 2 (`Mbpp/12/a0/r2`)
 
-Visible tests: **fail**. Thinking tokens: 7343. Answer tokens: 431.
+Visible tests: **fail**. Hidden tests: **❌ fail**. Thinking tokens: 7343. Answer tokens: 431.
 
 <details><summary>Thinking</summary>
 
@@ -453,7 +453,7 @@ ERROR   assert sort_matrix([[1, 2, 3], [2, 4, 5], [1, 1, 1]])==[[1, 1, 1], [1, 2
 
 ## Round 3 (`Mbpp/12/a0/r3`)
 
-Visible tests: **fail**. Thinking tokens: 5015. Answer tokens: 589.
+Visible tests: **fail**. Hidden tests: **❌ fail**. Thinking tokens: 5015. Answer tokens: 589.
 
 <details><summary>Thinking</summary>
 

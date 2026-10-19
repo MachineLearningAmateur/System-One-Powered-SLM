@@ -1,10 +1,10 @@
 # Mbpp/306, attempt 0
 
-3 rounds; no visible pass after round 3. Back to the [task](README.md). The prompt and the visible tests are on the task page; from round 2, the model also got its previous code and its visible-test report (never its previous thinking).
+3 rounds; no visible pass after round 3; final code on the hidden tests: ❌ fail. Back to the [task](README.md). The prompt and the visible tests are on the task page; from round 2, the model also got its previous code and its visible-test report (never its previous thinking, and never any hidden-test result).
 
 ## Round 1 (`Mbpp/306/a0/r1`)
 
-Visible tests: **fail**. Thinking tokens: 8192 (hit the 8,192-token cap). Answer tokens: 737.
+Visible tests: **fail**. Hidden tests: **❌ fail**. Thinking tokens: 8192 (hit the 8,192-token cap). Answer tokens: 737.
 
 <details><summary>Thinking</summary>
 
@@ -297,7 +297,7 @@ ERROR   assert max_sum_increasing_subseq([1, 101, 2, 3, 100, 4, 5 ], 7, 4, 6) ==
 
 ## Round 2 (`Mbpp/306/a0/r2`)
 
-Visible tests: **fail**. Thinking tokens: 3108. Answer tokens: 704.
+Visible tests: **fail**. Hidden tests: **❌ fail**. Thinking tokens: 3108. Answer tokens: 704.
 
 <details><summary>Thinking</summary>
 
@@ -432,7 +432,7 @@ ERROR   assert max_sum_increasing_subseq([1, 101, 2, 3, 100, 4, 5 ], 7, 4, 6) ==
 
 ## Round 3 (`Mbpp/306/a0/r3`)
 
-Visible tests: **fail**. Thinking tokens: 4101. Answer tokens: 873.
+Visible tests: **fail**. Hidden tests: **❌ fail**. Thinking tokens: 4101. Answer tokens: 873.
 
 <details><summary>Thinking</summary>
 

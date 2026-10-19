@@ -1,10 +1,10 @@
 # Mbpp/106, attempt 4
 
-2 rounds; visible pass. Back to the [task](README.md). The prompt and the visible tests are on the task page; from round 2, the model also got its previous code and its visible-test report (never its previous thinking).
+2 rounds; visible pass; final code on the hidden tests: ✅ pass. Back to the [task](README.md). The prompt and the visible tests are on the task page; from round 2, the model also got its previous code and its visible-test report (never its previous thinking, and never any hidden-test result).
 
 ## Round 1 (`Mbpp/106/a4/r1`)
 
-Visible tests: **fail**. Thinking tokens: 604. Answer tokens: 54.
+Visible tests: **fail**. Hidden tests: **❌ fail**. Thinking tokens: 604. Answer tokens: 54.
 
 <details><summary>Thinking</summary>
 
@@ -68,7 +68,7 @@ NOT_RUN assert add_lists([5, 6, 7], (9, 10)) == (9, 10, 5, 6, 7)
 
 ## Round 2 (`Mbpp/106/a4/r2`)
 
-Visible tests: **pass**. Thinking tokens: 387. Answer tokens: 55.
+Visible tests: **pass**. Hidden tests: **✅ pass**. Thinking tokens: 387. Answer tokens: 55.
 
 <details><summary>Thinking</summary>
 

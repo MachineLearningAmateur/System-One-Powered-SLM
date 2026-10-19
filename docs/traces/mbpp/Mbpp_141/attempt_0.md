@@ -1,10 +1,10 @@
 # Mbpp/141, attempt 0
 
-3 rounds; no visible pass after round 3. Back to the [task](README.md). The prompt and the visible tests are on the task page; from round 2, the model also got its previous code and its visible-test report (never its previous thinking).
+3 rounds; no visible pass after round 3; final code on the hidden tests: ❌ fail. Back to the [task](README.md). The prompt and the visible tests are on the task page; from round 2, the model also got its previous code and its visible-test report (never its previous thinking, and never any hidden-test result).
 
 ## Round 1 (`Mbpp/141/a0/r1`)
 
-Visible tests: **fail**. Thinking tokens: 8192 (hit the 8,192-token cap). Answer tokens: 180.
+Visible tests: **fail**. Hidden tests: **❌ fail**. Thinking tokens: 8192 (hit the 8,192-token cap). Answer tokens: 180.
 
 <details><summary>Thinking</summary>
 
@@ -462,7 +462,7 @@ NOT_RUN assert pancake_sort([15, 79, 25, 38, 69]) == [15, 25, 38, 69, 79]
 
 ## Round 2 (`Mbpp/141/a0/r2`)
 
-Visible tests: **fail**. Thinking tokens: 8192 (hit the 8,192-token cap). Answer tokens: 600.
+Visible tests: **fail**. Hidden tests: **❌ fail**. Thinking tokens: 8192 (hit the 8,192-token cap). Answer tokens: 600.
 
 <details><summary>Thinking</summary>
 
@@ -761,7 +761,7 @@ NOT_RUN assert pancake_sort([15, 79, 25, 38, 69]) == [15, 25, 38, 69, 79]
 
 ## Round 3 (`Mbpp/141/a0/r3`)
 
-Visible tests: **fail**. Thinking tokens: 8192 (hit the 8,192-token cap). Answer tokens: 575.
+Visible tests: **fail**. Hidden tests: **❌ fail**. Thinking tokens: 8192 (hit the 8,192-token cap). Answer tokens: 575.
 
 <details><summary>Thinking</summary>
 

@@ -1,10 +1,10 @@
 # Mbpp/11, attempt 0
 
-3 rounds; no visible pass after round 3. Back to the [task](README.md). The prompt and the visible tests are on the task page; from round 2, the model also got its previous code and its visible-test report (never its previous thinking).
+3 rounds; no visible pass after round 3; final code on the hidden tests: ❌ fail. Back to the [task](README.md). The prompt and the visible tests are on the task page; from round 2, the model also got its previous code and its visible-test report (never its previous thinking, and never any hidden-test result).
 
 ## Round 1 (`Mbpp/11/a0/r1`)
 
-Visible tests: **fail**. Thinking tokens: 8192 (hit the 8,192-token cap). Answer tokens: 81.
+Visible tests: **fail**. Hidden tests: **❌ fail**. Thinking tokens: 8192 (hit the 8,192-token cap). Answer tokens: 81.
 
 <details><summary>Thinking</summary>
 
@@ -663,7 +663,7 @@ ERROR   assert remove_Occ("hello","l") == "heo"
 
 ## Round 2 (`Mbpp/11/a0/r2`)
 
-Visible tests: **fail**. Thinking tokens: 7169. Answer tokens: 81.
+Visible tests: **fail**. Hidden tests: **❌ fail**. Thinking tokens: 7169. Answer tokens: 81.
 
 <details><summary>Thinking</summary>
 
@@ -1023,7 +1023,7 @@ ERROR   assert remove_Occ("hello","l") == "heo"
 
 ## Round 3 (`Mbpp/11/a0/r3`)
 
-Visible tests: **fail**. Thinking tokens: 6862. Answer tokens: 562.
+Visible tests: **fail**. Hidden tests: **❌ fail**. Thinking tokens: 6862. Answer tokens: 562.
 
 <details><summary>Thinking</summary>
 
