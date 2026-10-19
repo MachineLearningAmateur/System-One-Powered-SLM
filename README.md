@@ -390,6 +390,8 @@ These hypotheses come from exploratory results of this study, so this data set c
 | Exploratory | `uv run python scripts/analysis/nonlr_compare.py`, `uv run python scripts/analysis/trace_diagnostics.py` |
 | Pass rates by benchmark | `uv run python scripts/analysis/pass_by_benchmark.py` |
 
+**Collecting new data with another generator** (for example a 7–8B model): follow [docs/new-generator-runbook.md](docs/new-generator-runbook.md). Rules for coding agents in this repo: [AGENTS.md](AGENTS.md).
+
 Unit tests: `uv run pytest`. More commands and the output locations: [review guide](docs/review-guide.md#where-each-number-comes-from).
 
 **Repository layout.**

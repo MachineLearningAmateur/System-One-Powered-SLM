@@ -17,7 +17,9 @@ results/dev_router_scores_<version>.json (the dev scores, for the dev replay).
 v1: the five routers above. v2 (October 17, before any test run): v1 plus
 Pinocchio, whose router score is 1 - p_correct from scripts/score_pinocchio.py
 (no fitting, like the strong4 mean). v2 refuses to write if any v1 router's
-model or thresholds would differ from the frozen v1 file.
+model or thresholds would differ from the frozen v1 file. Versions added later for
+another generator (docs/new-generator-runbook.md) are fit on their own dev runs, so
+that check does not apply to them.
 """
 
 from __future__ import annotations
@@ -137,7 +139,7 @@ def main() -> int:
         print(f"{name:22s} " + "  ".join(f"q={q}: t={v['t']:.4f} a={v['alpha']:.2f} dev {v['dev_rate_weighted']:.3f}"
                                           for q, v in routers[name]["thresholds"].items()))
 
-    if args.version != "v1":
+    if args.version == "v2":  # v2 extends v1 on the same runs; a version for another generator has new runs
         v1 = json.loads((CONFIGS / "routers_v1.json").read_text(encoding="utf-8"))["routers"]
         for name in ROUTERS_V1:
             if json.loads(json.dumps(routers[name])) != v1[name]:
