@@ -1,6 +1,6 @@
 # Qwen3-8B replication plan (draft)
 
-**Status, October 22, 2026:** local and Azure exploratory 8B development-task smoke runs have completed. This plan has not been committed or frozen. The original 1.7B study and its results remain unchanged.
+**Status, October 23, 2026:** part A was committed at `4d5b7cf`; protocol development generation, grading, and scoring are complete. The October 23 part B below is the specification frozen by `q8b-protocol-freeze-v1`. Verify that tag is present before any test-task generation. The original 1.7B study and its results remain unchanged.
 
 ## October 22 Azure smoke amendment
 
@@ -52,3 +52,41 @@ After the gate, fit the existing router families on 8B dev data only, including 
 At the October 22 West US 3 retail rates, one A100 replica with 8 vCPUs and 56 GiB is approximately $3.20 per running hour: $0.000529/GPU-second + 8 × $0.000024/vCPU-second + 56 × $0.000003/GiB-second. The five selected smoke attempts took 112.9 seconds, which extrapolates to about 3.2 hours and $10 of active compute for the 505-attempt development design if their throughput and one-round behavior were representative. They may not be: other tasks can require longer thinking or repair rounds. Start the development deployment only under a separate dollar approval, with a 12-hour UTC deletion deadline (about $38.40 of active compute, plus startup and incidental charges) and no more than one replica. Re-estimate the test phase from the full development run and obtain a new spending approval before it. Azure billing can lag, so this time guard is an operational ceiling rather than a guaranteed invoice cap.
 
 Estimate GPU hours and Jev input tokens from the smoke and dev runs before requesting an approved dollar limit. [TypeSafe lists Jev](https://typesafe.ai/) at $0.042 per million input tokens and free output; confirm the account's actual charges before scaling up. The finished study's `configs/prices.yaml` still has null direct Jev prices and has not been edited. Set `score_jev.py --max-input-tokens` within the approved amount and monitor TypeSafe account spend. Do not start rented GPU time, Jev scoring or new frontier calls before the corresponding approval. The original frontier answers may be reusable for the offline replay if their prompts and provenance match; validate that in `scripts/replay.py` before replay. Keep run data in ignored `results/runs/` under new 8B IDs. Export aggregate results and traces under new names only if requested. Preserve the original study's files and tag.
+
+## October 23 part B: development result and test freeze
+
+The clean-commit development runs `q8b-pilot-v1` and `q8b-pilot-v1b` completed 217/217 and 288/288 attempts, respectively, without driver failures or KV preemptions. They produced 538 checkpoints; 499 passed visible tests. Of those, 96 failed the hidden tests, from 44 of the 217 development tasks. Final hidden pass was 403/505 attempts. The 72-task headroom sample projected 40.1 HumanEval+ and 63.6 MBPP+ test tasks with at least one visible-pass hidden failure, 103.7 total versus the required 30; all 20 seeds of the five task-grouped folds had both classes. No development change to the split, cap, feature definitions, or hypotheses was made in response.
+
+Both development runs were scored on the operator machine with the original `rubric_v2.yaml`, `evidence-v3` and 56,000-byte limit. All 1,076 primary Jev arms and 60 repeat arms returned `ok`, one version (`jev-1.14.0`), and used 2,831,945 input tokens in total. All repeat records rebuilt the same request bytes; the largest absolute repeat score change was 0.04. No request exceeded the byte limit, no base was trimmed, and none of the 499 visible-pass trace requests cut thinking (retained-share quartiles and median all 1.0). The visible-pass cap-hit count was 24/499; all-checkpoint cap hits were 56/538. The most tied Jev question was `special_cases_visible_tests`: its modal score covered 55.8% of history-arm values and 63.6% of trace-arm values; 27.4% and 33.8% of eligible visible-pass fail/pass pairs tied. Report this measurement limit rather than removing the question.
+
+The prespecified development resource guide gave pooled, task-grouped out-of-fold AUROC 0.766 for `cheap`, 0.760 for `cheap+code`, and 0.748 for `cheap+code+thinking` on the 499 visible-pass checkpoints. The full-minus-cheap gain was −0.0175, below the +0.03 effort rule: keep Jev in the confirmatory test and omit optional expanded questions, labels, or replay work first. This effort decision does **not** cancel, relabel, or change the test family. Standalone Pinocchio input-v1 and input-v2 development AUROC was 0.603 and 0.499; both inputs were scored completely under their pinned setup. These are development diagnostics, not test results.
+
+### Fitted router record and operating points
+
+The authoritative full fitted weights, feature columns, standardization means and scales, intercepts, Pinocchio setup, development score distributions, and **exact** operating thresholds are in `configs/routers_q8b-v1.json` (SHA-256 `0d825d734d02d45960b31aa74a702ba78d8694f0fdef5c9a6d441dfa93c05faf`). The file was generated once from the two development runs, with 499 visible-pass rows and frozen `predict-v2` feature sets. `results/dev_router_scores_q8b-v1.json` holds the corresponding development scores and stays out of git. The table below displays rounded `(threshold, tie fraction)` pairs; the JSON values, including every coefficient, are binding.
+
+| Router | 10% escalation | 25% escalation | 50% escalation |
+| --- | ---: | ---: | ---: |
+| `cheap` | (0.4171, 0.90) | (0.2393, 0.35) | (0.1381, 0.70) |
+| `cheap+code` | (0.4401, 0.78) | (0.2471, 0.15) | (0.1432, 0.50) |
+| `cheap+code+thinking` | (0.4401, 0.58) | (0.2541, 0.35) | (0.1302, 0.50) |
+| `cheap+strong4` | (0.4338, 0.90) | (0.2589, 0.75) | (0.1333, 0.10) |
+| `strong4 mean` | (0.3000, 0.49) | (0.2400, 0.84) | (0.1900, 0.25) |
+| `pinocchio` (input v1) | (0.9032, 0.90) | (0.8305, 0.75) | (0.6200, 0.50) |
+
+The headline development and test AUROCs pool visible-pass checkpoints; task weighting is a named sensitivity. Escalation thresholds weight each development decision row by the reciprocal of its task's sampled attempts. The frozen tie hash and 10%, 25%, 50% rates are those in `system1.eval.replay`. `cheap` is the offline replay fallback when a Jev or Pinocchio router score is unavailable. The primary held-out analysis itself requires both Jev arms on every visible-pass row and stops on a missing arm; it never fills a missing score. A descriptive comparator with missing scores uses only its available rows and reports a matched cheap comparison. No test label may change these rules.
+
+### Held-out hypotheses and analysis
+
+Generate with the same Qwen3-8B revision, vLLM image and limits, concurrency 2, split, visible tests, and five attempt indices on each of the 325 frozen test tasks. Amendment A2 excludes `HumanEval/32` from grading and analysis. Stop vLLM before hidden grading. Grade only in the networkless sandbox; never send hidden inputs, labels, or grades to the generator, Jev, or Pinocchio. Score the test trajectories with both Jev arms and both Pinocchio input versions. Require the returned Jev version to remain `jev-1.14.0` across the 8B runs; stop if it changes.
+
+The confirmatory population is the visible-pass held-out checkpoints after Amendment A2, pooled across benchmarks. The **two-sided** family at familywise α = 0.05 is exactly `scripts/test_analysis.py` with `--routers q8b-v1`:
+
+1. Primary: AUROC of `cheap+code+thinking` minus AUROC of `cheap`.
+2. Secondary H2 trace contrast: AUROC of `cheap+code+thinking` minus AUROC of `cheap+code`.
+
+Both null gains are zero. Use 19,999 paired bootstrap draws of whole tasks within benchmark and Holm adjustment over these two tests. The frozen router coefficients are refit on development only, and the test script must not fit, select, or tune from held-out labels. Report the planned pooled headline, task-weighted sensitivity, per-benchmark and by-round/cap-hit support, the same-question code-answer contrast, trace retention, Table 1 comparators (including Pinocchio input-v2 as a sensitivity), and within-task support as descriptive analyses. Stop and report any invalid grade, missing primary Jev arm, model-version change, or other failed protocol gate; do not repair an observed test result by changing a feature, threshold, question, or cap.
+
+The comparison with the finished Qwen3-1.7B study is **descriptive only**. Its raw `pilot-v1` and `main-test-v1` trajectories are unavailable here, so the preregistered same-request Jev drift check cannot run. The old scores used `jev-1.13.0`; this 8B development used `jev-1.14.0`. Report the versions and possible drift as a confound, alongside each generator's own visible-pass population and failure prevalence. Do not claim that a difference between the generators is an effect of size alone.
+
+The 505 development attempts took 3.203 hours of generation. Scaling to 1,625 test attempts projects 10.31 active GPU hours, about $33 at the West US 3 retail rate, or 12.37 hours and about $40 with 20% runtime slack. The development app's 3.342-hour lifetime estimates to $10.70; the actual bill is pending. Before test deployment, obtain a **new dollar limit** for the Azure GPU, launch a fresh deletion watchdog, and allow at most one replica. Estimate test Jev tokens from the completed development ledger and obtain its own dollar-limit approval before those calls. A token or UTC guard is not a guaranteed invoice ceiling. No optional new frontier-model calls are part of the confirmatory test.
