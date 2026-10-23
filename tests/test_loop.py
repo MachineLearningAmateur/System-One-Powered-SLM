@@ -8,6 +8,7 @@ from system1.eval.ledger import CostLedger
 from system1.features.telemetry import JEV_TELEMETRY_KEYS, cheap_features, jev_telemetry, loop_flag, marker_count
 from system1.loop.generate import (
     Generator,
+    _logprob_parts,
     add_missing_imports,
     confidence_summary,
     extract_code,
@@ -108,6 +109,19 @@ def test_confidence_uses_only_the_k_largest():
     assert s["n_tokens"] == 8 and s["mean_conf"] == pytest.approx(1.55)
     assert s["lowest_group_conf"] == pytest.approx(1.1) and s["tail_conf"] == pytest.approx(2.0)
     assert confidence_summary([], [])["mean_conf"] is None
+
+
+def test_local_stop_token_may_be_counted_without_logprobs():
+    choice = {"finish_reason": "stop", "logprobs": {
+        "token_logprobs": [-0.5], "top_logprobs": [{"x": -0.5}]}}
+    usage = {"completion_tokens": 2}
+    with pytest.raises(ValueError, match="do not match"):
+        _logprob_parts(choice, usage)
+    assert _logprob_parts(choice, usage, allow_terminal_token_without_logprob=True) == (
+        [{"x": -0.5}], [-0.5])
+    choice["finish_reason"] = "length"
+    with pytest.raises(ValueError, match="do not match"):
+        _logprob_parts(choice, usage, allow_terminal_token_without_logprob=True)
 
 
 # --- generation ------------------------------------------------------------------

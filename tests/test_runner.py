@@ -427,6 +427,27 @@ def test_vllm_metrics_and_delta(monkeypatch):
     assert reset == {"generation_tokens_total": 50.0, "num_preemptions_total": None, "counter_reset": True}
 
 
+def test_remote_vllm_identity_checks_manifest_and_served_model(monkeypatch):
+    from system1.loop.monitor import ServerMismatch, remote_vllm_server_identity
+    expected = {"--model": "Qwen/Qwen3-8B", "--revision": "abc", "--max-model-len": "16384",
+                "--dtype": "bfloat16", "--seed": "0"}
+    manifest = {"image_digest": "sha256:abc", "azure_revision": "app--one",
+                "command": [f"{k}={v}" for k, v in expected.items()]}
+    response = httpx.Response(200, json={"data": [{"id": "Qwen/Qwen3-8B", "max_model_len": 16384}]},
+                              request=httpx.Request("GET", "https://example.test/v1/models"))
+    monkeypatch.setattr(monitor.httpx, "get", lambda url, timeout: response)
+    identity = remote_vllm_server_identity(expected, manifest, "https://example.test/v1/models")
+    assert identity["azure_revision"] == "app--one" and identity["vllm_image_id"] == "sha256:abc"
+    with pytest.raises(ServerMismatch, match="other settings"):
+        remote_vllm_server_identity(expected, {**manifest, "command": ["--model=other"]},
+                                    "https://example.test/v1/models")
+    monkeypatch.setattr(monitor.httpx, "get", lambda url, timeout: httpx.Response(
+        200, json={"data": [{"id": "other", "max_model_len": 16384}]},
+        request=httpx.Request("GET", "https://example.test/v1/models")))
+    with pytest.raises(ServerMismatch, match="another model"):
+        remote_vllm_server_identity(expected, manifest, "https://example.test/v1/models")
+
+
 def test_energy_and_sampler(tmp_path):
     samples = [{"t": 0.0, "power_w": 100.0}, {"t": 36.0, "power_w": 200.0}]
     assert monitor.energy_wh(samples) == pytest.approx(1.5)  # 36 s at 150 W

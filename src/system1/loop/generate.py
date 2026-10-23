@@ -30,8 +30,8 @@ import numpy as np
 
 from system1.config import ROOT
 
-MODEL = "Qwen/Qwen3-1.7B"
-REVISION = "70d244cc86ccca08cf5af4e1e306ecf908b1ad5e"
+MODEL = "Qwen/Qwen3-8B"
+REVISION = "b968826d9c46dd6066d109eabc6255188de91218"
 VLLM_URL = "http://localhost:8000/v1/completions"
 MAX_MODEL_LEN = 16_384
 THINK_CAP = 8_192
@@ -159,12 +159,17 @@ def _finite(x: Any) -> bool:
     return isinstance(x, (int, float)) and math.isfinite(x)
 
 
-def _logprob_parts(choice: dict, usage: dict | None) -> tuple[list[dict], list[float]]:
-    """(top logprobs, sampled-token logprobs), checked: one entry per generated token, all finite."""
+def _logprob_parts(choice: dict, usage: dict | None, *,
+                   allow_terminal_token_without_logprob: bool = False) -> tuple[list[dict], list[float]]:
+    """Return finite logprobs, allowing a local backend's counted stop token if requested."""
     lp = choice.get("logprobs") or {}
     top, tok = lp.get("top_logprobs"), lp.get("token_logprobs")
     n = (usage or {}).get("completion_tokens")
-    if top is None or tok is None or len(top) != len(tok) or n is None or len(tok) != n:
+    terminal_token_counted = (allow_terminal_token_without_logprob
+                              and choice.get("finish_reason") == "stop"
+                              and isinstance(n, int) and not isinstance(n, bool)
+                              and tok is not None and n == len(tok) + 1)
+    if top is None or tok is None or len(top) != len(tok) or n is None or not (len(tok) == n or terminal_token_counted):
         raise ValueError(f"logprobs do not match the token count: top {None if top is None else len(top)}, "
                          f"tokens {None if tok is None else len(tok)}, usage {n}")
     for x, t in zip(tok, top):
@@ -178,13 +183,15 @@ CallHook = Callable[[dict], None]
 
 class Generator:
     def __init__(self, client: httpx.AsyncClient, tokenizer, url: str = VLLM_URL, think_cap: int = THINK_CAP,
-                 code_tokens: int = CODE_TOKENS, max_model_len: int = MAX_MODEL_LEN):
+                 code_tokens: int = CODE_TOKENS, max_model_len: int = MAX_MODEL_LEN,
+                 allow_terminal_token_without_logprob: bool = False):
         self.client = client
         self.tokenizer = tokenizer
         self.url = url
         self.think_cap = think_cap
         self.code_tokens = code_tokens
         self.max_model_len = max_model_len
+        self.allow_terminal_token_without_logprob = allow_terminal_token_without_logprob
 
     async def _complete(self, prompt: str, max_tokens: int, seed: int, stop: list[str] | None,
                         phase: str, on_call: CallHook | None) -> tuple[dict, list[dict], list[float]]:
@@ -207,7 +214,8 @@ class Generator:
             is_thinking = phase == "thinking" and (c.get("text", "").lstrip().startswith("<think>")
                                                    or c.get("finish_reason") == "length")
             call["reasoning_tokens"] = call["output_tokens"] if is_thinking else 0
-            top, tok = _logprob_parts(c, usage)
+            top, tok = _logprob_parts(c, usage, allow_terminal_token_without_logprob=
+                                      self.allow_terminal_token_without_logprob)
             return d, top, tok
         except httpx.HTTPStatusError as e:
             call["status"] = f"http:{e.response.status_code}"

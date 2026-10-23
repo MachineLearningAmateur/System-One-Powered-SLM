@@ -88,6 +88,33 @@ def vllm_server_identity(expected: dict[str, str], container: str = VLLM_CONTAIN
             "vllm_models": sorted((m["id"], m.get("max_model_len")) for m in models)}
 
 
+def remote_vllm_server_identity(expected: dict[str, str], manifest: dict,
+                                models_url: str) -> dict:
+    """Check the deployed command and live model before a remote generation run."""
+    image = manifest.get("image_digest")
+    revision = manifest.get("azure_revision")
+    command = manifest.get("command")
+    if not isinstance(image, str) or not image.startswith("sha256:") or not revision:
+        raise ServerMismatch("remote deployment manifest lacks an image digest or Azure revision")
+    if not isinstance(command, list) or not all(isinstance(x, str) for x in command):
+        raise ServerMismatch("remote deployment manifest lacks a command list")
+    flags = dict(a.split("=", 1) for a in command if a.startswith("--") and "=" in a)
+    wrong = {k: (flags.get(k), v) for k, v in expected.items() if flags.get(k) != v}
+    if wrong:
+        raise ServerMismatch(f"the remote vLLM command has other settings: {wrong}")
+    try:
+        response = httpx.get(models_url, timeout=30.0)
+        response.raise_for_status()
+        models = response.json()["data"]
+        identities = sorted((m["id"], m.get("max_model_len")) for m in models)
+    except (httpx.HTTPError, KeyError, ValueError, TypeError) as e:
+        raise ServerMismatch(f"the remote vLLM server does not answer: {e}") from e
+    if (expected["--model"], int(expected["--max-model-len"])) not in identities:
+        raise ServerMismatch(f"the remote vLLM server reports another model: {identities}")
+    return {"vllm_image_id": image, "vllm_cmd": command, "vllm_models": identities,
+            "azure_revision": revision, "server_kind": "azure-container-app"}
+
+
 def gpu_sample() -> dict | None:
     try:
         r = subprocess.run(["nvidia-smi", f"--query-gpu={POWER_QUERY}", "--format=csv,noheader,nounits"],

@@ -3,6 +3,7 @@
 Same code questions answered without the thinking (history arm) and with it (trace arm).
 Visible-pass checkpoints, y = 1 for hidden fail. No billed calls.
 """
+import argparse
 import importlib.util
 import sys
 from pathlib import Path
@@ -16,7 +17,11 @@ rg = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(rg)
 from system1.eval import predict as P  # noqa: E402
 
-data = [d for d in rg.load(["pilot-v1", "pilot-v1b"]) if d["cp"]["visible_pass"]]
+ap = argparse.ArgumentParser()
+ap.add_argument("--run-id", action="append")
+args = ap.parse_args()
+run_ids = args.run_id or ["pilot-v1", "pilot-v1b"]
+data = [d for d in rg.load(run_ids) if d["cp"]["visible_pass"]]
 y = np.array([0 if d["cp"]["hidden"]["passed"] else 1 for d in data])
 groups = np.array([d["cp"]["task_id"] for d in data])
 w = P.task_weights(groups)

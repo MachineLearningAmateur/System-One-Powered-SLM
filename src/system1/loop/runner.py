@@ -58,6 +58,7 @@ class RunContext:
     ledger: CostLedger  # cost ledger
     failures: CostLedger  # harness failures (JSONL)
     logprob_dir: Path
+    provider: str = "local-vllm"
 
 
 def shown_task(task: TaskSpec) -> str:
@@ -83,7 +84,7 @@ def _ledger_hook(ctx: RunContext, task: TaskSpec, attempt: int, rnd: int, exec_i
     def hook(call: dict) -> None:
         nonlocal n
         ctx.ledger.append(LedgerRow(
-            component="small_model", model=MODEL, provider="local-vllm", task_id=task.task_id,
+            component="small_model", model=MODEL, provider=ctx.provider, task_id=task.task_id,
             attempt=attempt, step=rnd, arm=call["phase"], call_id=f"{exec_id}:r{rnd}", http_attempt=n,
             input_tokens=call["input_tokens"], output_tokens=call["output_tokens"],
             reasoning_tokens=call["reasoning_tokens"],

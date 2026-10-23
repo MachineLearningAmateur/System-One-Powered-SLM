@@ -21,8 +21,8 @@ services:
     environment:
       - HF_HUB_OFFLINE=1
     command:
-      - --model=Qwen/Qwen3-1.7B
-      - --revision=70d244cc86ccca08cf5af4e1e306ecf908b1ad5e
+      - --model=Qwen/Qwen3-8B
+      - --revision=b968826d9c46dd6066d109eabc6255188de91218
       - --dtype=bfloat16
       - --max-model-len=16384
       - --gpu-memory-utilization=0.85

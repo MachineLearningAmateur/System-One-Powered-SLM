@@ -39,7 +39,8 @@ from system1.eval import predict as P
 from system1.eval import replay as R
 
 ROUTERS_V1 = list(P.FEATURE_SETS) + list(P.SENSITIVITY_SETS) + ["strong4 mean"]
-ROUTERS = {"v1": ROUTERS_V1, "v2": ROUTERS_V1 + ["pinocchio"]}
+ROUTERS = {"v1": ROUTERS_V1, "v2": ROUTERS_V1 + ["pinocchio"],
+           "q8b-v1": ROUTERS_V1 + ["pinocchio"]}
 FALLBACK = "cheap"  # decides when a Jev (or Pinocchio) score is missing
 PINOCCHIO_FILE = "pinocchio_scores.jsonl"
 

@@ -28,6 +28,7 @@ import subprocess
 import sys
 import time
 from datetime import datetime, timezone
+from pathlib import Path
 
 import httpx
 
@@ -42,7 +43,7 @@ from system1.loop.sandbox import VisibleRunner
 from system1.loop.tasks import VISIBLE_TESTS_PATH, load_tasks
 
 
-FREEZE_TAG = "protocol-freeze-v1"
+FREEZE_TAG = "q8b-protocol-freeze-v1"
 
 
 def finished(store: CostLedger) -> set[tuple[str, int]]:
@@ -63,9 +64,14 @@ EXPECTED_SERVER = {"--model": MODEL, "--revision": REVISION, "--max-model-len": 
 
 
 def protocol(tokenizer, visible: VisibleRunner, dirty: bool, commit: str, concurrency: int,
-             think_cap: int = THINK_CAP) -> dict:
+             think_cap: int = THINK_CAP, remote_manifest: dict | None = None,
+             server_url: str = "http://localhost:8000") -> dict:
     template = tokenizer.chat_template if tokenizer is not None else None
-    return {"model": MODEL, "revision": REVISION, **monitor.vllm_server_identity(EXPECTED_SERVER),
+    identity = (monitor.remote_vllm_server_identity(EXPECTED_SERVER, remote_manifest,
+                                                     f"{server_url}/v1/models") if remote_manifest is not None
+                else monitor.vllm_server_identity(EXPECTED_SERVER))
+    return {"model": MODEL, "revision": REVISION, **identity,
+            "server_url": server_url,
             "generation_concurrency": concurrency,
             "chat_template_sha256": hashlib.sha256(template.encode()).hexdigest() if template else None,
             "sampling": SAMPLING, "seed_tag": SEED_TAG, "think_cap": think_cap, "code_tokens": CODE_TOKENS,
@@ -93,12 +99,22 @@ async def main_async(args) -> int:
         return 2
     out = RESULTS / "runs" / args.run_id
     out.mkdir(parents=True, exist_ok=True)
+    remote_path = getattr(args, "remote_manifest", "")
+    server_url = getattr(args, "server_url", "http://localhost:8000").rstrip("/")
+    if bool(remote_path) != (server_url != "http://localhost:8000"):
+        print("--remote-manifest and a nonlocal --server-url must be provided together")
+        return 2
+    try:
+        remote_manifest = json.loads(Path(remote_path).read_text(encoding="utf-8")) if remote_path else None
+    except (OSError, ValueError) as e:
+        print(f"cannot read remote deployment manifest: {e}")
+        return 2
     tokenizer = load_tokenizer()
     visible = VisibleRunner(max_concurrent=args.visible_workers)
     try:
         # Compared as stored: a JSON round trip turns tuples into lists.
         proto = json.loads(json.dumps(protocol(tokenizer, visible, dirty, commit, args.concurrency,
-                                               args.think_cap)))
+                                               args.think_cap, remote_manifest, server_url)))
     except monitor.ServerMismatch as e:
         print(f"STOP: {e}")
         return 2
@@ -125,17 +141,21 @@ async def main_async(args) -> int:
     meta_path.write_text(json.dumps(meta, indent=1), encoding="utf-8")
     print(f"{len(jobs)} attempts to run ({len(done)} already done)", flush=True)
 
-    metrics_start = monitor.vllm_metrics()
-    sampler = monitor.PowerSampler(out / "power.jsonl").start()
+    metrics_url = f"{server_url}/metrics"
+    metrics_start = monitor.vllm_metrics(metrics_url) if remote_manifest else monitor.vllm_metrics()
+    sampler = None if remote_manifest else monitor.PowerSampler(out / "power.jsonl").start()
     sem = asyncio.Semaphore(args.concurrency)
     t0 = time.perf_counter()
     n_done, n_failed = 0, 0
     outcome = "interrupted"
     try:
         async with httpx.AsyncClient() as client:
-            ctx = RunContext(run_id=args.run_id, split=args.split, generator=Generator(client, tokenizer, think_cap=args.think_cap),
+            generator = (Generator(client, tokenizer, url=f"{server_url}/v1/completions", think_cap=args.think_cap)
+                         if remote_manifest else Generator(client, tokenizer, think_cap=args.think_cap))
+            ctx = RunContext(run_id=args.run_id, split=args.split, generator=generator,
                              visible=visible, store=store, ledger=ledger, failures=failures,
-                             logprob_dir=out / "logprobs")
+                             logprob_dir=out / "logprobs",
+                             provider="azure-container-app-vllm" if remote_manifest else "local-vllm")
 
             async def one(tid: str, attempt: int) -> None:
                 nonlocal n_done, n_failed
@@ -161,9 +181,11 @@ async def main_async(args) -> int:
         outcome = "finished"
     finally:  # also on Ctrl+C: the session keeps its time, energy and counters
         elapsed = round(time.perf_counter() - t0, 1)
-        metrics_end = monitor.vllm_metrics()
+        metrics_end = monitor.vllm_metrics(metrics_url) if remote_manifest else monitor.vllm_metrics()
         session.update({"ended": datetime.now(timezone.utc).isoformat(), "outcome": outcome, "elapsed_s": elapsed,
-                        "n_failed": n_failed, **sampler.stop(), "vllm_metrics_start": metrics_start,
+                        "n_failed": n_failed,
+                        **(sampler.stop() if sampler else {"power_samples": 0, "energy_wh": None, "mean_power_w": None}),
+                        "vllm_metrics_start": metrics_start,
                         "vllm_metrics_end": metrics_end, "vllm_delta": monitor.metrics_delta(metrics_start, metrics_end)})
         meta_path.write_text(json.dumps(meta, indent=1), encoding="utf-8")
     missing = [(t, a) for t in ids for a in attempts if (t, a) not in finished(store)]
@@ -187,6 +209,8 @@ def main() -> int:
     ap.add_argument("--concurrency", type=int, default=3)
     ap.add_argument("--visible-workers", type=int, default=4, help="visible-check containers at the same time")
     ap.add_argument("--allow-dirty", action="store_true", help="smoke runs only: the run is marked non-protocol")
+    ap.add_argument("--server-url", default="http://localhost:8000", help="vLLM base URL (HTTPS for Azure)")
+    ap.add_argument("--remote-manifest", default="", help="Azure deployment identity JSON for remote vLLM")
     args = ap.parse_args()
     if not 0 < args.think_cap <= MAX_MODEL_LEN - CODE_TOKENS:
         print(f"--think-cap must be in 1..{MAX_MODEL_LEN - CODE_TOKENS}")

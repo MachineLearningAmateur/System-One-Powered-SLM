@@ -116,7 +116,10 @@ git checkout -b gen-qwen3-8b
    ```
    Copy `HumanEvalPlus-v0.1.10.jsonl` and `MbppPlus-v0.2.0.jsonl` into `data/evalplus_cache/evalplus/`.
    Check that these versions match the ones recorded in `configs/split_v1.json` (`source`: HumanEval+
-   v0.1.10, hash `916d9bfe…`; MBPP+ v0.2.0, hash `92743def…`). Do **not** run
+   v0.1.10, hash `916d9bfe…`; MBPP+ v0.2.0, hash `92743def…`). The recorded MD5s use CRLF
+   JSONL line endings; the official downloads available on October 22 use LF. Converting only the record
+   separators to CRLF reproduces both recorded hashes, and all JSON records parse identically. Verify
+   this equivalence without changing either dataset file or the frozen split. Do **not** run
    `scripts/make_split.py`; the split is frozen.
 5. Build the sandbox and compute the ground truth:
    ```bash
