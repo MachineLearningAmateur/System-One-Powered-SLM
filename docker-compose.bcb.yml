@@ -1,0 +1,18 @@
+services:
+  bcb-sandbox:
+    build: docker/bcb_sandbox
+    image: system1-bcb-sandbox:v1
+    network_mode: none
+    read_only: true
+    tmpfs:
+      - /tmp:size=512m
+    mem_limit: 4g
+    memswap_limit: 4g
+    pids_limit: 128
+    cpus: 2
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]
+    cgroup: private
+    volumes:
+      - ./results/datasets/bcb_jev_only_hidden_v1.json:/bcb/hidden.json:ro
+    command: ["sleep", "infinity"]

@@ -65,7 +65,7 @@ EXPECTED_SERVER = {"--model": MODEL, "--revision": REVISION, "--max-model-len": 
 
 def protocol(tokenizer, visible: VisibleRunner, dirty: bool, commit: str, concurrency: int,
              think_cap: int = THINK_CAP, remote_manifest: dict | None = None,
-             server_url: str = "http://localhost:8000") -> dict:
+             server_url: str = "http://localhost:8000", task_manifest: Path | None = None) -> dict:
     template = tokenizer.chat_template if tokenizer is not None else None
     identity = (monitor.remote_vllm_server_identity(EXPECTED_SERVER, remote_manifest,
                                                      f"{server_url}/v1/models") if remote_manifest is not None
@@ -77,15 +77,23 @@ def protocol(tokenizer, visible: VisibleRunner, dirty: bool, commit: str, concur
             "sampling": SAMPLING, "seed_tag": SEED_TAG, "think_cap": think_cap, "code_tokens": CODE_TOKENS,
             "max_model_len": MAX_MODEL_LEN, "top_logprobs": TOP_LOGPROBS, "max_rounds": MAX_ROUNDS,
             "visible_timeout_s": VISIBLE_TIMEOUT_S, **visible.protocol(),
-            "split_sha256": file_sha256(SPLIT_PATH), "visible_tests_sha256": file_sha256(VISIBLE_TESTS_PATH),
+            "split_sha256": file_sha256(SPLIT_PATH) if task_manifest is None else None,
+            "visible_tests_sha256": file_sha256(VISIBLE_TESTS_PATH) if task_manifest is None else None,
+            **({"task_manifest_sha256": file_sha256(task_manifest)} if task_manifest else {}),
             "git_commit": commit, "git_dirty": dirty}
 
 
 async def main_async(args) -> int:
-    split = load_split()
-    tasks = load_tasks()
-    ids = [t for b in ("humaneval+", "mbpp+") if args.benchmark in ("all", b)
-           for t in split["benchmarks"][b][args.split]]
+    manifest_arg = getattr(args, "task_manifest", "")
+    task_manifest = ROOT / manifest_arg if manifest_arg else None
+    if task_manifest:
+        tasks = load_tasks(task_manifest)
+        ids = list(tasks)
+    else:
+        split = load_split()
+        tasks = load_tasks()
+        ids = [t for b in ("humaneval+", "mbpp+") if args.benchmark in ("all", b)
+               for t in split["benchmarks"][b][args.split]]
     if args.tasks_file:  # a frozen task list, e.g. configs/pilot_subsample_v1.json
         keep = set(json.loads((ROOT / args.tasks_file).read_text(encoding="utf-8"))["tasks"])
         ids = [t for t in ids if t in keep]
@@ -114,7 +122,7 @@ async def main_async(args) -> int:
     try:
         # Compared as stored: a JSON round trip turns tuples into lists.
         proto = json.loads(json.dumps(protocol(tokenizer, visible, dirty, commit, args.concurrency,
-                                               args.think_cap, remote_manifest, server_url)))
+                                               args.think_cap, remote_manifest, server_url, task_manifest)))
     except monitor.ServerMismatch as e:
         print(f"STOP: {e}")
         return 2
@@ -200,6 +208,8 @@ def main() -> int:
     ap.add_argument("--benchmark", choices=["all", "humaneval+", "mbpp+"], default="all")
     ap.add_argument("--limit", type=int, default=0, help="first N tasks of the split (0 = all)")
     ap.add_argument("--tasks-file", default="", help="JSON file with a 'tasks' list (repo-relative); only these run")
+    ap.add_argument("--task-manifest", default="", help="new benchmark task manifest with visible tests")
+    ap.add_argument("--freeze-tag", default=FREEZE_TAG, help="required ancestor tag for test generation")
     ap.add_argument("--attempts", type=int, default=1, help="attempt indices run up to (not including) this value")
     ap.add_argument("--first-attempt", type=int, default=0,
                     help="first attempt index; seeds depend on the index (not on the run), "
@@ -218,10 +228,10 @@ def main() -> int:
     if args.split == "test":
         # Test tasks get generation only after the protocol freeze (docs/research-plan.md): the freeze
         # tag must exist and be in the history of the commit that runs.
-        r = subprocess.run(["git", "merge-base", "--is-ancestor", FREEZE_TAG, "HEAD"], cwd=ROOT,
+        r = subprocess.run(["git", "merge-base", "--is-ancestor", args.freeze_tag, "HEAD"], cwd=ROOT,
                            capture_output=True, text=True)
         if r.returncode != 0:
-            print(f"Test tasks get no generation before the protocol freeze: tag {FREEZE_TAG} is missing "
+            print(f"Test tasks get no generation before the protocol freeze: tag {args.freeze_tag} is missing "
                   f"or not in the history of HEAD.")
             return 1
     return asyncio.run(main_async(args))
