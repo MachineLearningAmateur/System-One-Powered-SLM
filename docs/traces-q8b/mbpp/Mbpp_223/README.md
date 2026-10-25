@@ -1,0 +1,30 @@
+# Mbpp/223
+
+Benchmark: mbpp+. Run: `q8b-test-v1`. Back to the [index](../../README.md).
+
+## Attempts
+
+"Hidden tests" is the result of the attempt's final code on the full EvalPlus suite, without frontier help. ⚠️ marks code that passed the visible tests but fails the hidden tests: the case the routers try to catch.
+
+| Attempt | Rounds | End | Hidden tests (final code) | Thinking tokens per round | Cap hits |
+| --- | --- | --- | --- | --- | --- |
+| [Attempt 0](attempt_0.md) | 1 | visible pass | ✅ pass | 1351 | 0 |
+| [Attempt 1](attempt_1.md) | 1 | visible pass | ✅ pass | 1626 | 0 |
+| [Attempt 2](attempt_2.md) | 1 | visible pass | ✅ pass | 2090 | 0 |
+| [Attempt 3](attempt_3.md) | 1 | visible pass | ✅ pass | 2066 | 0 |
+| [Attempt 4](attempt_4.md) | 1 | visible pass | ✅ pass | 1721 | 0 |
+
+## Prompt shown to the model (round 1)
+
+```python
+"""
+Write a function that takes in a sorted array, its length (n), and an element and returns whether the element is the majority element in the given sorted array. (The majority element is the element that occurs more than n/2 times.)
+assert is_majority([1, 2, 3, 3, 3, 3, 10], 7, 3) == True
+"""
+```
+
+## Visible tests
+
+```python
+assert is_majority([1, 2, 3, 3, 3, 3, 10], 7, 3) == True
+```

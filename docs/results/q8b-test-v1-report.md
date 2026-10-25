@@ -6,6 +6,13 @@ Raw run data remain git-ignored under `results/runs/q8b-test-v1/` on the
 operator's machine. No finished 1.7B result, frozen router, or old run was
 changed.
 
+A review export of selected trajectory fields is available in the
+[8B trace index](../traces-q8b/README.md) and its
+[compressed machine-readable copy](../traces-q8b/q8b-test-v1_traces.jsonl.gz).
+It contains the prompt, model thinking, generated code, visible-test report,
+and hidden pass/fail outcome for each checkpoint. It excludes hidden-test
+inputs, Jev and Pinocchio scores, ledgers, and local run metadata.
+
 ## Protocol completion
 
 - The frozen `q8b-protocol-freeze-v1` commit was `04a4306`. Qwen3-8B generated
@@ -87,4 +94,5 @@ Sources: the operator-held `results/runs/q8b-test-v1/run_meta.json`,
 `grade_meta.json`, `jev_meta.json`, `jev_ledger.jsonl`, and both Pinocchio
 files; the aggregate analysis linked above; the original
 [1.7B aggregate analysis](test_analysis_main-test-v1.json); and the Azure
-activity log. Raw trajectories, scores, and labels are not included in git.
+activity log. The full raw trajectories, scores, and labels remain out of git;
+only the selected trace export described above is included.

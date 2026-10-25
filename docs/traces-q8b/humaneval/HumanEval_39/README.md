@@ -1,0 +1,46 @@
+# HumanEval/39
+
+Benchmark: humaneval+. Run: `q8b-test-v1`. Back to the [index](../../README.md).
+
+## Attempts
+
+"Hidden tests" is the result of the attempt's final code on the full EvalPlus suite, without frontier help. ⚠️ marks code that passed the visible tests but fails the hidden tests: the case the routers try to catch.
+
+| Attempt | Rounds | End | Hidden tests (final code) | Thinking tokens per round | Cap hits |
+| --- | --- | --- | --- | --- | --- |
+| [Attempt 0](attempt_0.md) | 1 | visible pass | ❌ fail ⚠️ visible pass | 5615 | 0 |
+| [Attempt 1](attempt_1.md) | 1 | visible pass | ❌ fail ⚠️ visible pass | 4725 | 0 |
+| [Attempt 2](attempt_2.md) | 1 | visible pass | ❌ fail ⚠️ visible pass | 4794 | 0 |
+| [Attempt 3](attempt_3.md) | 1 | visible pass | ❌ fail ⚠️ visible pass | 6890 | 0 |
+| [Attempt 4](attempt_4.md) | 2 | visible pass | ❌ fail ⚠️ visible pass | 8192 / 8110 | 1 |
+
+## Prompt shown to the model (round 1)
+
+```python
+
+
+def prime_fib(n: int):
+    """
+    prime_fib returns n-th number that is a Fibonacci number and it's also prime.
+    >>> prime_fib(1)
+    2
+    >>> prime_fib(2)
+    3
+    >>> prime_fib(3)
+    5
+    >>> prime_fib(4)
+    13
+    >>> prime_fib(5)
+    89
+    """
+```
+
+## Visible tests
+
+```python
+assert prime_fib(1) == 2
+assert prime_fib(2) == 3
+assert prime_fib(3) == 5
+assert prime_fib(4) == 13
+assert prime_fib(5) == 89
+```
