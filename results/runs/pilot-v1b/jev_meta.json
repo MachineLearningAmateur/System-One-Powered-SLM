@@ -1,0 +1,25 @@
+{
+ "run_id": "pilot-v1b",
+ "protocol": {
+  "rubric_version": "rubric-v2",
+  "rubric_sha256": "9d90bfda289aa6cc48d73d8d7db10d6d74a5353e7b2c0c90f8ec5faa9f1150a9",
+  "evidence_version": "evidence-v3",
+  "byte_budget": 56000,
+  "model_requested": "jev-latest",
+  "arms": [
+   "base+history",
+   "base+history+trace"
+  ]
+ },
+ "model_version": "jev-1.13.0",
+ "sessions": [
+  {
+   "started": "2026-10-17T00:35:57.358976+00:00",
+   "git_commit": "731acd54bcd601d4d032d0bb5b2cb13fcf5bc857",
+   "git_dirty": false,
+   "outcome": "finished",
+   "ended": "2026-10-17T00:37:23.502234+00:00",
+   "input_tokens_total": 2180333
+  }
+ ]
+}

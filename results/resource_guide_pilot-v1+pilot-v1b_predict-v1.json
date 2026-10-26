@@ -1,0 +1,423 @@
+{
+ "runs": [
+  "pilot-v1",
+  "pilot-v1b"
+ ],
+ "pipeline": "predict-v1",
+ "C": 1.0,
+ "folds": 5,
+ "repeats": 20,
+ "guide_gain": 0.03,
+ "visible_pass": {
+  "subset": "visible-pass checkpoints (the primary subset)",
+  "n": 470,
+  "positives": 116,
+  "tasks": 205,
+  "auroc": {
+   "cheap": 0.7942236508864212,
+   "cheap+code": 0.8140463666471849,
+   "cheap+code+thinking": 0.8018458990843561
+  },
+  "auroc_per_split_range": {
+   "cheap": [
+    0.7654393142411845,
+    0.8118546658873953
+   ],
+   "cheap+code": [
+    0.7778345996493279,
+    0.827902785895188
+   ],
+   "cheap+code+thinking": [
+    0.7641729982466395,
+    0.8204266510812389
+   ]
+  },
+  "bootstrap": {
+   "auroc": {
+    "cheap": [
+     0.7178794491525424,
+     0.8624678318678207
+    ],
+    "cheap+code": [
+     0.7340507372558964,
+     0.8848420603939516
+    ],
+    "cheap+code+thinking": [
+     0.7201815564356954,
+     0.875969786772843
+    ]
+   },
+   "delta": {
+    "cheap+code+thinking - cheap": [
+     -0.0448366830065359,
+     0.045949465435907395
+    ],
+    "cheap+code+thinking - cheap+code": [
+     -0.04182749287757358,
+     0.007826321048881339
+    ],
+    "cheap+code - cheap": [
+     -0.007414067858048587,
+     0.04820935711294141
+    ]
+   },
+   "delta_share_positive": {
+    "cheap+code+thinking - cheap": 0.67,
+    "cheap+code+thinking - cheap+code": 0.1565,
+    "cheap+code - cheap": 0.922
+   }
+  },
+  "columns": {
+   "cheap": [
+    "answer_mean_logprob",
+    "cap_hit",
+    "code_lines",
+    "log_thinking_tokens",
+    "loop_flag",
+    "marker_count",
+    "pass_count_delta",
+    "pass_count_delta__missing",
+    "returns_to_earlier_code",
+    "returns_to_earlier_code__missing",
+    "round",
+    "same_error_as_previous__missing",
+    "similarity_to_previous",
+    "similarity_to_previous__missing",
+    "thinking_bottom10_group_conf",
+    "thinking_mean_logprob",
+    "thinking_tail_conf"
+   ],
+   "cheap+code": [
+    "answer_mean_logprob",
+    "cap_hit",
+    "code_lines",
+    "jev_code_likely_fails",
+    "jev_repeats_previous_code",
+    "jev_repeats_previous_code__missing",
+    "jev_special_cases_visible_tests",
+    "log_thinking_tokens",
+    "loop_flag",
+    "marker_count",
+    "pass_count_delta",
+    "pass_count_delta__missing",
+    "returns_to_earlier_code",
+    "returns_to_earlier_code__missing",
+    "round",
+    "same_error_as_previous__missing",
+    "similarity_to_previous",
+    "similarity_to_previous__missing",
+    "thinking_bottom10_group_conf",
+    "thinking_mean_logprob",
+    "thinking_tail_conf"
+   ],
+   "cheap+code+thinking": [
+    "answer_mean_logprob",
+    "cap_hit",
+    "code_lines",
+    "jev_approach_change_without_evidence",
+    "jev_approach_change_without_evidence__missing",
+    "jev_code_likely_fails",
+    "jev_on_task",
+    "jev_repeating_failed_fix",
+    "jev_repeating_failed_fix__missing",
+    "jev_repeats_previous_code",
+    "jev_repeats_previous_code__missing",
+    "jev_special_cases_visible_tests",
+    "jev_stated_fix_matches_change",
+    "jev_stated_fix_matches_change__missing",
+    "jev_unsupported_claim",
+    "log_thinking_tokens",
+    "loop_flag",
+    "marker_count",
+    "pass_count_delta",
+    "pass_count_delta__missing",
+    "returns_to_earlier_code",
+    "returns_to_earlier_code__missing",
+    "round",
+    "same_error_as_previous__missing",
+    "similarity_to_previous",
+    "similarity_to_previous__missing",
+    "thinking_bottom10_group_conf",
+    "thinking_mean_logprob",
+    "thinking_tail_conf"
+   ]
+  }
+ },
+ "all": {
+  "subset": "all checkpoints (descriptive)",
+  "n": 621,
+  "positives": 267,
+  "tasks": 217,
+  "auroc": {
+   "cheap": 0.9118792187731436,
+   "cheap+code": 0.920099875156055,
+   "cheap+code+thinking": 0.9163651367993397
+  },
+  "auroc_per_split_range": {
+   "cheap": [
+    0.8997228041219663,
+    0.91768763621744
+   ],
+   "cheap+code": [
+    0.9043039421062655,
+    0.9259823525677648
+   ],
+   "cheap+code+thinking": [
+    0.9000719439683447,
+    0.9238134535220804
+   ]
+  },
+  "bootstrap": {
+   "auroc": {
+    "cheap": [
+     0.8658987526346383,
+     0.9474676264299298
+    ],
+    "cheap+code": [
+     0.8747095336193537,
+     0.9565982438790552
+    ],
+    "cheap+code+thinking": [
+     0.8682762621988647,
+     0.9543975311846297
+    ]
+   },
+   "delta": {
+    "cheap+code+thinking - cheap": [
+     -0.01429551939709835,
+     0.019058459919241013
+    ],
+    "cheap+code+thinking - cheap+code": [
+     -0.012777568329779517,
+     0.0023100316914794637
+    ],
+    "cheap+code - cheap": [
+     -0.0036658393928444663,
+     0.019780432163267928
+    ]
+   },
+   "delta_share_positive": {
+    "cheap+code+thinking - cheap": 0.7305,
+    "cheap+code+thinking - cheap+code": 0.154,
+    "cheap+code - cheap": 0.9215
+   }
+  },
+  "columns": {
+   "cheap": [
+    "answer_mean_logprob",
+    "cap_hit",
+    "code_lines",
+    "code_missing",
+    "err_AssertionError",
+    "err_load",
+    "err_other_error",
+    "log_thinking_tokens",
+    "loop_flag",
+    "marker_count",
+    "pass_count_delta",
+    "pass_count_delta__missing",
+    "returns_to_earlier_code",
+    "returns_to_earlier_code__missing",
+    "round",
+    "same_error_as_previous",
+    "same_error_as_previous__missing",
+    "similarity_to_previous",
+    "similarity_to_previous__missing",
+    "thinking_bottom10_group_conf",
+    "thinking_mean_logprob",
+    "thinking_tail_conf",
+    "visible_not_run_count",
+    "visible_pass_fraction"
+   ],
+   "cheap+code": [
+    "answer_mean_logprob",
+    "cap_hit",
+    "code_lines",
+    "code_missing",
+    "err_AssertionError",
+    "err_load",
+    "err_other_error",
+    "jev_code_likely_fails",
+    "jev_repeats_previous_code",
+    "jev_repeats_previous_code__missing",
+    "jev_special_cases_visible_tests",
+    "log_thinking_tokens",
+    "loop_flag",
+    "marker_count",
+    "pass_count_delta",
+    "pass_count_delta__missing",
+    "returns_to_earlier_code",
+    "returns_to_earlier_code__missing",
+    "round",
+    "same_error_as_previous",
+    "same_error_as_previous__missing",
+    "similarity_to_previous",
+    "similarity_to_previous__missing",
+    "thinking_bottom10_group_conf",
+    "thinking_mean_logprob",
+    "thinking_tail_conf",
+    "visible_not_run_count",
+    "visible_pass_fraction"
+   ],
+   "cheap+code+thinking": [
+    "answer_mean_logprob",
+    "cap_hit",
+    "code_lines",
+    "code_missing",
+    "err_AssertionError",
+    "err_load",
+    "err_other_error",
+    "jev_approach_change_without_evidence",
+    "jev_approach_change_without_evidence__missing",
+    "jev_clear_next_step",
+    "jev_clear_next_step__missing",
+    "jev_code_likely_fails",
+    "jev_on_task",
+    "jev_repeating_failed_fix",
+    "jev_repeating_failed_fix__missing",
+    "jev_repeats_previous_code",
+    "jev_repeats_previous_code__missing",
+    "jev_special_cases_visible_tests",
+    "jev_stated_fix_matches_change",
+    "jev_stated_fix_matches_change__missing",
+    "jev_unsupported_claim",
+    "log_thinking_tokens",
+    "loop_flag",
+    "marker_count",
+    "pass_count_delta",
+    "pass_count_delta__missing",
+    "returns_to_earlier_code",
+    "returns_to_earlier_code__missing",
+    "round",
+    "same_error_as_previous",
+    "same_error_as_previous__missing",
+    "similarity_to_previous",
+    "similarity_to_previous__missing",
+    "thinking_bottom10_group_conf",
+    "thinking_mean_logprob",
+    "thinking_tail_conf",
+    "visible_not_run_count",
+    "visible_pass_fraction"
+   ]
+  }
+ },
+ "decision": "keep Jev in the primary test; cut the extras first",
+ "coefficients_visible_pass_full_fit": [
+  [
+   "thinking_tail_conf",
+   -0.8431174594873199
+  ],
+  [
+   "thinking_bottom10_group_conf",
+   -0.7142858448047257
+  ],
+  [
+   "similarity_to_previous",
+   0.6442866758502414
+  ],
+  [
+   "answer_mean_logprob",
+   0.6383282849407207
+  ],
+  [
+   "jev_code_likely_fails",
+   0.6138653238998885
+  ],
+  [
+   "jev_special_cases_visible_tests",
+   0.5883700381224829
+  ],
+  [
+   "jev_repeating_failed_fix",
+   0.4331297290393581
+  ],
+  [
+   "returns_to_earlier_code",
+   -0.4171139410429409
+  ],
+  [
+   "thinking_mean_logprob",
+   0.38123516775202876
+  ],
+  [
+   "cap_hit",
+   0.3619365207833356
+  ],
+  [
+   "jev_unsupported_claim",
+   -0.31930660608453454
+  ],
+  [
+   "log_thinking_tokens",
+   0.2981144542973536
+  ],
+  [
+   "loop_flag",
+   0.2812720713724017
+  ],
+  [
+   "code_lines",
+   -0.21229086151447807
+  ],
+  [
+   "jev_on_task",
+   0.13619694015074912
+  ],
+  [
+   "jev_repeats_previous_code",
+   -0.09766466233627487
+  ],
+  [
+   "jev_approach_change_without_evidence__missing",
+   0.08238805513559767
+  ],
+  [
+   "jev_repeating_failed_fix__missing",
+   0.08238805513559767
+  ],
+  [
+   "jev_repeats_previous_code__missing",
+   0.08238805513559767
+  ],
+  [
+   "jev_stated_fix_matches_change__missing",
+   0.08238805513559767
+  ],
+  [
+   "pass_count_delta__missing",
+   0.08238805513559767
+  ],
+  [
+   "returns_to_earlier_code__missing",
+   0.08238805513559767
+  ],
+  [
+   "same_error_as_previous__missing",
+   0.08238805513559767
+  ],
+  [
+   "similarity_to_previous__missing",
+   0.08238805513559767
+  ],
+  [
+   "jev_stated_fix_matches_change",
+   -0.0781063675036696
+  ],
+  [
+   "jev_approach_change_without_evidence",
+   0.07629103682267696
+  ],
+  [
+   "round",
+   0.052815197121264
+  ],
+  [
+   "marker_count",
+   -0.01789084849199944
+  ],
+  [
+   "pass_count_delta",
+   0.01351745652624259
+  ]
+ ]
+}

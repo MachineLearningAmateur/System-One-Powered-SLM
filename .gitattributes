@@ -1,3 +1,8 @@
 # Every text file is stored and checked out with LF line endings on every machine,
 # so the frozen protocol files (configs/*.json) keep their SHA-256 hashes.
 * text=auto eol=lf
+
+# The committed run data and EvalPlus files are stored byte for byte (no line-ending change),
+# so their hashes stay the same as in the records.
+results/** -text
+data/evalplus_cache/** -text

@@ -1,0 +1,62 @@
+{
+ "run_id": "frontier-dev-v1",
+ "session": "20261017T054028-08dbc5",
+ "source": "frontier_answers.jsonl",
+ "started": "2026-10-17T05:40:28.351352+00:00",
+ "protocol": true,
+ "vllm_running": false,
+ "git_commit": "c22634ab7ae4d071ca015a9f466c538cb8e0bbd1",
+ "git_dirty": false,
+ "grading_code_sha256": "a8fcee5c6f9125b705cd6c514a5aa443da5bb0c739a09631fba5d4e248c2b801",
+ "evalplus_cache_sha256": "87352cb827ebd180289ea5949391df9f2b6c50f6ca4ca71a6f224bb724ec2fb3",
+ "container": {
+  "image": "sha256:207c21732a0a8d66b487e1623777bcf4ec4f07bf98b522c50ac97ef3e9cc2d19",
+  "memory": 10737418240,
+  "memory_swap": 10737418240,
+  "nano_cpus": 4000000000,
+  "pids_limit": 512,
+  "cgroupns": "private",
+  "network": "none"
+ },
+ "n_checkpoints": 651,
+ "dropped_executions": [],
+ "grader_version": "grader-v3",
+ "grader_settings": {
+  "evalplus": "0.3.1",
+  "min_time_limit": 1.0,
+  "gt_time_limit_factor": 4.0,
+  "fast_check": true,
+  "timeout_per_task": 60,
+  "candidate_budget_bytes": 4294967296
+ },
+ "datasets": {
+  "humaneval": {
+   "vm_size": 3103232000,
+   "n_tasks": 66,
+   "n_codes": 113,
+   "calibration_failures": [],
+   "canary_passed": true,
+   "memory_limit": 7239790592
+  },
+  "mbpp": {
+   "vm_size": 4128428032,
+   "n_tasks": 151,
+   "n_codes": 261,
+   "calibration_failures": [],
+   "canary_passed": true,
+   "memory_limit": 8264650752
+  }
+ },
+ "ended": "2026-10-17T05:42:20.265259+00:00",
+ "elapsed_s": 110.0,
+ "n_codes": 374,
+ "labels": {
+  "pass": 579,
+  "fail": 72,
+  "invalid": 0,
+  "no_code": 0
+ },
+ "first_two_disagree": 0,
+ "first_two_valid_pairs": 374,
+ "checkpoints_first_grade_differs": 0
+}

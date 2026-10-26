@@ -1,0 +1,85 @@
+{
+ "run_id": "main-test-v1",
+ "session": "20261017T205152-5d83aa",
+ "source": "trajectories.jsonl",
+ "started": "2026-10-17T20:51:52.908314+00:00",
+ "protocol": true,
+ "vllm_running": false,
+ "git_commit": "c71b37319fcd871fa8e11b88fc18f049cb6e8d8b",
+ "git_dirty": false,
+ "grading_code_sha256": "5059da33e47c0c669d10888c1172811b7fe2d38b36f1ff50377a794c52fecbad",
+ "evalplus_cache_sha256": "87352cb827ebd180289ea5949391df9f2b6c50f6ca4ca71a6f224bb724ec2fb3",
+ "container": {
+  "image": "sha256:207c21732a0a8d66b487e1623777bcf4ec4f07bf98b522c50ac97ef3e9cc2d19",
+  "memory": 10737418240,
+  "memory_swap": 10737418240,
+  "nano_cpus": 4000000000,
+  "pids_limit": 512,
+  "cgroupns": "private",
+  "network": "none"
+ },
+ "n_checkpoints": 2086,
+ "dropped_executions": [],
+ "exclusions": {
+  "version": "grading-exclusions-v1",
+  "sha256": "f0e5b4f30f891a30de56b01fe259e751e8310d0e365c15b832f87cf1599c82db",
+  "tasks": [
+   "HumanEval/32"
+  ],
+  "excluded_checkpoints": [
+   "HumanEval/32/a0/r1",
+   "HumanEval/32/a0/r2",
+   "HumanEval/32/a1/r1",
+   "HumanEval/32/a1/r2",
+   "HumanEval/32/a1/r3",
+   "HumanEval/32/a2/r1",
+   "HumanEval/32/a3/r1",
+   "HumanEval/32/a3/r2",
+   "HumanEval/32/a3/r3",
+   "HumanEval/32/a4/r1",
+   "HumanEval/32/a4/r2",
+   "HumanEval/32/a4/r3"
+  ],
+  "n_before": 2098,
+  "n_after": 2086
+ },
+ "grader_version": "grader-v3",
+ "grader_settings": {
+  "evalplus": "0.3.1",
+  "min_time_limit": 1.0,
+  "gt_time_limit_factor": 4.0,
+  "fast_check": true,
+  "timeout_per_task": 60,
+  "candidate_budget_bytes": 4294967296
+ },
+ "datasets": {
+  "humaneval": {
+   "vm_size": 3109650432,
+   "n_tasks": 97,
+   "n_codes": 448,
+   "calibration_failures": [],
+   "canary_passed": true,
+   "memory_limit": 7246209024
+  },
+  "mbpp": {
+   "vm_size": 4132618240,
+   "n_tasks": 227,
+   "n_codes": 1089,
+   "calibration_failures": [],
+   "canary_passed": true,
+   "memory_limit": 8268828672
+  }
+ },
+ "ended": "2026-10-17T21:09:10.051353+00:00",
+ "elapsed_s": 1035.2,
+ "n_codes": 1537,
+ "labels": {
+  "pass": 1199,
+  "fail": 885,
+  "invalid": 0,
+  "no_code": 2
+ },
+ "first_two_disagree": 0,
+ "first_two_valid_pairs": 1537,
+ "checkpoints_first_grade_differs": 0
+}

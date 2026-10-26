@@ -1,0 +1,48 @@
+{
+ "run_id": "frontier-dev-v1",
+ "split": "dev",
+ "protocol": {
+  "mode": "takeover_from_scratch",
+  "model": "anthropic/claude-sonnet-5.5-20260928",
+  "provider": {
+   "order": [
+    "anthropic"
+   ],
+   "allow_fallbacks": false
+  },
+  "reasoning": {
+   "effort": "low"
+  },
+  "max_tokens": 8000,
+  "temperature": "provider default",
+  "messages": "loop.tasks.first_round_messages",
+  "visible_tests_sha256": "5b9dbbd105ae784b0e8a5c71f452cfdbc262ae5891771afe9c3c09227cb5aa43",
+  "split_sha256": "c9d608144df0b6a5237871f23578a1954dcd07179bcf8be10e7bd425fb52e692",
+  "client_sha256": "345930e8f569dd0320ab32be0cda3f7bfc77364561a995ab7c26c65eb7247f19",
+  "git_dirty": false
+ },
+ "git_commit": "c22634ab7ae4d071ca015a9f466c538cb8e0bbd1",
+ "sessions": [
+  {
+   "started": "2026-10-17T05:34:40.813037+00:00",
+   "git_commit": "c22634ab7ae4d071ca015a9f466c538cb8e0bbd1",
+   "limit_usd": 5.0,
+   "samples": 1,
+   "n_tasks": 1
+  },
+  {
+   "started": "2026-10-17T05:34:59.004908+00:00",
+   "git_commit": "c22634ab7ae4d071ca015a9f466c538cb8e0bbd1",
+   "limit_usd": 5.0,
+   "samples": 1,
+   "n_tasks": 20
+  },
+  {
+   "started": "2026-10-17T05:35:29.880648+00:00",
+   "git_commit": "c22634ab7ae4d071ca015a9f466c538cb8e0bbd1",
+   "limit_usd": 5.0,
+   "samples": 3,
+   "n_tasks": 217
+  }
+ ]
+}

@@ -10,14 +10,14 @@ you run or change anything.
    (`configs/routers_v1.json`, `routers_v2.json`, `routers_transfer_v1.json`), the tag `protocol-freeze-v1`,
    or the existing files in `docs/results/`. New result files may go into `docs/results/` only under new,
    unique names. New data collection goes on its own git branch, with new run ids and new config files.
-2. **Never overwrite old run data,** even though it is not in git: the folders in `results/runs/`, their
-   score and label files, and the analysis outputs in `results/`. Write new data to new run ids and new
-   file names.
+2. **Never overwrite old run data,** in git or not: the folders in `results/runs/`, their score and label
+   files, and the analysis outputs in `results/`. Write new data to new run ids and new file names.
 3. **Secrets.** API keys live only in `.env` on the operator's own machine (copy `.env.example`). Never
    print a key, never commit it, and never copy it to a remote or rented machine. Check a key only by its
    length. Before every commit, scan the staged changes without printing them, for example
-   `git diff --cached | grep -cE "sk-or-v1|sk-ant-|TYPESAFE_API_KEY=.|OPENROUTER_API_KEY=."` (a count of 0
-   is clean; on a match, find the file with `grep -l`, not by printing lines).
+   `git diff --cached | grep -cE "sk-or-v1-[A-Za-z0-9]{16}|sk-ant-[A-Za-z0-9_-]{16}|hf_[A-Za-z0-9]{30}|(TYPESAFE|OPENROUTER)_API_KEY=[^<\" ]"`
+   (a count of 0 is clean; the pattern does not match its own text). Run the scan as its own command and
+   read the count before you commit. On a match, find the file with `grep -l`, not by printing lines.
 4. **Billed calls need the operator's approval first,** with a dollar limit: Jev (`scripts/score_jev.py`),
    the frontier model (`scripts/run_frontier.py`) and any rented GPU. Give the expected cost before you ask,
    and set a per-run guard (`score_jev.py --max-input-tokens`). A token guard is not a dollar cap: the last
@@ -28,8 +28,11 @@ you run or change anything.
 6. **Hidden tests stay hidden.** Grading (`scripts/grade_hidden.py`) runs only after generation, with vLLM
    stopped. Never show hidden-test inputs, grades or labels to a generator or a judge, and never use test
    labels to choose a model, a threshold or a feature.
-7. **Run data stays out of git.** `results/` is git-ignored. Only aggregate results and the trace export
-   made by `scripts/export_traces.py` go into git, and only when the operator asks.
+7. **Run data stays out of git, with one exception.** `results/` is git-ignored, except the finished
+   1.7B study's data that `.gitignore` lists: the runs `pilot-v1`, `pilot-v1b`, `main-test-v1`,
+   `frontier-dev-v1` and `frontier-test-v1`, their aggregate files, and the two EvalPlus dataset files.
+   They are in git so that a clone can reuse the pipeline. They hold hidden labels, so rule 6 applies to
+   them. New run data, aggregate results and trace exports go into git only when the operator asks.
 8. **Freeze before test data.** Before you generate on any test task, the hypotheses, the analysis plan
    and the frozen routers must be committed and the commit tagged. Record every later change as a dated
    amendment.

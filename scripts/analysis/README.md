@@ -3,7 +3,7 @@
 These scripts produced the numbers in `docs/findings.md`. They are kept for
 reproducibility, not as part of the frozen pipeline. Run them from the
 repository root with `uv run python scripts/analysis/<name>.py`. They read
-`results/runs/<run-id>/` (git-ignored) and need the hidden labels from
+`results/runs/<run-id>/` (the finished study's runs are in git; new runs are git-ignored) and need the hidden labels from
 `scripts/grade_hidden.py`.
 
 | Script | What it measured | Calls |

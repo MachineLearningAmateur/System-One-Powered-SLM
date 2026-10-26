@@ -15,6 +15,34 @@ data/*
 !data/.gitkeep
 results/*
 !results/.gitkeep
+
+# Exceptions: the finished 1.7B study's data, in git so that a clone can reuse the pipeline
+# (docs/new-generator-runbook.md). New runs stay ignored. The EvalPlus ground-truth .pkl files
+# (255 MB and 793 MB) are too large for GitHub; `sandbox-setup` makes them again.
+!data/evalplus_cache/
+data/evalplus_cache/*
+!data/evalplus_cache/evalplus/
+data/evalplus_cache/evalplus/*
+!data/evalplus_cache/evalplus/HumanEvalPlus-v0.1.10.jsonl
+!data/evalplus_cache/evalplus/MbppPlus-v0.2.0.jsonl
+!results/runs/
+results/runs/*
+!results/runs/pilot-v1/
+!results/runs/pilot-v1b/
+!results/runs/main-test-v1/
+!results/runs/frontier-dev-v1/
+!results/runs/frontier-test-v1/
+!results/jev_check_v1/
+!results/dev_router_scores.json
+!results/dev_router_scores_v2.json
+!results/jev_gates_pilot-v1+pilot-v1b.json
+!results/replay_main-test-v1_final_routers-v2.json
+!results/replay_pilot-v1+pilot-v1b_dev-oof.json
+!results/replay_pilot-v1+pilot-v1b_dev-oof_routers-v2.json
+!results/resource_guide_pilot-v1+pilot-v1b_predict-v1.json
+!results/resource_guide_pilot-v1+pilot-v1b_predict-v2.json
+!results/test_analysis_main-test-v1.json
+!results/transfer_main-test-v1.json
 hf_cache/
 *.safetensors
 *.bin

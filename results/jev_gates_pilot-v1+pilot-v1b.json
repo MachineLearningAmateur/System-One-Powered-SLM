@@ -1,0 +1,261 @@
+{
+ "runs": [
+  "pilot-v1",
+  "pilot-v1b"
+ ],
+ "checkpoints": 621,
+ "unscored_checkpoints": 0,
+ "http_attempts": {
+  "ok": 1322
+ },
+ "model_versions": {
+  "jev-1.13.0": 1322
+ },
+ "input_tokens": 3670600,
+ "arms": {
+  "base+history": {
+   "records": 621,
+   "status": {
+    "ok": 621
+   },
+   "valid_share": 1.0,
+   "failed_after_retries_share": 0.0,
+   "max_request_bytes": 6040,
+   "over_budget": 0,
+   "trace_truncated": 0,
+   "base_trimmed": 0,
+   "not_applicable": {
+    "na:arm_lacks_trace": 1741,
+    "na:first_round,arm_lacks_trace": 1515,
+    "na:visible_pass,arm_lacks_trace": 470,
+    "na:first_round": 505
+   },
+   "features": {
+    "code_likely_fails": {
+     "n": 621,
+     "distinct": 88,
+     "mode": 0.2,
+     "share_at_mode": 0.04508856682769726,
+     "share_at_0_or_1": 0.0,
+     "sd": 0.26046192878379054,
+     "min": 0.06,
+     "max": 0.96,
+     "vp_pairs": 41064,
+     "vp_pairs_tied_share": 0.017095265926358856
+    },
+    "repeats_previous_code": {
+     "n": 116,
+     "distinct": 43,
+     "mode": 0.98,
+     "share_at_mode": 0.31896551724137934,
+     "share_at_0_or_1": 0.0,
+     "sd": 0.36579693064713925,
+     "min": 0.03,
+     "max": 0.99,
+     "vp_pairs": 380,
+     "vp_pairs_tied_share": 0.018421052631578946
+    },
+    "special_cases_visible_tests": {
+     "n": 621,
+     "distinct": 28,
+     "mode": 0.02,
+     "share_at_mode": 0.4138486312399356,
+     "share_at_0_or_1": 0.0,
+     "sd": 0.11258882931469012,
+     "min": 0.02,
+     "max": 0.98,
+     "vp_pairs": 41064,
+     "vp_pairs_tied_share": 0.24184200272744982
+    }
+   },
+   "duplicate_feature_vectors": 332
+  },
+  "base+history+trace": {
+   "records": 621,
+   "status": {
+    "ok": 621
+   },
+   "valid_share": 1.0,
+   "failed_after_retries_share": 0.0,
+   "max_request_bytes": 41855,
+   "over_budget": 0,
+   "trace_truncated": 0,
+   "base_trimmed": 0,
+   "not_applicable": {
+    "na:first_round": 2020,
+    "na:visible_pass": 470
+   },
+   "features": {
+    "approach_change_without_evidence": {
+     "n": 116,
+     "distinct": 42,
+     "mode": 0.18,
+     "share_at_mode": 0.06896551724137931,
+     "share_at_0_or_1": 0.0,
+     "sd": 0.1252650875232192,
+     "min": 0.04,
+     "max": 0.56,
+     "vp_pairs": 380,
+     "vp_pairs_tied_share": 0.03684210526315789
+    },
+    "clear_next_step": {
+     "n": 151,
+     "distinct": 50,
+     "mode": 0.07,
+     "share_at_mode": 0.15894039735099338,
+     "share_at_0_or_1": 0.0,
+     "sd": 0.2283989693641671,
+     "min": 0.05,
+     "max": 0.9,
+     "vp_pairs": 0,
+     "vp_pairs_tied_share": null
+    },
+    "code_likely_fails": {
+     "n": 621,
+     "distinct": 87,
+     "mode": 0.12,
+     "share_at_mode": 0.05152979066022544,
+     "share_at_0_or_1": 0.0,
+     "sd": 0.2733398735221291,
+     "min": 0.05,
+     "max": 0.97,
+     "vp_pairs": 41064,
+     "vp_pairs_tied_share": 0.015414962010520164
+    },
+    "on_task": {
+     "n": 621,
+     "distinct": 62,
+     "mode": 0.97,
+     "share_at_mode": 0.14492753623188406,
+     "share_at_0_or_1": 0.0,
+     "sd": 0.1380365350800068,
+     "min": 0.19,
+     "max": 0.98,
+     "vp_pairs": 41064,
+     "vp_pairs_tied_share": 0.05425676992012468
+    },
+    "repeating_failed_fix": {
+     "n": 116,
+     "distinct": 51,
+     "mode": 0.09,
+     "share_at_mode": 0.04310344827586207,
+     "share_at_0_or_1": 0.0,
+     "sd": 0.3114582040047347,
+     "min": 0.05,
+     "max": 0.92,
+     "vp_pairs": 380,
+     "vp_pairs_tied_share": 0.07105263157894737
+    },
+    "repeats_previous_code": {
+     "n": 116,
+     "distinct": 39,
+     "mode": 0.98,
+     "share_at_mode": 0.31896551724137934,
+     "share_at_0_or_1": 0.0,
+     "sd": 0.3906987094546897,
+     "min": 0.04,
+     "max": 0.99,
+     "vp_pairs": 380,
+     "vp_pairs_tied_share": 0.02368421052631579
+    },
+    "special_cases_visible_tests": {
+     "n": 621,
+     "distinct": 27,
+     "mode": 0.02,
+     "share_at_mode": 0.5136876006441223,
+     "share_at_0_or_1": 0.0,
+     "sd": 0.1106926892481318,
+     "min": 0.01,
+     "max": 0.98,
+     "vp_pairs": 41064,
+     "vp_pairs_tied_share": 0.31029612312487825
+    },
+    "stated_fix_matches_change": {
+     "n": 116,
+     "distinct": 36,
+     "mode": 0.06,
+     "share_at_mode": 0.15517241379310345,
+     "share_at_0_or_1": 0.0,
+     "sd": 0.41328265930278335,
+     "min": 0.04,
+     "max": 0.99,
+     "vp_pairs": 380,
+     "vp_pairs_tied_share": 0.18157894736842106
+    },
+    "unsupported_claim": {
+     "n": 621,
+     "distinct": 77,
+     "mode": 0.35,
+     "share_at_mode": 0.037037037037037035,
+     "share_at_0_or_1": 0.0,
+     "sd": 0.19594844204843673,
+     "min": 0.14,
+     "max": 0.93,
+     "vp_pairs": 41064,
+     "vp_pairs_tied_share": 0.017095265926358856
+    }
+   },
+   "duplicate_feature_vectors": 24
+  }
+ },
+ "repeat": {
+  "records": 80,
+  "same_request_bytes": 80,
+  "abs_change": {
+   "approach_change_without_evidence": {
+    "n": 6,
+    "mean": 0.003333333333333327,
+    "max": 0.010000000000000009,
+    "exact_same_share": 0.6666666666666666
+   },
+   "clear_next_step": {
+    "n": 7,
+    "mean": 0.004285714285714286,
+    "max": 0.010000000000000009,
+    "exact_same_share": 0.5714285714285714
+   },
+   "code_likely_fails": {
+    "n": 80,
+    "mean": 0.010125000000000002,
+    "max": 0.03999999999999998,
+    "exact_same_share": 0.35
+   },
+   "on_task": {
+    "n": 40,
+    "mean": 0.004000000000000001,
+    "max": 0.020000000000000018,
+    "exact_same_share": 0.65
+   },
+   "repeating_failed_fix": {
+    "n": 6,
+    "mean": 0.00999999999999999,
+    "max": 0.030000000000000027,
+    "exact_same_share": 0.5
+   },
+   "repeats_previous_code": {
+    "n": 12,
+    "mean": 0.00916666666666666,
+    "max": 0.04999999999999993,
+    "exact_same_share": 0.6666666666666666
+   },
+   "special_cases_visible_tests": {
+    "n": 80,
+    "mean": 0.0015,
+    "max": 0.010000000000000009,
+    "exact_same_share": 0.85
+   },
+   "stated_fix_matches_change": {
+    "n": 6,
+    "mean": 0.0,
+    "max": 0.0,
+    "exact_same_share": 1.0
+   },
+   "unsupported_claim": {
+    "n": 40,
+    "mean": 0.011750000000000003,
+    "max": 0.030000000000000027,
+    "exact_same_share": 0.275
+   }
+  }
+ }
+}

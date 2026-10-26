@@ -508,7 +508,7 @@ These were chosen after seeing the test results. They are descriptive, not tests
 
 ## Where each number comes from
 
-The raw runs (trajectories, hidden labels, Jev and Pinocchio records, ledgers, power samples) are not in the repository (`results/runs/` is git-ignored); they are available from the authors on request. With them in `results/runs/`, the environment (`uv sync`, plus `uv sync --group pinocchio` for Pinocchio) and the sandbox image for grading, these commands recompute every number in this guide. Grading and scoring are already done; re-running them is not needed to recompute the analyses.
+The raw runs (trajectories, hidden labels, Jev and Pinocchio records, ledgers, power samples) are in the repository, in `results/runs/` (`pilot-v1`, `pilot-v1b`, `main-test-v1`, `frontier-dev-v1`, `frontier-test-v1`; other runs are git-ignored). With them, the environment (`uv sync`, plus `uv sync --group pinocchio` for Pinocchio) and the sandbox image for grading, these commands recompute every number in this guide. Grading and scoring are already done; re-running them is not needed to recompute the analyses.
 
 | Numbers | Command | Committed aggregate copy (the script writes to `results/`) |
 | --- | --- | --- |

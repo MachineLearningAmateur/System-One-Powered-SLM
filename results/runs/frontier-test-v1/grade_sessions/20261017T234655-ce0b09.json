@@ -1,0 +1,72 @@
+{
+ "run_id": "frontier-test-v1",
+ "session": "20261017T234655-ce0b09",
+ "source": "frontier_answers.jsonl",
+ "started": "2026-10-17T23:46:55.872649+00:00",
+ "protocol": true,
+ "vllm_running": false,
+ "git_commit": "c71b37319fcd871fa8e11b88fc18f049cb6e8d8b",
+ "git_dirty": false,
+ "grading_code_sha256": "5059da33e47c0c669d10888c1172811b7fe2d38b36f1ff50377a794c52fecbad",
+ "evalplus_cache_sha256": "87352cb827ebd180289ea5949391df9f2b6c50f6ca4ca71a6f224bb724ec2fb3",
+ "container": {
+  "image": "sha256:207c21732a0a8d66b487e1623777bcf4ec4f07bf98b522c50ac97ef3e9cc2d19",
+  "memory": 10737418240,
+  "memory_swap": 10737418240,
+  "nano_cpus": 4000000000,
+  "pids_limit": 512,
+  "cgroupns": "private",
+  "network": "none"
+ },
+ "n_checkpoints": 972,
+ "dropped_executions": [],
+ "exclusions": {
+  "version": "grading-exclusions-v1",
+  "sha256": "f0e5b4f30f891a30de56b01fe259e751e8310d0e365c15b832f87cf1599c82db",
+  "tasks": [
+   "HumanEval/32"
+  ],
+  "excluded_checkpoints": [],
+  "n_before": 972,
+  "n_after": 972
+ },
+ "grader_version": "grader-v3",
+ "grader_settings": {
+  "evalplus": "0.3.1",
+  "min_time_limit": 1.0,
+  "gt_time_limit_factor": 4.0,
+  "fast_check": true,
+  "timeout_per_task": 60,
+  "candidate_budget_bytes": 4294967296
+ },
+ "datasets": {
+  "humaneval": {
+   "vm_size": 3103223808,
+   "n_tasks": 97,
+   "n_codes": 159,
+   "calibration_failures": [],
+   "canary_passed": true,
+   "memory_limit": 7239782400
+  },
+  "mbpp": {
+   "vm_size": 4128354304,
+   "n_tasks": 227,
+   "n_codes": 394,
+   "calibration_failures": [],
+   "canary_passed": true,
+   "memory_limit": 8264572928
+  }
+ },
+ "ended": "2026-10-17T23:50:36.433803+00:00",
+ "elapsed_s": 218.7,
+ "n_codes": 553,
+ "labels": {
+  "pass": 878,
+  "fail": 94,
+  "invalid": 0,
+  "no_code": 0
+ },
+ "first_two_disagree": 0,
+ "first_two_valid_pairs": 553,
+ "checkpoints_first_grade_differs": 0
+}

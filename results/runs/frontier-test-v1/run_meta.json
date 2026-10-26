@@ -1,0 +1,41 @@
+{
+ "run_id": "frontier-test-v1",
+ "split": "test",
+ "protocol": {
+  "mode": "takeover_from_scratch",
+  "model": "anthropic/claude-sonnet-5.5-20260928",
+  "provider": {
+   "order": [
+    "anthropic"
+   ],
+   "allow_fallbacks": false
+  },
+  "reasoning": {
+   "effort": "low"
+  },
+  "max_tokens": 8000,
+  "temperature": "provider default",
+  "messages": "loop.tasks.first_round_messages",
+  "visible_tests_sha256": "5b9dbbd105ae784b0e8a5c71f452cfdbc262ae5891771afe9c3c09227cb5aa43",
+  "split_sha256": "c9d608144df0b6a5237871f23578a1954dcd07179bcf8be10e7bd425fb52e692",
+  "client_sha256": "345930e8f569dd0320ab32be0cda3f7bfc77364561a995ab7c26c65eb7247f19",
+  "git_dirty": false
+ },
+ "git_commit": "c71b37319fcd871fa8e11b88fc18f049cb6e8d8b",
+ "sessions": [
+  {
+   "started": "2026-10-17T21:24:00.159834+00:00",
+   "git_commit": "c71b37319fcd871fa8e11b88fc18f049cb6e8d8b",
+   "limit_usd": 10.0,
+   "samples": 3,
+   "n_tasks": 324,
+   "exclusions": {
+    "version": "grading-exclusions-v1",
+    "sha256": "f0e5b4f30f891a30de56b01fe259e751e8310d0e365c15b832f87cf1599c82db",
+    "tasks": [
+     "HumanEval/32"
+    ]
+   }
+  }
+ ]
+}

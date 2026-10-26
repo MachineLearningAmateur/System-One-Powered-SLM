@@ -109,23 +109,23 @@ git checkout -b gen-qwen3-8b
    ```bash
    uv run --group pinocchio python -c "from huggingface_hub import snapshot_download; from system1.features import pinocchio_input as PI; [snapshot_download(r, revision=v) for r, v in ((PI.BASE_REPO, PI.BASE_REVISION), (PI.ADAPTER_REPO, PI.ADAPTER_REVISION))]"
    ```
-4. EvalPlus data. The setup container has no network. Load the datasets once on the host, which
-   downloads them to the EvalPlus user cache (by default `~/.cache/evalplus/`):
-   ```bash
-   uv run python -c "from evalplus.data import get_human_eval_plus, get_mbpp_plus; get_human_eval_plus(); get_mbpp_plus()"
-   ```
-   Copy `HumanEvalPlus-v0.1.10.jsonl` and `MbppPlus-v0.2.0.jsonl` into `data/evalplus_cache/evalplus/`.
-   Check that these versions match the ones recorded in `configs/split_v1.json` (`source`: HumanEval+
-   v0.1.10, hash `916d9bfe…`; MBPP+ v0.2.0, hash `92743def…`). The recorded MD5s use CRLF
-   JSONL line endings; the official downloads available on October 22 use LF. Converting only the record
-   separators to CRLF reproduces both recorded hashes, and all JSON records parse identically. Verify
-   this equivalence without changing either dataset file or the frozen split. Do **not** run
+4. EvalPlus data. `HumanEvalPlus-v0.1.10.jsonl` and `MbppPlus-v0.2.0.jsonl` are in git, in
+   `data/evalplus_cache/evalplus/`, stored byte for byte (`.gitattributes`: `-text`). The setup container
+   has no network, so it uses these files. Check that they are there and that the versions match the ones
+   recorded in `configs/split_v1.json` (`source`: HumanEval+ v0.1.10, hash `916d9bfe…`; MBPP+ v0.2.0, hash
+   `92743def…`). The recorded MD5s use CRLF JSONL line endings, and the committed copies keep them. The
+   official downloads available on October 22 use LF; converting only the record separators to CRLF
+   reproduces both recorded hashes, and all JSON records parse identically. Do **not** run
    `scripts/make_split.py`; the split is frozen.
 5. Build the sandbox and compute the ground truth:
    ```bash
    docker compose build sandbox
    docker compose --profile setup run --rm sandbox-setup
    ```
+   This writes the two ground-truth `.pkl` files (about 1 GB; not in git) next to the dataset files. They
+   hold run times measured on this machine, which EvalPlus uses for its time limits, so the
+   `evalplus_cache_sha256` in a new `grade_meta.json` differs from the 1.7B runs'. Report it; it is
+   expected.
 
 ## 4. Plan part A (before any new data)
 
@@ -139,6 +139,9 @@ Write `docs/q8b-plan.md` with:
 Commit it (after approval). Parts that come later are amendments with a date.
 
 ## 5. Jev drift check (the 1.7B scores are from October 16–17, 2026)
+
+The 1.7B runs that this step and section 10 read (`pilot-v1`, `pilot-v1b`, `main-test-v1`,
+`frontier-test-v1`) are in git, in `results/runs/`. Only read them; never write into them.
 
 The scorer enforces one Jev version inside a run, not across runs. Before the new scores are compared with
 the old ones, check that Jev still gives the same answers to the same bytes. The check sends no new
@@ -295,7 +298,7 @@ commit skips finished attempts. Do not restart a run that the system stopped wit
 ## 11. What to hand back
 
 - The new run folders `results/runs/q8b-*` and `results/runs/jev-drift-*`, copied to the operator (they
-  stay out of git).
+  stay out of git unless the operator asks; then add them to the exceptions in `.gitignore`).
 - New aggregate result files, copied into `docs/results/` under new names when the operator asks.
 - Optional: `uv run python scripts/export_traces.py --run-id q8b-test-v1` (writes `docs/traces-q8b/` after
   step 3.7).
