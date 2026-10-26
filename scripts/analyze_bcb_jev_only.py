@@ -32,13 +32,14 @@ N_ATTEMPTS = 5
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--run-id", required=True)
+    ap.add_argument("--task-manifest", default="configs/bcb_jev_only_tasks_v1.json")
     args = ap.parse_args()
     out_path = RESULTS / f"bcb_jev_only_analysis_{args.run_id}.json"
     if out_path.exists():
         print("STOP: analysis output already exists; refusing to overwrite")
         return 2
     cfg = json.loads(ROUTERS.read_text(encoding="utf-8"))
-    tasks = set(json.loads(MANIFEST.read_text(encoding="utf-8"))["tasks"])
+    tasks = set(json.loads((ROOT / args.task_manifest).read_text(encoding="utf-8"))["tasks"])
     data = load_rg().load([args.run_id], split="test", require_ok=True)
     all_attempts = {(d["cp"]["task_id"], d["cp"]["attempt"]) for d in data}
     if all_attempts != {(tid, a) for tid in tasks for a in range(N_ATTEMPTS)}:

@@ -1,0 +1,4 @@
+services:
+  bcb-sandbox:
+    volumes:
+      - ./results/datasets/bcb_jev_only_hidden_v2.json:/bcb/hidden.json:ro

@@ -1,0 +1,799 @@
+{
+  "version": "bcb-jev-only-v2",
+  "dataset_revision": "b74c0d0bf70d2c0bc459be537895cca163007f1a",
+  "source_sha256": "d9a4965821c9507ebdfb551c288656b2d5fe553234f5183044333ca8a4018267",
+  "source_manifest_sha256": "3b7551befff4f941248df79daa4f7ba708248a59fd5f6f42685393d76d94dbc0",
+  "eligibility": "v1 selector plus public canonical code passes every frozen visible example",
+  "tasks": {
+    "BigCodeBench/98": {
+      "benchmark": "bigcodebench",
+      "prompt": "import random\nimport string\nfrom collections import Counter\n\ndef task_func(num_strings, string_length):\n    \"\"\"\n    Creates a list of random strings, each of a specified length, and counts the frequency\n    of each character across all strings. The function then returns the characters\n    and their frequencies sorted by frequency in descending order.\n    The random strings are composed of ASCII lowercase characters.\n\n    Parameters:\n        num_strings (int): The number of random strings to generate.\n        string_length (int): The length of each random string.\n\n    Requirements:\n    - random\n    - string\n    - collections.Counter\n\n    Returns:\n        list of tuple: A list of tuples where each tuple contains a character and its count,\n                       sorted by count in descending order.\n\n    Examples:\n    >>> type(task_func(1000, 5)) == list\n    True\n    >>> all(isinstance(pair, tuple) and len(pair) == 2 for pair in task_func(1000, 5))\n    True\n    \"\"\"\n",
+      "entry_point": "task_func",
+      "visible_tests": [
+        {
+          "kind": "compare",
+          "call": "all(isinstance(pair, tuple) and len(pair) == 2 for pair in task_func(1000, 5))",
+          "expected": "True"
+        }
+      ],
+      "visible_source": "docstring",
+      "shown_tests": "",
+      "canonical_fails_visible": false
+    },
+    "BigCodeBench/125": {
+      "benchmark": "bigcodebench",
+      "prompt": "from collections import defaultdict\nimport itertools\nimport json\nimport random\n\ndef task_func(LETTERS, n):\n    \"\"\"\n    Generates all possible combinations of a given set of letters of length 'n'.\n    Counts the occurrences of each letter in these combinations and saves the results\n    in a JSON file. The name of the file is prefix_<random-number-here>.json. The value of\n    <random-number-here> is between 0 and 100. \n\n    Parameters:\n        LETTERS (list): The list of letters to generate combinations from.\n        n (int): The length of the combinations.\n\n    Returns:\n        str: The name of the generated JSON file containing letter counts.\n\n    Requirements:\n    - collections.defaultdict\n    - itertools\n    - json\n    - random\n\n    Examples:\n    >>> isinstance(task_func(['a', 'b', 'c', 'd', 'e'], 3), str)\n    True\n    >>> 'letter_combinations_' in task_func(['a', 'b', 'c', 'd', 'e'], 2)\n    True\n    \"\"\"\n",
+      "entry_point": "task_func",
+      "visible_tests": [
+        {
+          "kind": "compare",
+          "call": "isinstance(task_func(['a', 'b', 'c', 'd', 'e'], 3), str)",
+          "expected": "True"
+        }
+      ],
+      "visible_source": "docstring",
+      "shown_tests": "",
+      "canonical_fails_visible": false
+    },
+    "BigCodeBench/202": {
+      "benchmark": "bigcodebench",
+      "prompt": "import re\nimport json\nfrom collections import Counter\n\n\ndef task_func(json_str, top_n=10):\n    \"\"\"\n    Extract all URLs from a string-serialized JSON dict using a specific URL pattern and return a dict\n    with the URLs as keys and the number of times they appear as values.\n\n    Parameters:\n    json_str (str): The JSON string.\n    top_n (int, Optional): The number of URLs to return. Defaults to 10. \n\n    Returns:\n    dict: A dict with URLs as keys and the number of times they appear as values.\n\n    Requirements:\n    - re\n    - json\n    - collections.Counter\n\n    Example:\n    >>> task_func('{\"name\": \"John\", \"website\": \"https://www.example.com\"}')\n    {'https://www.example.com': 1}\n    \"\"\"\n",
+      "entry_point": "task_func",
+      "visible_tests": [
+        {
+          "kind": "compare",
+          "call": "task_func('{\"name\": \"John\", \"website\": \"https://www.example.com\"}')",
+          "expected": "{'https://www.example.com': 1}"
+        }
+      ],
+      "visible_source": "docstring",
+      "shown_tests": "",
+      "canonical_fails_visible": false
+    },
+    "BigCodeBench/229": {
+      "benchmark": "bigcodebench",
+      "prompt": "import json\nimport random\nfrom datetime import datetime, timedelta\n\n\n# Constants\nUSERS = ['Alice', 'Bob', 'Charlie', 'Dave', 'Eve']\n\ndef task_func(file_path, num_entries, seed=None):\n    \"\"\"\n    Create a JSON file on a specific file path with random user activity data.\n    The number of entries in the JSON file is determined by num_entries. The written JSON file contains a list of dictionaries, with each dictionary representing a log entry with the following keys: 'user', 'action', and 'timestamp'.\n\n    Parameters:\n    file_path (str): The file path where the JSON file should be created.\n    num_entries (int): The number of entries of random data to generate.\n    seed (int, optional): The seed for random data generation. Default is None.\n\n    Returns:\n    str: The file path of the generated JSON file.\n\n    Requirements:\n    - os\n    - json\n    - random\n    - datetime\n\n    Example:\n    >>> task_func('/tmp/log.json', 100)\n    '/tmp/log.json'\n    \"\"\"\n",
+      "entry_point": "task_func",
+      "visible_tests": [
+        {
+          "kind": "compare",
+          "call": "task_func('/tmp/log.json', 100)",
+          "expected": "'/tmp/log.json'"
+        }
+      ],
+      "visible_source": "docstring",
+      "shown_tests": "",
+      "canonical_fails_visible": false
+    },
+    "BigCodeBench/270": {
+      "benchmark": "bigcodebench",
+      "prompt": "import re\nfrom collections import Counter\n\ndef task_func(sentence):\n    \"\"\"\n    Count the occurrence of each word in a sentence and return the result as a dictionary.\n    This function uses a regular expression to find words and a Counter to count their occurrences.\n\n    Parameters:\n    sentence (str): The sentence to count the words in.\n\n    Returns:\n    dict: A dictionary where the keys are the words and the values are their counts.\n\n    Requirements:\n    - re\n    - collections.Counter\n    \n    Example:\n    >>> task_func(\"apple banana apple orange orange orange\")\n    {'apple': 2, 'banana': 1, 'orange': 3}\n    \"\"\"\n",
+      "entry_point": "task_func",
+      "visible_tests": [
+        {
+          "kind": "compare",
+          "call": "task_func(\"apple banana apple orange orange orange\")",
+          "expected": "{'apple': 2, 'banana': 1, 'orange': 3}"
+        }
+      ],
+      "visible_source": "docstring",
+      "shown_tests": "",
+      "canonical_fails_visible": false
+    },
+    "BigCodeBench/295": {
+      "benchmark": "bigcodebench",
+      "prompt": "import itertools\nimport statistics\n\n\n# Refined function after importing required libraries\ndef task_func(elements, subset_size):\n    \"\"\"\n    Generate all subsets of a given size from a tuple and calculate the mean, median, and mode of the sums of the subsets.\n\n    Args:\n    - elements (tuple): A tuple of numbers from which subsets will be generated.\n    - subset_size (int): The size of the subsets to be generated.\n\n    Returns:\n    dict: A dictionary with the mean, median, and mode of the sums of the subsets.\n\n    Requirements:\n    - itertools\n    - statistics\n    \n    Example:\n    >>> task_func((1, 2, 3, 4, 5, 6, 7, 8, 9, 10), 2)\n    {'mean': 11, 'median': 11, 'mode': 11}\n    \"\"\"\n",
+      "entry_point": "task_func",
+      "visible_tests": [
+        {
+          "kind": "compare",
+          "call": "task_func((1, 2, 3, 4, 5, 6, 7, 8, 9, 10), 2)",
+          "expected": "{'mean': 11, 'median': 11, 'mode': 11}"
+        }
+      ],
+      "visible_source": "docstring",
+      "shown_tests": "",
+      "canonical_fails_visible": false
+    },
+    "BigCodeBench/297": {
+      "benchmark": "bigcodebench",
+      "prompt": "import itertools\nimport collections\n\n\ndef task_func(elements, subset_size):\n    \"\"\"\n    Generate all 2-element subsets of a tuple and count the occurrences of each sum in the subsets.\n\n    Returns:\n    dict: A dictionary with the sums and their counts.\n\n    Requirements:\n    - itertools\n    - random\n    - collections\n    \n    \n    Example:\n    >>> dict(task_func((1, 2, 3, 4, 5), 2))\n    {3: 1, 4: 1, 5: 2, 6: 2, 7: 2, 8: 1, 9: 1}\n    \"\"\"\n",
+      "entry_point": "task_func",
+      "visible_tests": [
+        {
+          "kind": "compare",
+          "call": "dict(task_func((1, 2, 3, 4, 5), 2))",
+          "expected": "{3: 1, 4: 1, 5: 2, 6: 2, 7: 2, 8: 1, 9: 1}"
+        }
+      ],
+      "visible_source": "docstring",
+      "shown_tests": "",
+      "canonical_fails_visible": false
+    },
+    "BigCodeBench/305": {
+      "benchmark": "bigcodebench",
+      "prompt": "from collections import Counter\nimport itertools\nimport random\n\n\n# Constants\nALPHABET = 'abcdefghijklmnopqrstuvwxyz'\n\ndef task_func(list_of_lists, seed=0):\n    \"\"\"\n    Count the frequency of each letter in a list of lists. If a list is empty, \n    fill it with a random sample from the alphabet, and then count the letters.\n    \n    Parameters:\n    list_of_lists (list): The list of lists.\n    seed (int): The seed for the random number generator. Defaults to 0.\n    \n    Returns:\n    Counter: A Counter object with the frequency of each letter.\n    \n    Requirements:\n    - collections.Counter\n    - itertools\n    - random.sample\n    \n    Example:\n    >>> dict(task_func([['a', 'b', 'c'], [], ['d', 'e', 'f']]))\n    {'a': 1, 'b': 2, 'c': 1, 'd': 1, 'e': 1, 'f': 1, 'm': 1, 'y': 1, 'n': 1, 'i': 1, 'q': 1, 'p': 1, 'z': 1, 'j': 1, 't': 1}\n    \"\"\"\n",
+      "entry_point": "task_func",
+      "visible_tests": [
+        {
+          "kind": "compare",
+          "call": "dict(task_func([['a', 'b', 'c'], [], ['d', 'e', 'f']]))",
+          "expected": "{'a': 1, 'b': 2, 'c': 1, 'd': 1, 'e': 1, 'f': 1, 'm': 1, 'y': 1, 'n': 1, 'i': 1, 'q': 1, 'p': 1, 'z': 1, 'j': 1, 't': 1}"
+        }
+      ],
+      "visible_source": "docstring",
+      "shown_tests": "",
+      "canonical_fails_visible": false
+    },
+    "BigCodeBench/331": {
+      "benchmark": "bigcodebench",
+      "prompt": "import bisect\nimport random\n\ndef task_func(num, list_length = 5, min_value = 0, max_value = 0):\n    \"\"\"\n    Insert a number into a randomly generated sorted list and return the new sorted list.\n\n    Parameters:\n    num (int): The integer number to insert.\n    list_length (int): The length of the randomly generated list of integers.\n    min_value (int): The minimum value for randomly generated integers.\n    max_value (int): The maximum value for randomly generated integers.\n\n    Returns:\n    tuple: A tuple containing two lists: \n        list[int]: The randomly generated list of integers with the specified length.\n        list[int]: A new sorted list containing the original elements and the inserted number.\n    \n    Requirements:\n    - bisect\n    - random\n\n    Example:\n    >>> random.seed(0)\n    >>> task_func(4, 5, 100, 100)\n    ([100, 100, 100, 100, 100], [4, 100, 100, 100, 100, 100])\n    >>> task_func(15, 0, 10, 20)\n    ([], [15])\n    \"\"\"\n",
+      "entry_point": "task_func",
+      "visible_tests": [
+        {
+          "kind": "compare",
+          "call": "task_func(4, 5, 100, 100)",
+          "expected": "([100, 100, 100, 100, 100], [4, 100, 100, 100, 100, 100])"
+        },
+        {
+          "kind": "compare",
+          "call": "task_func(15, 0, 10, 20)",
+          "expected": "([], [15])"
+        }
+      ],
+      "visible_source": "docstring",
+      "shown_tests": "",
+      "canonical_fails_visible": false
+    },
+    "BigCodeBench/394": {
+      "benchmark": "bigcodebench",
+      "prompt": "import collections\nimport string\nimport random\n\n\ndef task_func(length, seed=0):\n    \"\"\"\n    Generate a random string of a given length using ASCII letters and calculate the frequency of each character.​\n\n    Parameters:\n    length (int): The length of the random string to be generated.\n    seed (int, Optional): The seed to be used for the random number generator. Default is 0.\n\n    Returns:\n    dict: A dictionary with the frequency of each character in the generated string.\n\n    Requirements:\n    - The function uses the 'collections', 'string', and 'random' modules from the Python standard library.\n    - The generated string consists only of ASCII letters.\n\n    Example:\n    >>> result = task_func(4)\n    >>> isinstance(result, dict)  # The result should be a dictionary\n    True\n    >>> all(key in string.ascii_letters for key in result.keys())  # All keys should be ASCII letters\n    True\n    >>> task_func(5, 0)  # The result should be deterministic for a given seed\n    {'y': 1, 'W': 1, 'A': 1, 'c': 1, 'q': 1}\n    \"\"\"\n",
+      "entry_point": "task_func",
+      "visible_tests": [
+        {
+          "kind": "compare",
+          "call": "task_func(5, 0)  # The result should be deterministic for a given seed",
+          "expected": "{'y': 1, 'W': 1, 'A': 1, 'c': 1, 'q': 1}"
+        }
+      ],
+      "visible_source": "docstring",
+      "shown_tests": "",
+      "canonical_fails_visible": false
+    },
+    "BigCodeBench/433": {
+      "benchmark": "bigcodebench",
+      "prompt": "import base64\nimport hashlib\nimport hmac\nimport binascii\n\ndef task_func(s, signature, secret_key):\n    \"\"\"\n    Validates the HMAC SHA-1 signature of a base64-encoded message against a provided signature using a specified secret key.\n    This function first decodes the base64-encoded message, then computes its HMAC SHA-1 hash using the provided secret key,\n    and finally compares this computed hash with the provided signature.\n\n    Parameters:\n    s (str): The base64-encoded message to validate.\n    signature (str): The HMAC SHA-1 signature to compare against.\n    secret_key (str): The secret key used to compute the HMAC SHA-1 hash.\n\n    Returns:\n    bool: Returns True if the provided signature matches the computed signature, False otherwise.\n\n    Requirements:\n    - base64\n    - hashlib\n    - hmac\n    - binascii\n\n    Examples:\n    >>> task_func('SGVsbG8gV29ybGQ=', 'c47c23299efca3c220f4c19a5f2e4ced14729322', 'my_secret_key')\n    True\n\n    >>> task_func('SGVsbG8gV29ybGQ=', 'incorrect_signature', 'my_secret_key')\n    False\n    \"\"\"\n",
+      "entry_point": "task_func",
+      "visible_tests": [
+        {
+          "kind": "compare",
+          "call": "task_func('SGVsbG8gV29ybGQ=', 'c47c23299efca3c220f4c19a5f2e4ced14729322', 'my_secret_key')",
+          "expected": "True"
+        },
+        {
+          "kind": "compare",
+          "call": "task_func('SGVsbG8gV29ybGQ=', 'incorrect_signature', 'my_secret_key')",
+          "expected": "False"
+        }
+      ],
+      "visible_source": "docstring",
+      "shown_tests": "",
+      "canonical_fails_visible": false
+    },
+    "BigCodeBench/453": {
+      "benchmark": "bigcodebench",
+      "prompt": "import re\nimport string\nfrom random import choice\n\ndef task_func(n, pattern):\n    \"\"\"\n    Generates a random string of a specified length that conforms to a given regular expression pattern.\n    The function repeatedly generates random strings, using both uppercase and lowercase ASCII letters,\n    of the specified length until one matches the pattern.\n\n    Parameters:\n    n (int): The length of the string to be generated.\n    pattern (str): A regular expression pattern the generated string must match, including start and end anchors.\n\n    Returns:\n    str: A randomly generated string that matches the specified pattern.\n\n    Requirements:\n    - re\n    - string\n    - random.choice\n\n    Examples:\n    >>> len(task_func(5, '[a-z]*')) == 5\n    True\n\n    >>> bool(re.match('^[A-Z]+$', task_func(3, '^[A-Z]+$')))\n    True\n    \"\"\"\n",
+      "entry_point": "task_func",
+      "visible_tests": [
+        {
+          "kind": "compare",
+          "call": "bool(re.match('^[A-Z]+$', task_func(3, '^[A-Z]+$')))",
+          "expected": "True"
+        }
+      ],
+      "visible_source": "docstring",
+      "shown_tests": "",
+      "canonical_fails_visible": false
+    },
+    "BigCodeBench/464": {
+      "benchmark": "bigcodebench",
+      "prompt": "import json\nfrom datetime import datetime\nfrom decimal import Decimal\n\ndef task_func(my_obj):\n    \"\"\"\n    Serializes an object to a JSON string, adding support for datetime and Decimal data types.\n    \n    Handle complex data types not natively supported by the json module's default encoder. The `My_class` parameter is reserved for future use and does \n    not affect the current implementation.\n    \n    Parameters:\n    - my_obj (object): The object to serialize, can include complex types such as datetime and Decimal.\n    \n    Returns:\n    - str: A JSON-formatted string representing `my_obj`, with datetime and Decimal objects properly serialized.\n        \n    Requirements:\n    - json\n    - datetime.datetime\n    - decimal.Decimal\n    \n    Examples:\n    Serialize a dictionary containing datetime and Decimal:\n    >>> result = task_func({'time': datetime(2023, 4, 1, 12, 0), 'amount': Decimal('10.99')})\n    >>> '2023-04-01T12:00:00' in result and '10.99' in result\n    True\n\n    Serialize a simple dictionary:\n    >>> task_func({'name': 'Alice', 'age': 30})\n    '{\"name\": \"Alice\", \"age\": 30}'\n    \"\"\"\n",
+      "entry_point": "task_func",
+      "visible_tests": [
+        {
+          "kind": "compare",
+          "call": "task_func({'name': 'Alice', 'age': 30})",
+          "expected": "'{\"name\": \"Alice\", \"age\": 30}'"
+        }
+      ],
+      "visible_source": "docstring",
+      "shown_tests": "",
+      "canonical_fails_visible": false
+    },
+    "BigCodeBench/466": {
+      "benchmark": "bigcodebench",
+      "prompt": "import json\nfrom enum import Enum\n\nclass Color(Enum):\n    RED = 1\n    GREEN = 2\n    BLUE = 3\n\n\ndef task_func(my_obj):\n    \"\"\"\n    Serializes an object into a JSON string with support for complex data types like Enum.\n    The function uses a custom JSONEncoder to handle Enum types by converting them to their names or values.\n\n    Parameters:\n    my_obj (object): The object to be serialized. Can be a dictionary, list, etc.\n\n    Returns:\n    str: The serialized JSON string of the object.\n\n    Requirements:\n    - json\n    - enum\n\n    Examples:\n    Serialize a dictionary containing Enum.\n    >>> result = task_func({'color': Color.RED})\n    >>> 'RED' in result\n    True\n\n    Serialize a simple dictionary.\n    >>> task_func({'name': 'Alice', 'age': 30})\n    '{\"name\": \"Alice\", \"age\": 30}'\n    \"\"\"\n",
+      "entry_point": "task_func",
+      "visible_tests": [
+        {
+          "kind": "compare",
+          "call": "task_func({'name': 'Alice', 'age': 30})",
+          "expected": "'{\"name\": \"Alice\", \"age\": 30}'"
+        }
+      ],
+      "visible_source": "docstring",
+      "shown_tests": "",
+      "canonical_fails_visible": false
+    },
+    "BigCodeBench/542": {
+      "benchmark": "bigcodebench",
+      "prompt": "import hashlib\nimport random\nimport struct\n\nKEYS = ['470FC614', '4A0FC614', '4B9FC614', '4C8FC614', '4D7FC614']\n\n\ndef task_func(hex_keys=KEYS, seed=42):\n    \"\"\"\n    Given a list of hexadecimal string keys, this function selects one at random,\n    converts it into a floating-point number, and then computes its MD5 hash. An optional\n    seed parameter allows for deterministic random choices for testing purposes.\n\n    Parameters:\n    hex_keys (list of str): A list of hexadecimal strings to choose from.\n    seed (int, optional): A seed for the random number generator to ensure deterministic behavior.\n\n    Returns:\n    str: The MD5 hash of the floating-point number derived from the randomly selected hexadecimal string.\n\n    Raises:\n    ValueError: If contains invalid hexadecimal strings.\n\n    Requirements:\n    - struct\n    - hashlib\n    - random\n\n    Example:\n    >>> task_func(['1a2b3c4d', '5e6f7g8h'])\n    '426614caa490f2c185aebf58f1d4adac'\n    \"\"\"\n",
+      "entry_point": "task_func",
+      "visible_tests": [
+        {
+          "kind": "compare",
+          "call": "task_func(['1a2b3c4d', '5e6f7g8h'])",
+          "expected": "'426614caa490f2c185aebf58f1d4adac'"
+        }
+      ],
+      "visible_source": "docstring",
+      "shown_tests": "",
+      "canonical_fails_visible": false
+    },
+    "BigCodeBench/666": {
+      "benchmark": "bigcodebench",
+      "prompt": "from itertools import combinations\nimport math\n\ndef task_func(seq, letter_weight_dict):\n    \"\"\"\n    Find the subsequence in a string that has the maximum total weight based on the weights given for each character. \n    The weights are assigned randomly and a subsequence is a sequence that can be derived from another sequence by deleting some elements without changing the order of the remaining elements.\n\n    Parameters:\n    - seq (str): The input string.\n    - letter_weight_dict (dict): A dictionary with the weights for each character.\n\n    Returns:\n    - str: The subsequence with the highest weight.\n\n    Requirements:\n    - itertools\n    - math\n\n    Example:\n    >>> task_func('abc', {'a': 1, 'b': 2, 'c': 3})\n    'abc'\n    >>> task_func('aabc', {'a': 10, 'b': -5, 'c': 3})\n    'aac'\n    \"\"\"\n",
+      "entry_point": "task_func",
+      "visible_tests": [
+        {
+          "kind": "compare",
+          "call": "task_func('abc', {'a': 1, 'b': 2, 'c': 3})",
+          "expected": "'abc'"
+        },
+        {
+          "kind": "compare",
+          "call": "task_func('aabc', {'a': 10, 'b': -5, 'c': 3})",
+          "expected": "'aac'"
+        }
+      ],
+      "visible_source": "docstring",
+      "shown_tests": "",
+      "canonical_fails_visible": false
+    },
+    "BigCodeBench/667": {
+      "benchmark": "bigcodebench",
+      "prompt": "import heapq\nimport collections\n\ndef task_func(x, n):\n    \"\"\"\n    Find the n most common letters in a dictionary, x, where the key letters and the values are their frequencies.\n\n    Parameters:\n    - x (dict): The dictionary of letter frequencies.\n    - n (int): The number of most frequent letters to return.\n\n    Returns:\n    - list: The n most frequent letters.\n\n    Requirements:\n    - heapq\n    - collections\n\n    Example:\n    >>> task_func({'a': 1, 'b': 2, 'c': 3}, 2)\n    ['c', 'b']\n    \"\"\"\n",
+      "entry_point": "task_func",
+      "visible_tests": [
+        {
+          "kind": "compare",
+          "call": "task_func({'a': 1, 'b': 2, 'c': 3}, 2)",
+          "expected": "['c', 'b']"
+        }
+      ],
+      "visible_source": "docstring",
+      "shown_tests": "",
+      "canonical_fails_visible": false
+    },
+    "BigCodeBench/668": {
+      "benchmark": "bigcodebench",
+      "prompt": "import itertools\nimport math\n\ndef task_func(x):\n    \"\"\"\n    Find the sub-sequence of a dictionary, x, with the minimum total length, where the keys are letters and the values are their lengths.\n\n    Parameters:\n    - x (dict): The dictionary of letter lengths.\n\n    Returns:\n    - list: The subsequence with the minimum total length.\n\n    Requirements:\n    - itertools\n    - math\n\n    Example:\n    >>> task_func({'a': 1, 'b': 2, 'c': 3})\n    ['a']\n    >>> task_func({'a': 1, 'b': -2, 'c': -5, 'd': 4})\n    ['b', 'c']\n    \"\"\"\n",
+      "entry_point": "task_func",
+      "visible_tests": [
+        {
+          "kind": "compare",
+          "call": "task_func({'a': 1, 'b': 2, 'c': 3})",
+          "expected": "['a']"
+        },
+        {
+          "kind": "compare",
+          "call": "task_func({'a': 1, 'b': -2, 'c': -5, 'd': 4})",
+          "expected": "['b', 'c']"
+        }
+      ],
+      "visible_source": "docstring",
+      "shown_tests": "",
+      "canonical_fails_visible": false
+    },
+    "BigCodeBench/670": {
+      "benchmark": "bigcodebench",
+      "prompt": "from itertools import combinations\nimport math\n\ndef task_func(x, w):\n    \"\"\"\n    Find the continuous substring of x, which has the maximum total weight, given a dictionary where the keys are characters and the values are their weights.\n\n    Parameters:\n    - x (str): The input string.\n    - w (dict): The dictionary of character weights.\n\n    Returns:\n    - max_substr (str): The continuous substring with the highest weight.\n\n    Requirements:\n    - itertools\n    - math\n\n    Example:\n    >>> task_func('c', {'a': 1, 'b': 2, 'c': 3})\n    'c'\n    >>> task_func('abc', {'a': 10, 'b': -5, 'c': 3})\n    'a'\n    \"\"\"\n",
+      "entry_point": "task_func",
+      "visible_tests": [
+        {
+          "kind": "compare",
+          "call": "task_func('c', {'a': 1, 'b': 2, 'c': 3})",
+          "expected": "'c'"
+        },
+        {
+          "kind": "compare",
+          "call": "task_func('abc', {'a': 10, 'b': -5, 'c': 3})",
+          "expected": "'a'"
+        }
+      ],
+      "visible_source": "docstring",
+      "shown_tests": "",
+      "canonical_fails_visible": false
+    },
+    "BigCodeBench/682": {
+      "benchmark": "bigcodebench",
+      "prompt": "from collections import Counter\nimport math\n\ndef task_func(nested_dict):\n    \"\"\"\n    Aggregate the values of the same keys from a nested dictionary and remove the \"ele\" key. For each remaining key take the sine.\n    \n    Parameters:\n    - nested_dict (dict): The nested dictionary. Default is NESTED_DICT constant.\n    \n    Returns:\n    - dict: A dictionary with aggregated values.\n\n    Requirements:\n    - math\n    - collections\n\n    Example:\n    >>> task_func({\n    ...     'dict1': {'ale': 1, 'ele': 2, 'ile': 3},\n    ...     'dict2': {'ele': 4, 'ole': 5, 'ule': 6},\n    ...     'dict3': {'ile': 7, 'ale': 8, 'ele': 9}\n    ... })\n    {'ale': 0.4121184852417566, 'ile': -0.5440211108893698, 'ole': -0.9589242746631385, 'ule': -0.27941549819892586}\n    \"\"\"\n",
+      "entry_point": "task_func",
+      "visible_tests": [
+        {
+          "kind": "compare",
+          "call": "task_func({\n    'dict1': {'ale': 1, 'ele': 2, 'ile': 3},\n    'dict2': {'ele': 4, 'ole': 5, 'ule': 6},\n    'dict3': {'ile': 7, 'ale': 8, 'ele': 9}\n})",
+          "expected": "{'ale': 0.4121184852417566, 'ile': -0.5440211108893698, 'ole': -0.9589242746631385, 'ule': -0.27941549819892586}"
+        }
+      ],
+      "visible_source": "docstring",
+      "shown_tests": "",
+      "canonical_fails_visible": false
+    },
+    "BigCodeBench/733": {
+      "benchmark": "bigcodebench",
+      "prompt": "import re\nimport string\n\ndef task_func(content):\n    \"\"\"Count the non-stop words in a sentence without the last word.\n\n    Parameters:\n    - content (str): The sentence to count non-stopwords from.\n\n    Returns:\n    - count (int): The count of non-stopwords.\n\n    Requirements:\n    - re\n    - string\n\n    Example:\n    >>> task_func('this is an example content')\n    1\n    \"\"\"\n",
+      "entry_point": "task_func",
+      "visible_tests": [
+        {
+          "kind": "compare",
+          "call": "task_func('this is an example content')",
+          "expected": "1"
+        }
+      ],
+      "visible_source": "docstring",
+      "shown_tests": "",
+      "canonical_fails_visible": false
+    },
+    "BigCodeBench/766": {
+      "benchmark": "bigcodebench",
+      "prompt": "import re\nimport collections\n\n\ndef task_func(string, patterns=['nnn', 'aaa', 'sss', 'ddd', 'fff']):\n    \"\"\"\n    Counts the occurrence of specific patterns in a string.\n    \n    Parameters:\n    string (str): The input string.\n    patterns (list[str], optional): List of patterns to search for. Defaults to ['nnn', 'aaa', 'sss', 'ddd', 'fff'].\n    \n    Returns:\n    dict: A dictionary with patterns as keys and their counts as values.\n\n    Raises:\n    - TypeError: If string is not a str.\n    - TypeError: If patterns is not a list of str.\n    \n    Requirements:\n    - re\n    - collections\n    \n    Example:\n    >>> task_func(\"nnnaaaasssdddeeefffggg\")\n    {'nnn': 1, 'aaa': 1, 'sss': 1, 'ddd': 1, 'fff': 1}\n    >>> task_func('asdfasdfasdfasdaaaaf', patterns=['a', 'asdf'])\n    {'a': 8, 'asdf': 3}\n    >>> task_func('123kajhdlkfah12345k,jk123', patterns=['123', '1234'])\n    {'123': 3, '1234': 1}\n    \"\"\"\n",
+      "entry_point": "task_func",
+      "visible_tests": [
+        {
+          "kind": "compare",
+          "call": "task_func(\"nnnaaaasssdddeeefffggg\")",
+          "expected": "{'nnn': 1, 'aaa': 1, 'sss': 1, 'ddd': 1, 'fff': 1}"
+        },
+        {
+          "kind": "compare",
+          "call": "task_func('asdfasdfasdfasdaaaaf', patterns=['a', 'asdf'])",
+          "expected": "{'a': 8, 'asdf': 3}"
+        },
+        {
+          "kind": "compare",
+          "call": "task_func('123kajhdlkfah12345k,jk123', patterns=['123', '1234'])",
+          "expected": "{'123': 3, '1234': 1}"
+        }
+      ],
+      "visible_source": "docstring",
+      "shown_tests": "",
+      "canonical_fails_visible": false
+    },
+    "BigCodeBench/769": {
+      "benchmark": "bigcodebench",
+      "prompt": "from collections import Counter\nimport itertools\nimport operator\n\ndef task_func(list_of_menuitems):\n    \"\"\"\n    Faced with a nested list of menu items, flatten the list and return the most common menu item.\n\n    Parameters:\n    - list_of_menuitems (list): A nested list of menu items.\n\n    Returns:\n    - str: The most common menu item.\n\n    Requirements:\n    - collections\n    - itertools\n    - operator\n\n    Example:\n    >>> task_func([['Pizza', 'Burger'], ['Pizza', 'Coke'], ['Pasta', 'Coke']])\n    'Pizza'\n    \"\"\"\n",
+      "entry_point": "task_func",
+      "visible_tests": [
+        {
+          "kind": "compare",
+          "call": "task_func([['Pizza', 'Burger'], ['Pizza', 'Coke'], ['Pasta', 'Coke']])",
+          "expected": "'Pizza'"
+        }
+      ],
+      "visible_source": "docstring",
+      "shown_tests": "",
+      "canonical_fails_visible": false
+    },
+    "BigCodeBench/775": {
+      "benchmark": "bigcodebench",
+      "prompt": "from string import ascii_lowercase\nimport re\nfrom collections import Counter\n\n# Constants\nLETTERS_PATTERN = re.compile(r'^(.*?)-[a-z]$')\nLETTERS = ascii_lowercase\n\ndef task_func(string):\n    \"\"\"\n    If a string occurs, divide it the last time \"-\" occurs and count the frequency of each lowercase letter in the prefix of the string.\n    \n    Parameters:\n    - string (str): The input string.\n\n    Requirements:\n    - string\n    - re\n    - collections\n\n    Returns:\n    - dict: A dictionary with the frequency of each lowercase letter.\n\n    Example:\n    >>> task_func('abc-def-ghij')\n    {'a': 1, 'b': 1, 'c': 1, 'd': 1, 'e': 1, 'f': 1, 'g': 0, 'h': 0, 'i': 0, 'j': 0, 'k': 0, 'l': 0, 'm': 0, 'n': 0, 'o': 0, 'p': 0, 'q': 0, 'r': 0, 's': 0, 't': 0, 'u': 0, 'v': 0, 'w': 0, 'x': 0, 'y': 0, 'z': 0}\n    \"\"\"\n",
+      "entry_point": "task_func",
+      "visible_tests": [
+        {
+          "kind": "compare",
+          "call": "task_func('abc-def-ghij')",
+          "expected": "{'a': 1, 'b': 1, 'c': 1, 'd': 1, 'e': 1, 'f': 1, 'g': 0, 'h': 0, 'i': 0, 'j': 0, 'k': 0, 'l': 0, 'm': 0, 'n': 0, 'o': 0, 'p': 0, 'q': 0, 'r': 0, 's': 0, 't': 0, 'u': 0, 'v': 0, 'w': 0, 'x': 0, 'y': 0, 'z': 0}"
+        }
+      ],
+      "visible_source": "docstring",
+      "shown_tests": "",
+      "canonical_fails_visible": false
+    },
+    "BigCodeBench/817": {
+      "benchmark": "bigcodebench",
+      "prompt": "from collections import Counter\nimport logging\n\ndef task_func(letter_list, element, log_path):\n    \"\"\"\n    Count the frequency of a particular letter in a given list of letters with logging.\n\n    Logs are written to a file named 'task_func.log' with encoding 'utf-8' and logging level DEBUG.\n    The log file is created by the function or overwritten if already exists.\n    For each function call the following is logged with the respective logging level:\n        - info: f\"Function called with list: {letter_list} and element: {element}\"\n        - error: if the element is not in the letter list\n        - info: f\"Frequency of '{element}' is {element_frequency}\"\n    \n    After the last info has been logged, the logging is shutdown, such that all\n    files are released.\n\n    Parameters:\n    letter_list (list of str): The list of letters.\n    element (str): The specific letter for which the frequency needs to be counted.\n    log_path (str): the path to the folder in which to save the log file\n\n    Returns:\n    int: The frequency of the letter.\n\n    Raises:\n    ValueError: If element is not in letter_list.\n\n    Requirements:\n    - collections\n    - logging\n\n    Example:\n    >>> task_func(['a', 'b', 'a', 'c', 'a'], 'a', log_path='./')\n    3\n    >>> with open('task_func.log') as log:\n    ...     print(log.read())\n    INFO:Function called with list: ['a', 'b', 'a', 'c', 'a'] and element: a\n    INFO:Frequency of 'a' is 3\n    <BLANKLINE>\n\n    >>> task_func(['x', 'y', 'z'], 'y', log_path='./')\n    1\n    >>> with open('task_func.log') as log:\n    ...     print(log.read())\n    INFO:Function called with list: ['x', 'y', 'z'] and element: y\n    INFO:Frequency of 'y' is 1\n    <BLANKLINE>\n\n    >>> try:\n    ...     task_func(['x', 'y', 'z'], 'a', log_path='./')\n    ... except:\n    ...     with open('task_func.log') as log:\n    ...        print(log.read())\n    INFO:Function called with list: ['x', 'y', 'z'] and element: a\n    ERROR:The element is not in the letter list.\n    <BLANKLINE>\n\n    \"\"\"\n",
+      "entry_point": "task_func",
+      "visible_tests": [
+        {
+          "kind": "compare",
+          "call": "task_func(['a', 'b', 'a', 'c', 'a'], 'a', log_path='./')",
+          "expected": "3"
+        },
+        {
+          "kind": "compare",
+          "call": "task_func(['x', 'y', 'z'], 'y', log_path='./')",
+          "expected": "1"
+        }
+      ],
+      "visible_source": "docstring",
+      "shown_tests": "",
+      "canonical_fails_visible": false
+    },
+    "BigCodeBench/818": {
+      "benchmark": "bigcodebench",
+      "prompt": "import re\nimport string\n\n# Constants\nPUNCTUATION = string.punctuation\n\ndef task_func(text):\n    \"\"\"\n    Divide a string into words, remove punctuation marks and convert them to lowercase letters.\n\n    Parameters:\n    - text (str): The input string.\n\n    Returns:\n    - cleaned_words (list): A list of cleaned words.\n\n    Requirements:\n    - re\n    - string\n\n    Example:\n    >>> task_func(\"Hello, world! This is a test.\")\n    ['hello', 'world', 'this', 'is', 'a', 'test']\n    \"\"\"\n",
+      "entry_point": "task_func",
+      "visible_tests": [
+        {
+          "kind": "compare",
+          "call": "task_func(\"Hello, world! This is a test.\")",
+          "expected": "['hello', 'world', 'this', 'is', 'a', 'test']"
+        }
+      ],
+      "visible_source": "docstring",
+      "shown_tests": "",
+      "canonical_fails_visible": false
+    },
+    "BigCodeBench/820": {
+      "benchmark": "bigcodebench",
+      "prompt": "import random\nimport string\n\n# Constants\nLETTERS = string.ascii_letters\n\ndef task_func(num_words, word_length):\n    \"\"\"\n    Create a list of random words of a certain length.\n\n    Parameters:\n    - num_words (int): The number of words to generate.\n    - word_length (int): The length of each word.\n\n    Returns:\n    - words (list): A list of random words.\n\n    Requirements:\n    - random\n    - string\n\n    Raises:\n    - ValueError: If num_words or word_length is negative.\n    \n    Example:\n    >>> task_func(5, 3)\n    ['Ohb', 'Vrp', 'oiV', 'gRV', 'IfL']\n    \"\"\"\n",
+      "entry_point": "task_func",
+      "visible_tests": [
+        {
+          "kind": "compare",
+          "call": "task_func(5, 3)",
+          "expected": "['Ohb', 'Vrp', 'oiV', 'gRV', 'IfL']"
+        }
+      ],
+      "visible_source": "docstring",
+      "shown_tests": "",
+      "canonical_fails_visible": false
+    },
+    "BigCodeBench/822": {
+      "benchmark": "bigcodebench",
+      "prompt": "import random\nimport string\n\n# Constants\nLETTERS = string.ascii_letters\nDIGITS = string.digits\n\ndef task_func(length, num_digits):\n    \"\"\"\n    Generate a random password with a specified length and number of digits.\n\n    The function creates a random password consisting of letters and digits. The total length of the password\n    and the number of digits in it are specified by the user. The characters in the password are randomly\n    shuffled to ensure variability.\n\n    Parameters:\n    - length (int): The total length of the password. Must be a positive integer.\n    - num_digits (int): The number of digits to be included in the password. Must be a non-negative integer and\n                      less than or equal to the total length of the password.\n\n    Returns:\n    - str: A string representing the randomly generated password.\n\n    Requirements:\n    - random\n    - string\n\n    Examples:\n    >>> task_func(10, 3)\n    'Vpbr812Ooh'\n    >>> task_func(5, 2)\n    '4Ob3h'\n    \"\"\"\n",
+      "entry_point": "task_func",
+      "visible_tests": [
+        {
+          "kind": "compare",
+          "call": "task_func(10, 3)",
+          "expected": "'Vpbr812Ooh'"
+        },
+        {
+          "kind": "compare",
+          "call": "task_func(5, 2)",
+          "expected": "'4Ob3h'"
+        }
+      ],
+      "visible_source": "docstring",
+      "shown_tests": "",
+      "canonical_fails_visible": false
+    },
+    "BigCodeBench/824": {
+      "benchmark": "bigcodebench",
+      "prompt": "import re\nimport string\n\n# Constants\nPUNCTUATION = string.punctuation\n\ndef task_func(text):\n    \"\"\"\n    Count the number of words and punctuation marks in a string.\n\n    Parameters:\n    - text (str): The input string.\n\n    Returns:\n    - tuple: A tuple containing the number of words and punctuation marks.\n\n    Requirements:\n    - re\n    - string\n\n    Example:\n    >>> task_func(\"Hello, world! This is a test.\")\n    (6, 3)\n    \"\"\"\n",
+      "entry_point": "task_func",
+      "visible_tests": [
+        {
+          "kind": "compare",
+          "call": "task_func(\"Hello, world! This is a test.\")",
+          "expected": "(6, 3)"
+        }
+      ],
+      "visible_source": "docstring",
+      "shown_tests": "",
+      "canonical_fails_visible": false
+    },
+    "BigCodeBench/834": {
+      "benchmark": "bigcodebench",
+      "prompt": "import binascii\nimport io\nimport gzip\n\ndef task_func(compressed_hex):\n    \"\"\"\n    Uncompress a gzip-compressed hexadecimal string and decrypt the result to UTF-8.\n    \n    Parameters:\n    - compressed_hex (str): The gzip-compressed hexadecimal string.\n    \n    Returns:\n    - decoded_string (str): The decoded and decompressed string in UTF-8 format, or an error message.\n    \n    Requirements:\n    - binascii\n    - io\n    - gzip\n    \n    Example:\n    >>> task_func('1f8b08000000000002ff0b49494e55560304000000ffff8b202d0b000000')\n    'Error during decompression: CRC check failed 0xff000000 != 0x41449975'\n    \"\"\"\n",
+      "entry_point": "task_func",
+      "visible_tests": [
+        {
+          "kind": "compare",
+          "call": "task_func('1f8b08000000000002ff0b49494e55560304000000ffff8b202d0b000000')",
+          "expected": "'Error during decompression: CRC check failed 0xff000000 != 0x41449975'"
+        }
+      ],
+      "visible_source": "docstring",
+      "shown_tests": "",
+      "canonical_fails_visible": false
+    },
+    "BigCodeBench/852": {
+      "benchmark": "bigcodebench",
+      "prompt": "import random\nimport string\n\ndef task_func(max_length, n_samples, seed=None):\n    \"\"\"Generate a list containing random strings of lowercase letters. Each string's length varies from 1 to `max_length`.\n    An optional seed can be set for the random number generator for reproducible results.\n\n    Note:\n    The function utilizes the `random.choices` function to generate random strings and combines them into a list.\n\n    Parameters:\n    max_length (int): The maximum length of the strings.\n    n_samples (int): The number of strings to return.\n    seed (int, optional): A seed for the random number generator. If None, the generator is initialized without a seed.\n\n    Returns:\n    list: A list containing random strings. Each string is a random combination of lowercase letters, \n    and their lengths will vary from 1 to `max_length`.\n\n    Requirements:\n    - random\n    - string\n\n    Raises:\n    ValueError: If max_length is smaller than 1.\n\n    Example:\n    >>> task_func(3, 12, seed=12)\n    ['gn', 'da', 'mq', 'rp', 'aqz', 'ex', 'o', 'b', 'vru', 'a', 'v', 'ncz']\n    >>> task_func(5, n_samples=8, seed=1)\n    ['ou', 'g', 'tmjf', 'avlt', 's', 'sfy', 'aao', 'rzsn']\n\n    \"\"\"\n",
+      "entry_point": "task_func",
+      "visible_tests": [
+        {
+          "kind": "compare",
+          "call": "task_func(3, 12, seed=12)",
+          "expected": "['gn', 'da', 'mq', 'rp', 'aqz', 'ex', 'o', 'b', 'vru', 'a', 'v', 'ncz']"
+        },
+        {
+          "kind": "compare",
+          "call": "task_func(5, n_samples=8, seed=1)",
+          "expected": "['ou', 'g', 'tmjf', 'avlt', 's', 'sfy', 'aao', 'rzsn']"
+        }
+      ],
+      "visible_source": "docstring",
+      "shown_tests": "",
+      "canonical_fails_visible": false
+    },
+    "BigCodeBench/860": {
+      "benchmark": "bigcodebench",
+      "prompt": "import re\nimport random\nimport string\n\ndef task_func(n, pattern, seed=None):\n    \"\"\"\n    Generate a random string of length 'n' and find all non-overlapping matches\n    of the regex 'pattern'.\n\n    The function generates a random string of ASCII Letters and Digits using \n    the random module. By providing a seed the results are reproducable.\n    Non overlapping matches of the provided pattern are then found using the re\n    module.\n    \n    Parameters:\n    n (int): The length of the random string to be generated.\n    pattern (str): The regex pattern to search for in the random string.\n    seed (int, optional): A seed parameter for the random number generator for reproducible results. Defaults to None.\n\n    Returns:\n    list: A list of all non-overlapping matches of the regex pattern in the generated string.\n\n    Requirements:\n    - re\n    - random\n    - string\n\n    Example:\n    >>> task_func(100, r'[A-Za-z]{5}', seed=12345)\n    ['mrKBk', 'BqJOl', 'NJlwV', 'UfHVA', 'LGkjn', 'vubDv', 'GSVAa', 'kXLls', 'RKlVy', 'vZcoh', 'FnVZW', 'JQlqL']\n\n    >>> task_func(1000, r'[1-9]{2}', seed=1)\n    ['51', '84', '16', '79', '16', '28', '63', '82', '94', '18', '68', '42', '95', '33', '64', '38', '69', '56', '32', '16', '18', '19', '27']\n     \"\"\"\n",
+      "entry_point": "task_func",
+      "visible_tests": [
+        {
+          "kind": "compare",
+          "call": "task_func(100, r'[A-Za-z]{5}', seed=12345)",
+          "expected": "['mrKBk', 'BqJOl', 'NJlwV', 'UfHVA', 'LGkjn', 'vubDv', 'GSVAa', 'kXLls', 'RKlVy', 'vZcoh', 'FnVZW', 'JQlqL']"
+        },
+        {
+          "kind": "compare",
+          "call": "task_func(1000, r'[1-9]{2}', seed=1)",
+          "expected": "['51', '84', '16', '79', '16', '28', '63', '82', '94', '18', '68', '42', '95', '33', '64', '38', '69', '56', '32', '16', '18', '19', '27']"
+        }
+      ],
+      "visible_source": "docstring",
+      "shown_tests": "",
+      "canonical_fails_visible": false
+    },
+    "BigCodeBench/912": {
+      "benchmark": "bigcodebench",
+      "prompt": "from collections import Counter\nimport itertools\n\ndef task_func(letters: list, repetitions: int) -> dict:\n    \"\"\"\n    Count the frequency of each letter in a list after repeating it a given number of times.\n\n    Parameters:\n    - letters (list): A list of single-character strings representing letters.\n    - repetitions (int): The number of times to repeat the list.\n\n    Returns:\n    Returns a dictionary where the keys are the letters and the values are their frequencies.\n\n    Requirements:\n    - collections.Counter\n    - itertools\n\n    Example:\n    >>> task_func(['A', 'B', 'C'], 2)\n    {'A': 2, 'B': 2, 'C': 2}\n    >>> task_func(['A', 'B'], 3)\n    {'A': 3, 'B': 3}\n    \"\"\"\n",
+      "entry_point": "task_func",
+      "visible_tests": [
+        {
+          "kind": "compare",
+          "call": "task_func(['A', 'B', 'C'], 2)",
+          "expected": "{'A': 2, 'B': 2, 'C': 2}"
+        },
+        {
+          "kind": "compare",
+          "call": "task_func(['A', 'B'], 3)",
+          "expected": "{'A': 3, 'B': 3}"
+        }
+      ],
+      "visible_source": "docstring",
+      "shown_tests": "",
+      "canonical_fails_visible": false
+    },
+    "BigCodeBench/932": {
+      "benchmark": "bigcodebench",
+      "prompt": "from collections import Counter\nimport re\n\ndef task_func(word: str) -> list:\n    \"\"\"\n    Finds the most common two-letter combination in a given, cleaned word (lowercased and alphabetic characters only) \n    and returns its frequency. The search is case-insensitive and ignores non-alphabetic characters.\n    \n    Requirements:\n    - collections.Counter\n    - re\n    \n    Parameters:\n    - word (str): The input string containing the word to analyze. The word should have a length of at least 2 to form pairs.\n    \n    Returns:\n    - list: A list containing a single tuple. The tuple consists of the most frequent two-letter combination (str) \n      and its frequency (int). Returns an empty list if the word has fewer than 2 letters, or after cleaning, \n      the word has fewer than 2 alphabetic characters.\n    \n    Examples:\n    >>> task_func(\"aaBBcc\")\n    [('aa', 1)]\n    >>> task_func(\"abc!abc\")\n    [('ab', 2)]\n    >>> task_func(\"a\")\n    []\n    >>> task_func(\"abcd\")\n    [('ab', 1)]\n    >>> task_func(\"a1b2c3\")\n    [('ab', 1)]\n    \"\"\"\n",
+      "entry_point": "task_func",
+      "visible_tests": [
+        {
+          "kind": "compare",
+          "call": "task_func(\"aaBBcc\")",
+          "expected": "[('aa', 1)]"
+        },
+        {
+          "kind": "compare",
+          "call": "task_func(\"abc!abc\")",
+          "expected": "[('ab', 2)]"
+        },
+        {
+          "kind": "compare",
+          "call": "task_func(\"a\")",
+          "expected": "[]"
+        },
+        {
+          "kind": "compare",
+          "call": "task_func(\"abcd\")",
+          "expected": "[('ab', 1)]"
+        },
+        {
+          "kind": "compare",
+          "call": "task_func(\"a1b2c3\")",
+          "expected": "[('ab', 1)]"
+        }
+      ],
+      "visible_source": "docstring",
+      "shown_tests": "",
+      "canonical_fails_visible": false
+    },
+    "BigCodeBench/934": {
+      "benchmark": "bigcodebench",
+      "prompt": "from collections import Counter\nimport hashlib\n\ndef task_func(word: str) -> dict:\n    \"\"\"\n    Count the occurrence of each adjacent pair of letters from left to right in a word and encode the result as an MD5 hash.\n\n    Parameters:\n    - word (str): The word in which to count the adjacent letter pairs.\n\n    Returns:\n    - dict: A dictionary where keys are adjacent letter pairs and values are their counts.\n\n    Requirements:\n    - collections.Counter\n\n    Examples:\n    >>> task_func('abracadabra')\n    'bc9af285d87b312e61ab3661e66b741b'\n    >>> task_func('hello')\n    'dd5dec1a853625e2dc48f3d42665c337'\n    \"\"\"\n",
+      "entry_point": "task_func",
+      "visible_tests": [
+        {
+          "kind": "compare",
+          "call": "task_func('abracadabra')",
+          "expected": "'bc9af285d87b312e61ab3661e66b741b'"
+        },
+        {
+          "kind": "compare",
+          "call": "task_func('hello')",
+          "expected": "'dd5dec1a853625e2dc48f3d42665c337'"
+        }
+      ],
+      "visible_source": "docstring",
+      "shown_tests": "",
+      "canonical_fails_visible": false
+    },
+    "BigCodeBench/956": {
+      "benchmark": "bigcodebench",
+      "prompt": "import re\nimport string\nimport random\n\n\ndef task_func(text: str, seed=None) -> str:\n    \"\"\"\n    Transforms a given string by removing special characters, normalizing whitespace,\n    and randomizing character casing.\n\n    Parameters:\n    - text (str): The text string to be preprocessed.\n    - seed (int, optional): Random seed for reproducibility. Defaults to None (not set).\n\n    Returns:\n    - str: The preprocessed text string.\n\n    Requirements:\n    - re\n    - string\n    - random\n\n    Note:\n    - This function considers special characters to be string punctuations.\n    - Spaces, tabs, and newlines are replaced with with '_', '__', and '___' respectively.\n    - To randomize casing, this function converts characters to uppercase with a 50% probability.\n\n    Example:\n    >>> task_func('Hello   World!', 0)\n    'HeLlo___WORlD'\n    >>> task_func('attention is all you need', 42)\n    'ATtENTIOn_IS_ALL_You_Need'\n    \"\"\"\n",
+      "entry_point": "task_func",
+      "visible_tests": [
+        {
+          "kind": "compare",
+          "call": "task_func('Hello   World!', 0)",
+          "expected": "'HeLlo___WORlD'"
+        },
+        {
+          "kind": "compare",
+          "call": "task_func('attention is all you need', 42)",
+          "expected": "'ATtENTIOn_IS_ALL_You_Need'"
+        }
+      ],
+      "visible_source": "docstring",
+      "shown_tests": "",
+      "canonical_fails_visible": false
+    },
+    "BigCodeBench/957": {
+      "benchmark": "bigcodebench",
+      "prompt": "import string\nimport re\n\n\ndef task_func(text: str) -> tuple:\n    \"\"\"\n    Counts the number of words, characters, and unique characters in a given text.\n\n    Parameters:\n    - text (str): The input text to be analyzed.\n\n    Returns:\n    - tuple: A tuple containing three integers: the number of words,\n                                                the number of characters,\n                                                the number of unique characters.\n\n    Requirements:\n    - string\n    - re\n\n    Note:\n    - This function considers whitespace-separated substrings as words.\n    - When counting characters, this function excludes whitespace and special\n      characters (i.e. string.punctuation).\n\n    Example:\n    >>> task_func('Hello, world!')\n    (2, 10, 7)\n    >>> task_func('Python is  awesome!  ')\n    (3, 15, 12)\n    \"\"\"\n",
+      "entry_point": "task_func",
+      "visible_tests": [
+        {
+          "kind": "compare",
+          "call": "task_func('Hello, world!')",
+          "expected": "(2, 10, 7)"
+        },
+        {
+          "kind": "compare",
+          "call": "task_func('Python is  awesome!  ')",
+          "expected": "(3, 15, 12)"
+        }
+      ],
+      "visible_source": "docstring",
+      "shown_tests": "",
+      "canonical_fails_visible": false
+    },
+    "BigCodeBench/958": {
+      "benchmark": "bigcodebench",
+      "prompt": "import random\nimport re\n\n\ndef task_func(text, seed=None):\n    \"\"\"\n    Scramble the letters in each word of a given text, keeping the first and last letters of each word intact.\n\n    Parameters:\n    text (str): The text to be scrambled.\n    seed (int, optional): A seed for the random number generator to ensure reproducible results.\n                          Defaults to None (not set).\n\n    Returns:\n    str: The scrambled text.\n\n    Requirements:\n    - random\n    - re\n\n    Notes:\n    - Words are determined by regex word boundaries.\n    - The scrambling only affects words longer than three characters, leaving shorter words unchanged.\n\n    Examples:\n    >>> task_func('Hello, world!', 0)\n    'Hello, wlrod!'\n    >>> task_func(\"Programming is fun, isn't it?\", 42)\n    \"Prmiangmrog is fun, isn't it?\"\n    \"\"\"\n",
+      "entry_point": "task_func",
+      "visible_tests": [
+        {
+          "kind": "compare",
+          "call": "task_func('Hello, world!', 0)",
+          "expected": "'Hello, wlrod!'"
+        },
+        {
+          "kind": "compare",
+          "call": "task_func(\"Programming is fun, isn't it?\", 42)",
+          "expected": "\"Prmiangmrog is fun, isn't it?\""
+        }
+      ],
+      "visible_source": "docstring",
+      "shown_tests": "",
+      "canonical_fails_visible": false
+    },
+    "BigCodeBench/960": {
+      "benchmark": "bigcodebench",
+      "prompt": "import string\nimport random\n\n\ndef task_func(text, seed=None):\n    \"\"\"\n    Generates a password that mirrors the structure of the given text by replacing alphabetic\n    characters with random ascii lowercase letters, digits with random single-digit numbers,\n    spaces wth either a random digit or random lowercase letter at equal probabilities, and\n    leaving other characters unchanged.\n\n    Parameters:\n    - text (str): The text to be mirrored in the generated password. Must not be empty.\n    - seed (int, optional): Seed for the random number generator. Defaults to None (not set).\n\n    Returns:\n    - str: The generated password.\n\n    Raises:\n    - ValueError: If the input text is empty.\n\n    Requirements:\n    - random\n    - string\n\n    Note:\n    - This function does not handle high Unicode characters and focuses only on ASCII values.\n\n    Examples:\n    >>> task_func(\"hello world! 123\", 0)\n    'mbqmp3jytre!v553'\n    >>> task_func(\"apple321#\", seed=42)\n    'uahev901#'\n    \"\"\"\n",
+      "entry_point": "task_func",
+      "visible_tests": [
+        {
+          "kind": "compare",
+          "call": "task_func(\"hello world! 123\", 0)",
+          "expected": "'mbqmp3jytre!v553'"
+        },
+        {
+          "kind": "compare",
+          "call": "task_func(\"apple321#\", seed=42)",
+          "expected": "'uahev901#'"
+        }
+      ],
+      "visible_source": "docstring",
+      "shown_tests": "",
+      "canonical_fails_visible": false
+    },
+    "BigCodeBench/989": {
+      "benchmark": "bigcodebench",
+      "prompt": "import random\nimport string\n\n\ndef task_func(length: int, predicates: list, seed: int = None):\n    \"\"\"\n    Generates a random string of specified length and evaluates it for specific characteristics.\n\n    Parameters:\n    - length (int): Desired length of the generated string.\n    - predicates (list of strings): Conditions to evaluate the string.\n        Must contain options from 'has_uppercase', 'has_lowercase', 'has_special_chars', 'has_numbers'.\n    - seed (int, optional): Seed for the random number generator for reproducibility.\n\n    Returns:\n    - tuple:\n        - string: the generated random text\n        - dict: the text's characteristics\n\n    Raises:\n    - ValueError: If the specified length is negative.\n    - KeyError: If any predicate is not recognized.\n\n    Notes:\n    - Predicates are deduplicated.\n    - Characters are randomly sampled from string ascii_letters, digits, and punctuation with replacement.\n    - Any invalid predicates provided will result in a KeyError.\n    - If no predicates are provided, the result dictionary will be empty.\n\n    Requirements:\n    - string\n    - random\n\n    Example:\n    >>> task_func(10, ['has_uppercase', 'has_numbers'], seed=42)[0]\n    '8czu(\"@iNc'\n    >>> task_func(5, ['has_lowercase'], seed=123)\n    ('eiMk[', {'has_lowercase': True})\n    \"\"\"\n",
+      "entry_point": "task_func",
+      "visible_tests": [
+        {
+          "kind": "compare",
+          "call": "task_func(5, ['has_lowercase'], seed=123)",
+          "expected": "('eiMk[', {'has_lowercase': True})"
+        }
+      ],
+      "visible_source": "docstring",
+      "shown_tests": "",
+      "canonical_fails_visible": false
+    },
+    "BigCodeBench/1021": {
+      "benchmark": "bigcodebench",
+      "prompt": "import binascii\nimport hashlib\n\n\ndef task_func(input_string, verify_hash=None):\n    \"\"\"\n    Compute the SHA256 hash of a given input string and return its hexadecimal representation.\n    Optionally, verify the computed hash against a provided hash.\n\n    Parameters:\n    - input_string (str): The string to be hashed.\n    - verify_hash (str, optional): A hexadecimal string to be compared with the computed hash.\n\n    Returns:\n    - str: A hexadecimal string representing the SHA256 hash of the input string.\n    - bool: True if verify_hash is provided and matches the computed hash, otherwise None.\n\n    Raises:\n    - TypeError: If the input is not a string or verify_hash is not a string or None.\n\n    Requirements:\n    - hashlib\n    - binascii\n\n    Example:\n    >>> task_func(\"Hello, World!\")\n    'dffd6021bb2bd5b0af676290809ec3a53191dd81c7f70a4b28688a362182986f'\n    >>> task_func(\"Hello, World!\", \"dffd6021bb2bd5b0af676290809ec3a53191dd81c7f70a4b28688a362182986f\")\n    True\n    \"\"\"\n",
+      "entry_point": "task_func",
+      "visible_tests": [
+        {
+          "kind": "compare",
+          "call": "task_func(\"Hello, World!\")",
+          "expected": "'dffd6021bb2bd5b0af676290809ec3a53191dd81c7f70a4b28688a362182986f'"
+        },
+        {
+          "kind": "compare",
+          "call": "task_func(\"Hello, World!\", \"dffd6021bb2bd5b0af676290809ec3a53191dd81c7f70a4b28688a362182986f\")",
+          "expected": "True"
+        }
+      ],
+      "visible_source": "docstring",
+      "shown_tests": "",
+      "canonical_fails_visible": false
+    },
+    "BigCodeBench/1097": {
+      "benchmark": "bigcodebench",
+      "prompt": "import re\nfrom string import punctuation\n\n# Predefined list of common stopwords\nPREDEFINED_STOPWORDS = {\n    \"i\", \"me\", \"my\", \"myself\", \"we\", \"our\", \"ours\", \"ourselves\", \"you\", \"your\", \"yours\", \n    \"yourself\", \"yourselves\", \"he\", \"him\", \"his\", \"himself\", \"she\", \"her\", \"hers\", \n    \"herself\", \"it\", \"its\", \"itself\", \"they\", \"them\", \"their\", \"theirs\", \"themselves\", \n    \"what\", \"which\", \"who\", \"whom\", \"this\", \"that\", \"these\", \"those\", \"am\", \"is\", \"are\", \n    \"was\", \"were\", \"be\", \"been\", \"being\", \"have\", \"has\", \"had\", \"having\", \"do\", \"does\", \n    \"did\", \"doing\", \"a\", \"an\", \"the\", \"and\", \"but\", \"if\", \"or\", \"because\", \"as\", \"until\", \n    \"while\", \"of\", \"at\", \"by\", \"for\", \"with\", \"about\", \"against\", \"between\", \"into\", \n    \"through\", \"during\", \"before\", \"after\", \"above\", \"below\", \"to\", \"from\", \"up\", \"down\", \n    \"in\", \"out\", \"on\", \"off\", \"over\", \"under\", \"again\", \"further\", \"then\", \"once\", \"more\"\n}\n\ndef task_func(text):\n    \"\"\"\n    Clean the specified text by removing URLs, stopwords, and punctuation.\n\n    Parameters:\n    text (str): The text to be cleaned.\n\n    Returns:\n    str: The cleaned text with URLs, predefined stopwords, and punctuation removed.\n\n    Requirements:\n    - re\n    - string.punctuation\n\n    Example:\n    >>> task_func('Visit https://www.python.org for more info. I love to eat apples.')\n    'Visit info love eat apples'\n    \"\"\"\n",
+      "entry_point": "task_func",
+      "visible_tests": [
+        {
+          "kind": "compare",
+          "call": "task_func('Visit https://www.python.org for more info. I love to eat apples.')",
+          "expected": "'Visit info love eat apples'"
+        }
+      ],
+      "visible_source": "docstring",
+      "shown_tests": "",
+      "canonical_fails_visible": false
+    },
+    "BigCodeBench/1098": {
+      "benchmark": "bigcodebench",
+      "prompt": "import re\nfrom collections import Counter\n\n\ndef task_func(text, top_n):\n    \"\"\"\n    Count the N most common words in a text after removing URLs.\n\n    Parameters:\n    text (str): The text to analyze.\n    top_n (int): The number of top words to return.\n\n    Returns:\n    list: A list of tuples where each tuple contains a word and its frequency.\n\n    Requirements:\n    - re\n    - collections.Counter\n\n    Example:\n    >>> task_func('Visit https://www.python.org for more info. Python is great. I love Python.', 2)\n    [('Python', 2), ('Visit', 1)]\n\n    Note:\n    - Valid url is start with http or https\n    \"\"\"\n",
+      "entry_point": "task_func",
+      "visible_tests": [
+        {
+          "kind": "compare",
+          "call": "task_func('Visit https://www.python.org for more info. Python is great. I love Python.', 2)",
+          "expected": "[('Python', 2), ('Visit', 1)]"
+        }
+      ],
+      "visible_source": "docstring",
+      "shown_tests": "",
+      "canonical_fails_visible": false
+    },
+    "BigCodeBench/1099": {
+      "benchmark": "bigcodebench",
+      "prompt": "import re\nfrom collections import Counter\n\n# Predefined list of common stopwords\nPREDEFINED_STOPWORDS = {\n    \"i\", \"me\", \"my\", \"myself\", \"we\", \"our\", \"ours\", \"ourselves\", \"you\", \"your\", \"yours\", \n    \"yourself\", \"yourselves\", \"he\", \"him\", \"his\", \"himself\", \"she\", \"her\", \"hers\", \n    \"herself\", \"it\", \"its\", \"itself\", \"they\", \"them\", \"their\", \"theirs\", \"themselves\", \n    \"what\", \"which\", \"who\", \"whom\", \"this\", \"that\", \"these\", \"those\", \"am\", \"is\", \"are\", \n    \"was\", \"were\", \"be\", \"been\", \"being\", \"have\", \"has\", \"had\", \"having\", \"do\", \"does\", \n    \"did\", \"doing\", \"a\", \"an\", \"the\", \"and\", \"but\", \"if\", \"or\", \"because\", \"as\", \"until\", \n    \"while\", \"of\", \"at\", \"by\", \"for\", \"with\", \"about\", \"against\", \"between\", \"into\", \n    \"through\", \"during\", \"before\", \"after\", \"above\", \"below\", \"to\", \"from\", \"up\", \"down\", \n    \"in\", \"out\", \"on\", \"off\", \"over\", \"under\", \"again\", \"further\", \"then\", \"once\", \"more\"\n}\n\ndef task_func(text):\n    \"\"\"\n    Count the stopwords found in the text after you have removed URLs.\n\n    Parameters:\n    text (str): The text to summarize.\n\n    Returns:\n    list: A list of tuples where each tuple contains a word and its frequency.\n\n    Requirements:\n    - re\n    - collection.Counter\n\n    Example:\n    >>> task_func('Visit https://www.python.org for more info. Python is great, we love Python.')\n    [('for', 1), ('more', 1), ('is', 1), ('we', 1)]\n    >>> task_func('Visit https://www.python.org for more info. Python is great, we love Python, and we also love Rust.')\n    [('for', 1), ('more', 1), ('is', 1), ('we', 2), ('and', 1)]\n\n    Note:\n    - Valid url is start with http or https\n    - The capitilization need to macth the stopwords\n    \"\"\"\n",
+      "entry_point": "task_func",
+      "visible_tests": [
+        {
+          "kind": "compare",
+          "call": "task_func('Visit https://www.python.org for more info. Python is great, we love Python.')",
+          "expected": "[('for', 1), ('more', 1), ('is', 1), ('we', 1)]"
+        },
+        {
+          "kind": "compare",
+          "call": "task_func('Visit https://www.python.org for more info. Python is great, we love Python, and we also love Rust.')",
+          "expected": "[('for', 1), ('more', 1), ('is', 1), ('we', 2), ('and', 1)]"
+        }
+      ],
+      "visible_source": "docstring",
+      "shown_tests": "",
+      "canonical_fails_visible": false
+    },
+    "BigCodeBench/1126": {
+      "benchmark": "bigcodebench",
+      "prompt": "import re\nimport hashlib\n\ndef task_func(input_str):\n    \"\"\"\n    Removes all special characters, punctuation marks, and spaces from the input string using a regular expression,\n    retaining only alphanumeric characters. Then hashes the cleaned string with SHA256.\n\n    Parameters:\n    input_str (str): The input string to be cleaned and hashed.\n\n    Returns:\n    str: The SHA256 hash of the cleaned string.\n\n    Requirements:\n    - re\n    - hashlib\n\n    Example:\n    >>> task_func('Special $#! characters   spaces 888323')\n    'af30263c4d44d67917a4f0727191a4149e1ab615b772b2aeda859068178b146c'\n    \"\"\"\n",
+      "entry_point": "task_func",
+      "visible_tests": [
+        {
+          "kind": "compare",
+          "call": "task_func('Special $#! characters   spaces 888323')",
+          "expected": "'af30263c4d44d67917a4f0727191a4149e1ab615b772b2aeda859068178b146c'"
+        }
+      ],
+      "visible_source": "docstring",
+      "shown_tests": "",
+      "canonical_fails_visible": false
+    }
+  }
+}

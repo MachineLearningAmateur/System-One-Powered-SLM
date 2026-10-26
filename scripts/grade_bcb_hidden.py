@@ -41,7 +41,11 @@ def sha(path):
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--run-id", required=True)
+    ap.add_argument("--task-manifest", default="configs/bcb_jev_only_tasks_v1.json")
+    ap.add_argument("--hidden-data", default="results/datasets/bcb_jev_only_hidden_v1.json")
     args = ap.parse_args()
+    manifest = ROOT / args.task_manifest
+    hidden = ROOT / args.hidden_data
     out = RESULTS / "runs" / args.run_id
     labels_path = out / LABELS_FILE
     if labels_path.exists():
@@ -55,14 +59,14 @@ def main() -> int:
         print("STOP: clean git tree required")
         return 2
     meta_path = out / "run_meta.json"
-    if not meta_path.exists() or not HIDDEN.exists():
+    if not meta_path.exists() or not hidden.exists():
         print("STOP: run metadata or local hidden data missing")
         return 2
     run_meta = json.loads(meta_path.read_text(encoding="utf-8"))
     if run_meta.get("split") != "test" or run_meta.get("non_protocol") or run_meta["protocol"].get("git_commit") != commit:
         print("STOP: generation is not a clean test run on this commit")
         return 2
-    if run_meta["protocol"].get("task_manifest_sha256") != sha(MANIFEST):
+    if run_meta["protocol"].get("task_manifest_sha256") != sha(manifest):
         print("STOP: generation used another task manifest")
         return 2
     rows, bad = read_jsonl(out / "trajectories.jsonl")
@@ -71,7 +75,7 @@ def main() -> int:
         return 2
     dropped = []
     cps = complete_executions(rows, dropped=dropped)
-    ids = set(json.loads(MANIFEST.read_text(encoding="utf-8"))["tasks"])
+    ids = set(json.loads(manifest.read_text(encoding="utf-8"))["tasks"])
     if {r["task_id"] for r in cps} != ids or any(r["benchmark"] != "bigcodebench" for r in cps):
         print("STOP: task set differs from the frozen BigCodeBench manifest")
         return 2
@@ -84,8 +88,8 @@ def main() -> int:
     log = CostLedger(out / "hidden_grades.jsonl")
     meta = {"run_id": args.run_id, "session": session, "protocol": True, "git_commit": commit,
             "git_dirty": False, "started": datetime.now(timezone.utc).isoformat(),
-            "dataset": "bigcodebench-v0.1.4", "task_manifest_sha256": sha(MANIFEST),
-            "hidden_data_sha256": sha(HIDDEN), "grader_image_id": image,
+            "dataset": "bigcodebench-v0.1.4", "task_manifest_sha256": sha(manifest),
+            "hidden_data_sha256": sha(hidden), "grader_image_id": image,
             "grader_worker_sha256": sha(ROOT / "docker/bcb_sandbox/worker.py"),
             "dropped_executions": dropped, "n_checkpoints": len(cps)}
     sb = Sandbox(container=CONTAINER, cmd=["docker", "exec", "-i", CONTAINER, *WORKER],
