@@ -1,0 +1,3 @@
+services:
+  bcb-sandbox:
+    image: system1-bcb-sandbox:v2

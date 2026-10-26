@@ -13,7 +13,7 @@ import types
 import unittest
 
 DATA_PATH = "/bcb/hidden.json"
-VERSION = "bcb-grader-v1"
+VERSION = "bcb-grader-v2-assertEquals"
 TIMEOUT_S = 30.0
 _PROTO_FD: int | None = None
 
@@ -31,6 +31,10 @@ def child(code: str, test: str, w: int) -> None:
         os.dup2(null, fd)
     os.chdir("/tmp")
     try:
+        # BigCodeBench v0.1.4 still calls this old unittest spelling in one
+        # hidden suite. Python 3.12 removed it; restore its identical alias
+        # before either the reference or a candidate is tested.
+        unittest.TestCase.assertEquals = unittest.TestCase.assertEqual
         module = types.ModuleType("bcb_candidate")
         ns = module.__dict__
         exec(compile(code, "<candidate>", "exec"), ns)
