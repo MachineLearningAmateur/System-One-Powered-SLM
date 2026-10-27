@@ -1,0 +1,18 @@
+{
+  "version": "cached-accepted-plan-integration-v1",
+  "purpose": "engineering integration check using a cached accepted plan",
+  "primary_research_estimate": false,
+  "task_id": "HumanEval/59",
+  "attempt": 0,
+  "source_run_id": "bg-v1a-integration-dev-20261027",
+  "source_checkpoint_id": "HumanEval/59/a0/shared/r1",
+  "preflight_run_id": "bg-v1b-planner-preflight-20261027",
+  "preflight_call_id": "5b76a3eef8ad495b9806d402b6a31ee0",
+  "accepted_plan_sha256": "8dada55126c03965446ce27d754dad6f237e83c22300ceee5d54b83d258c7fe2",
+  "continuation_arms": ["control", "guidance"],
+  "max_worker_http_requests": 4,
+  "max_frontier_requests": 0,
+  "max_wall_seconds": 900,
+  "max_watchdog_seconds": 2400,
+  "proposed_gpu_spend_limit_usd": 3.0
+}
