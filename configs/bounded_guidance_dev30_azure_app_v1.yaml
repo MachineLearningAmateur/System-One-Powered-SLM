@@ -1,0 +1,55 @@
+name: bg-dev30-vllm-1027
+location: westus3
+type: Microsoft.App/containerApps
+properties:
+  environmentId: /subscriptions/a1c817da-8cb1-4f20-bc7a-bca1b22e1a9b/resourceGroups/rg-bg-dev30-20261027/providers/Microsoft.App/managedEnvironments/bg-dev30-env-1027
+  workloadProfileName: gpu-a100
+  configuration:
+    activeRevisionsMode: Single
+    ingress:
+      external: true
+      targetPort: 8000
+      allowInsecure: false
+      transport: auto
+      traffic:
+      - latestRevision: true
+        weight: 100
+      ipSecurityRestrictions:
+      - name: operator-machine
+        ipAddressRange: __OPERATOR_PUBLIC_IP_CIDR__
+        action: Allow
+  template:
+    revisionSuffix: dev30v1
+    containers:
+    - name: vllm
+      image: docker.io/vllm/vllm-openai:v0.30.0@sha256:5f5e535216848d0c52159c8c13a0af04be5f6fe1a84e79914300610796f76d40
+      command:
+      - python3
+      - -m
+      - vllm.entrypoints.openai.api_server
+      args:
+      - --model=Qwen/Qwen3-8B
+      - --revision=b968826d9c46dd6066d109eabc6255188de91218
+      - --dtype=bfloat16
+      - --max-model-len=16384
+      - --gpu-memory-utilization=0.85
+      - --max-logprobs=20
+      - --seed=0
+      env:
+      - name: HOME
+        value: /tmp
+      - name: HF_HOME
+        value: /tmp/huggingface
+      - name: XDG_CACHE_HOME
+        value: /tmp/.cache
+      resources:
+        cpu: 8
+        memory: 56Gi
+    scale:
+      minReplicas: 0
+      maxReplicas: 1
+      rules:
+      - name: http
+        http:
+          metadata:
+            concurrentRequests: '10'

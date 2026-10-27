@@ -17,13 +17,21 @@ import os
 import subprocess
 import sys
 import time
+import uuid
 from collections import Counter
 from dataclasses import dataclass
 from datetime import datetime, timezone
 
 import httpx
 
-from system1.bounded_guidance import PLAN_MAX_OUTPUT_TOKENS, PLAN_MAX_WORDS, PLAN_MAX_CHARS, run_pair
+from system1.bounded_guidance import (PLAN_MAX_OUTPUT_TOKENS, PLAN_MAX_WORDS, PLAN_MAX_CHARS,
+                                      dev30_plan_messages, plan_messages, run_pair)
+from system1.bounded_guidance_dev30 import (FRONTIER_LIMIT_USD as DEV30_FRONTIER_LIMIT_USD,
+    GPU_RATE_USD_PER_HOUR as DEV30_GPU_RATE,
+    MAX_FRONTIER_REQUESTS as DEV30_MAX_FRONTIER, MAX_PAIRS as DEV30_MAX_PAIRS,
+    MAX_WALL_SECONDS as DEV30_MAX_WALL, MAX_WORKER_HTTP as DEV30_MAX_WORKER,
+    TOTAL_CEILING_USD as DEV30_TOTAL_CEILING, WATCHDOG_SECONDS as DEV30_WATCHDOG_SECONDS,
+    load_manifest as load_dev30_manifest)
 from system1.config import RESULTS, ROOT, load_prices
 from system1.eval.ledger import CostLedger, LedgerRow
 from system1.eval.split import load_split
@@ -35,6 +43,7 @@ from system1.loop.sandbox import VisibleRunner
 from system1.loop.tasks import TaskSpec, load_tasks
 
 PILOT_TASKS_FILE = "configs/bounded_guidance_pilot_v1.json"
+DEV30_TASKS_FILE = "configs/bounded_guidance_dev30_v1.json"
 PILOT_MAX_PAIRS = 120
 PILOT_MAX_FRONTIER_USD = 1.50
 PILOT_MAX_FRONTIER_REQUESTS = 120
@@ -48,6 +57,18 @@ MAX_CONSECUTIVE_INVALID_ADVICE = 3
 
 def validate_pilot_limits(args):
     """Fail before any paid call if pilot selection or operational caps expand."""
+    if args.tasks_file == DEV30_TASKS_FILE:
+        if args.split != "dev" or args.attempts != 1 or args.limit:
+            raise SystemExit("dev30 requires the complete frozen development manifest and one attempt")
+        if (args.limit_usd != DEV30_FRONTIER_LIMIT_USD
+                or args.max_frontier_requests != DEV30_MAX_FRONTIER
+                or args.max_worker_http_requests != DEV30_MAX_WORKER
+                or args.max_wall_seconds != DEV30_MAX_WALL):
+            raise SystemExit("dev30 requires exact frozen request, spend, and wall-time limits")
+        if DEV30_GPU_RATE * DEV30_WATCHDOG_SECONDS / 3600 + args.limit_usd >= DEV30_TOTAL_CEILING:
+            raise SystemExit("dev30 watchdog model reaches the proposed total ceiling")
+        load_dev30_manifest()
+        return
     if args.split != "dev" or args.attempts != 1 or args.tasks_file != PILOT_TASKS_FILE:
         raise SystemExit("real pilot requires the frozen 120-task dev file and one attempt")
     if any(x <= 0 for x in (args.limit_usd, args.max_frontier_requests,
@@ -232,6 +253,38 @@ class BoundedAdviser:
                            parsed["finish_reason"])
 
 
+class RecordingWorkerClient:
+    """One record per Qwen HTTP attempt, including failures and raw bodies."""
+
+    def __init__(self, client: httpx.AsyncClient, exchanges: CostLedger, maximum: int):
+        self.client, self.exchanges, self.maximum = client, exchanges, maximum
+        self.used = 0
+        self.task_id = None
+
+    async def post(self, url, *, json, timeout):
+        if self.used >= self.maximum:
+            raise RuntimeError("Qwen HTTP request ceiling reached")
+        self.used += 1
+        row = {"call_id": uuid.uuid4().hex, "task_id": self.task_id,
+               "http_ordinal": self.used, "request_body": json,
+               "response_body": None, "http_status": None}
+        started = time.perf_counter()
+        try:
+            response = await self.client.post(url, json=json, timeout=timeout)
+            row["http_status"] = response.status_code
+            try:
+                row["response_body"] = response.json()
+            except ValueError:
+                row["response_text"] = response.text
+            return response
+        except BaseException as exc:
+            row["error_type"] = type(exc).__name__
+            raise
+        finally:
+            row["latency_ms"] = round((time.perf_counter() - started) * 1000, 1)
+            self.exchanges.append_obj(row)
+
+
 def git_state():
     commit = subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=ROOT, text=True).strip()
     dirty = bool(subprocess.check_output(["git", "status", "--porcelain"], cwd=ROOT, text=True).strip())
@@ -256,6 +309,9 @@ async def run(args):
         raise SystemExit("real inference also needs wall-time and request-count ceilings")
     if args.real:
         validate_pilot_limits(args)
+    is_dev30 = args.real and args.tasks_file == DEV30_TASKS_FILE
+    if is_dev30 and args.resume:
+        raise SystemExit("dev30 does not allow resuming, retrying, or replacing a stopped task")
     if bool(args.remote_manifest) != (args.server_url.rstrip("/") != "http://localhost:8000"):
         raise SystemExit("a remote server URL and --remote-manifest must be provided together")
     if args.real and args.split == "test":
@@ -296,19 +352,24 @@ async def run(args):
         raw = task_file.read_bytes()
         spec = json.loads(raw)
         selected = spec.get("tasks")
-        if (spec.get("version") != "bounded-guidance-pilot-v1" or spec.get("split") != args.split
+        expected_version = "bounded-guidance-dev30-v1" if is_dev30 else "bounded-guidance-pilot-v1"
+        if (spec.get("version") != expected_version or spec.get("split") != args.split
                 or not isinstance(selected, list) or len(selected) != len(set(selected))):
             raise SystemExit("invalid pilot task manifest")
-        if len(selected) != PILOT_MAX_PAIRS or any(tid not in ids for tid in selected):
+        expected_count = DEV30_MAX_PAIRS if is_dev30 else PILOT_MAX_PAIRS
+        expected_benchmarks = {"humaneval+": 9, "mbpp+": 21} if is_dev30 else {"humaneval+": 36, "mbpp+": 84}
+        if len(selected) != expected_count or any(tid not in ids for tid in selected):
             raise SystemExit("pilot tasks are missing, excluded, or outside the split")
-        if Counter(tasks[tid].benchmark for tid in selected) != {"humaneval+": 36, "mbpp+": 84}:
+        if Counter(tasks[tid].benchmark for tid in selected) != expected_benchmarks:
             raise SystemExit("pilot benchmark counts changed")
+        if is_dev30:
+            load_dev30_manifest(task_file)
         ids = selected
         import hashlib
         task_file_sha256 = hashlib.sha256(raw).hexdigest()
     ids = ids[:args.limit] if args.limit else ids
-    if args.real and len(ids) * args.attempts > PILOT_MAX_PAIRS:
-        raise SystemExit("pilot exceeds 120 paired units")
+    if args.real and len(ids) * args.attempts > (DEV30_MAX_PAIRS if is_dev30 else PILOT_MAX_PAIRS):
+        raise SystemExit("pilot exceeds its paired-unit ceiling")
     out = RESULTS / "runs" / args.run_id
     if out.exists() and not args.resume:
         raise SystemExit(f"{out} exists; use a fresh run id, or explicit --resume after a stopped job")
@@ -324,6 +385,8 @@ async def run(args):
              "worker_revision": REVISION, "frontier_model": FRONTIER_MODEL,
              "excluded_tasks_sha256": excluded["sha256"] if args.real else None,
              "task_file_sha256": task_file_sha256,
+             "pilot_profile": "dev30-v1" if is_dev30 else None,
+             "planner_prompt": "successful-planner-preflight-v1b-20261027" if is_dev30 else "original-v1a",
              "server": server_identity, "server_url": args.server_url.rstrip("/"),
              "visible": visible.protocol(), "git_commit": commit,
              "git_dirty": dirty}
@@ -340,6 +403,7 @@ async def run(args):
     exchanges = CostLedger(out / "frontier_exchanges.jsonl")
     checkpoints = CostLedger(out / "checkpoints.jsonl")
     calls = CostLedger(out / "worker_calls.jsonl")
+    worker_exchanges = CostLedger(out / "worker_exchanges.jsonl") if is_dev30 else None
     failures = CostLedger(out / "failures.jsonl")
     ledger = CostLedger(out / "ledger.jsonl")
     done, bad = pairs.read()
@@ -374,6 +438,8 @@ async def run(args):
                     # three two-phase Qwen generations and one plan request.
                     n_worker = len(calls.read()[0])
                     n_plan = sum(r.get("component") == "frontier" for r in ledger.read()[0])
+                    if is_dev30 and len(worker_exchanges.read()[0]) != n_worker:
+                        raise RuntimeError("Qwen exchange and usage logs disagree; stop before another task")
                     if n_worker + 6 > args.max_worker_http_requests:
                         raise RuntimeError("Qwen HTTP request ceiling reached before next pair")
                     if n_plan + 1 > args.max_frontier_requests:
@@ -381,9 +447,13 @@ async def run(args):
                     if time.monotonic() - start_time >= args.max_wall_seconds:
                         raise RuntimeError("wall-time ceiling reached before next pair")
                 try:
+                    if is_dev30:
+                        worker_client.task_id = task_id
                     result = await run_pair(tasks[task_id], attempt, worker, visible, adviser,
                                             on_worker_call=calls.append_obj, on_advice=plans.append_obj,
-                                            on_checkpoint=checkpoints.append_obj)
+                                            on_checkpoint=checkpoints.append_obj,
+                                            planner_messages=dev30_plan_messages if is_dev30 else plan_messages,
+                                            require_equal_continuation_caps=is_dev30)
                     # The unit is committed only when both branches finish.
                     pairs.append_obj({"pair_id": result.pair_id, "task_id": task_id,
                         "benchmark": tasks[task_id].benchmark, "attempt": attempt,
@@ -406,7 +476,9 @@ async def run(args):
             session["mock_counts"] = {"worker_generations": worker.calls, "frontier_plans": adviser.calls}
         else:
             async with httpx.AsyncClient() as client:
-                worker = Generator(client, load_tokenizer(),
+                worker_client = (RecordingWorkerClient(client, worker_exchanges, args.max_worker_http_requests)
+                                 if is_dev30 else client)
+                worker = Generator(worker_client, load_tokenizer(),
                                    url=args.server_url.rstrip("/") + "/v1/completions")
                 adviser = BoundedAdviser(ledger, args.limit_usd, exchanges)
                 try:

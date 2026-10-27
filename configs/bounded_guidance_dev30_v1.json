@@ -1,0 +1,119 @@
+{
+  "version": "bounded-guidance-dev30-v1",
+  "purpose": "fixed 30-task development pilot; paired intention-to-treat",
+  "split": "dev",
+  "selection_salt": "bounded-guidance-dev30-v1",
+  "benchmarks": {
+    "humaneval+": 9,
+    "mbpp+": 21
+  },
+  "excluded_integration_debug_tasks": [
+    "HumanEval/2",
+    "HumanEval/4",
+    "HumanEval/5",
+    "HumanEval/59",
+    "Mbpp/2",
+    "Mbpp/4"
+  ],
+  "source_sha256": {
+    "split_v1": "c9d608144df0b6a5237871f23578a1954dcd07179bcf8be10e7bd425fb52e692",
+    "grading_exclusions_v1": "f0e5b4f30f891a30de56b01fe259e751e8310d0e365c15b832f87cf1599c82db",
+    "visible_tests_v2": "5b9dbbd105ae784b0e8a5c71f452cfdbc262ae5891771afe9c3c09227cb5aa43"
+  },
+  "tasks": [
+    "HumanEval/136",
+    "HumanEval/120",
+    "HumanEval/65",
+    "HumanEval/25",
+    "HumanEval/154",
+    "HumanEval/30",
+    "HumanEval/54",
+    "HumanEval/132",
+    "HumanEval/107",
+    "Mbpp/308",
+    "Mbpp/780",
+    "Mbpp/257",
+    "Mbpp/260",
+    "Mbpp/752",
+    "Mbpp/615",
+    "Mbpp/555",
+    "Mbpp/424",
+    "Mbpp/20",
+    "Mbpp/796",
+    "Mbpp/165",
+    "Mbpp/448",
+    "Mbpp/610",
+    "Mbpp/70",
+    "Mbpp/591",
+    "Mbpp/232",
+    "Mbpp/130",
+    "Mbpp/771",
+    "Mbpp/287",
+    "Mbpp/109",
+    "Mbpp/14"
+  ],
+  "protocol": {
+    "shared_drafts_per_task": 1,
+    "control_continuations_per_task": 1,
+    "guided_continuations_per_task": 1,
+    "fresh_plans_per_task": 1,
+    "planner_prompt": "successful-planner-preflight-v1b-20261027",
+    "planner_instruction_sha256": "2f6b3615d50d08038e18fb61933b695b525ddad3bde6c540106c683864af0d69",
+    "plan_max_words": 120,
+    "plan_max_unicode_chars": 900,
+    "plan_max_completion_tokens_including_reasoning": 512,
+    "planner_model": "anthropic/claude-sonnet-5.5-20260928",
+    "planner_provider": {
+      "order": [
+        "anthropic"
+      ],
+      "allow_fallbacks": false
+    },
+    "planner_reasoning": {
+      "effort": "low"
+    },
+    "worker_model": "Qwen/Qwen3-8B",
+    "worker_revision": "b968826d9c46dd6066d109eabc6255188de91218",
+    "worker_sampling": {
+      "temperature": 0.6,
+      "top_p": 0.95,
+      "top_k": 20
+    },
+    "worker_think_cap": 8192,
+    "worker_answer_cap": 2048,
+    "worker_max_model_len": 16384,
+    "worker_top_logprobs": 5,
+    "jev_enabled": false,
+    "invalid_plan_fallback": "charge plan and run ordinary guided continuation; retain treatment unit",
+    "invalid_plan_streak_stop": 3,
+    "no_retries_or_task_replacement": true,
+    "stopping_rules": [
+      "stop before the next task after three consecutive completed invalid plans",
+      "stop before a task if six Qwen HTTP slots or one frontier slot are unavailable",
+      "stop before a planner request whose conservative reservation exceeds $0.60",
+      "stop after an actual planner charge exceeds $0.60 or usage is unresolved",
+      "stop on provider, configuration, logging, or integrity error",
+      "stop new tasks at 90 minutes; kill the process at 90 minutes",
+      "delete the GPU app immediately on completion or failure",
+      "independent Azure deletion watchdog fires within two hours of provisioning start"
+    ]
+  },
+  "limits": {
+    "max_worker_http_requests": 180,
+    "max_frontier_requests": 30,
+    "max_harness_wall_seconds": 5400,
+    "watchdog_from_provisioning_seconds": 7200,
+    "frontier_spend_guard_usd": 0.6,
+    "proposed_total_spending_ceiling_usd": 10.0,
+    "gpu_rate_usd_per_hour_assumption": 3.2004
+  },
+  "deployment": {
+    "subscription_id": "a1c817da-8cb1-4f20-bc7a-bca1b22e1a9b",
+    "resource_group": "rg-bg-dev30-20261027",
+    "container_app": "bg-dev30-vllm-1027",
+    "environment": "bg-dev30-env-1027",
+    "region": "westus3",
+    "max_gpu_replicas": 1,
+    "vllm_image": "docker.io/vllm/vllm-openai:v0.30.0@sha256:5f5e535216848d0c52159c8c13a0af04be5f6fe1a84e79914300610796f76d40"
+  }
+}

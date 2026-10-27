@@ -11,7 +11,7 @@ import hashlib
 import json
 import uuid
 from dataclasses import dataclass
-from typing import Any, Protocol
+from typing import Any, Callable, Protocol
 
 from system1.loop.generate import SEED_TAG
 from system1.loop.runner import VISIBLE_TIMEOUT_S
@@ -21,6 +21,15 @@ PLAN_MAX_WORDS = 120
 PLAN_MAX_CHARS = 900
 PLAN_MAX_OUTPUT_TOKENS = 512  # total completion, including provider reasoning
 ARMS = ("control", "guidance")
+DEV30_PLANNER_INSTRUCTIONS = (
+    "Give the Qwen coding assistant one short repair plan for the task below. "
+    "Use at most 100 whitespace-separated words and 900 characters after trimming "
+    "leading and trailing whitespace. Use plain text only: no backticks, code "
+    "fences, numbered lists, or advice about final-answer formatting. "
+    "State a concrete defect and repair only if one is evident. If no clear "
+    "defect is evident, say so and give only useful checks; do not invent a "
+    "defect or change. Do not write code, a patch, hidden tests, or a final answer.\n\n"
+)
 
 
 class Worker(Protocol):
@@ -40,20 +49,33 @@ class InvalidPlan(ValueError):
     pass
 
 
-def plan_messages(task: TaskSpec, code: str | None, report: str) -> list[dict]:
-    """The frontier sees only the shown task, first code, and first visible result."""
+def _plan_messages_with_header(task: TaskSpec, code: str | None, report: str,
+                               header: str) -> list[dict]:
     shown = first_round_messages(task)[0]["content"]
     return [{"role": "user", "content": (
+        header +
+        f"Task and visible examples:\n{shown}\n"
+        f"First draft:\n```python\n{(code or '').rstrip()}\n```\n"
+        f"Visible-test result:\n{report.rstrip()}\n"
+    )}]
+
+
+def plan_messages(task: TaskSpec, code: str | None, report: str) -> list[dict]:
+    """The original planner prompt, retained for earlier protocol versions."""
+    header = (
         "Give the Qwen coding assistant one short repair plan for the task below. "
         f"Use at most {PLAN_MAX_WORDS} whitespace-separated words and {PLAN_MAX_CHARS} characters "
         "after trimming leading and trailing whitespace. "
         "State the likely defect and concrete steps to fix it. "
         "Do not write code, a patch, hidden tests, or a final answer. "
         "If the visible result gives insufficient evidence, say what to check.\n\n"
-        f"Task and visible examples:\n{shown}\n"
-        f"First draft:\n```python\n{(code or '').rstrip()}\n```\n"
-        f"Visible-test result:\n{report.rstrip()}\n"
-    )}]
+    )
+    return _plan_messages_with_header(task, code, report, header)
+
+
+def dev30_plan_messages(task: TaskSpec, code: str | None, report: str) -> list[dict]:
+    """The successful preflight's instruction header with fresh task evidence."""
+    return _plan_messages_with_header(task, code, report, DEV30_PLANNER_INSTRUCTIONS)
 
 
 def validate_plan(reply: str | None) -> str:
@@ -90,7 +112,9 @@ class PairResult:
 
 async def run_pair(task: TaskSpec, attempt: int, worker: Worker, visible: Visible,
                    adviser: Adviser, *, on_worker_call=None, on_advice=None,
-                   on_checkpoint=None) -> PairResult:
+                   on_checkpoint=None,
+                   planner_messages: Callable[[TaskSpec, str | None, str], list[dict]] = plan_messages,
+                   require_equal_continuation_caps: bool = False) -> PairResult:
     """Run one paired unit: one shared draft and one continuation per arm.
 
     Invalid advice is a charged, recorded treatment delivery failure. Provider,
@@ -146,7 +170,7 @@ async def run_pair(task: TaskSpec, attempt: int, worker: Worker, visible: Visibl
         return row
 
     first = await checkpoint("shared", 1, first_round_messages(task))
-    req = plan_messages(task, first["code"], first["visible_report"])
+    req = planner_messages(task, first["code"], first["visible_report"])
     reply = adviser.ask(req, task_id=task.task_id, sample=attempt)
     if reply.status != "ok":
         raise RuntimeError(f"adviser returned {reply.status}")
@@ -182,10 +206,23 @@ async def run_pair(task: TaskSpec, attempt: int, worker: Worker, visible: Visibl
     if on_advice is not None:
         on_advice(plan_record)
     final: dict[str, dict] = {}
+    continuation_by_arm = {
+        arm: continuation_messages(task, first["code"] or "(no code was produced)",
+                                   first["visible_report"], plan if arm == "guidance" else None)
+        for arm in ARMS
+    }
+    if require_equal_continuation_caps:
+        from system1.loop.generate import render_prompt
+        caps = {}
+        for arm, messages in continuation_by_arm.items():
+            prompt = render_prompt(worker.tokenizer, messages)
+            n_prompt = len(worker.tokenizer(prompt)["input_ids"])
+            caps[arm] = min(worker.think_cap, worker.max_model_len - n_prompt - worker.code_tokens - 16)
+        if caps["control"] != caps["guidance"] or min(caps.values()) <= 0:
+            raise RuntimeError(f"unequal or exhausted Qwen continuation thinking caps: {caps}")
     # Balance temporal ordering without consulting any outcome or hidden label.
     order = ARMS if int(hashlib.sha256(f"{task.task_id}:{attempt}".encode()).hexdigest(), 16) % 2 == 0 else ARMS[::-1]
     for arm in order:
-        messages = continuation_messages(task, first["code"] or "(no code was produced)",
-                                         first["visible_report"], plan if arm == "guidance" else None)
+        messages = continuation_by_arm[arm]
         final[arm] = await checkpoint(arm, 2, messages)
     return PairResult(pair_id, rows, plan_record, final)

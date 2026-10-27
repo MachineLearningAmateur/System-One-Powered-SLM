@@ -54,6 +54,13 @@ def final_units(pairs):
     return units
 
 
+def generation_is_gradable(meta: dict, *, real: bool) -> bool:
+    latest_status = meta["sessions"][-1]["status"] if meta["sessions"] else None
+    return latest_status == "finished" or (
+        real and meta["protocol"].get("pilot_profile") == "dev30-v1"
+        and latest_status == "stopped")
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--run-id", required=True)
@@ -65,7 +72,10 @@ def main():
     meta = json.loads((out / "run_meta.json").read_text())
     if meta["protocol"]["backend"] != ("mock" if args.mock else "real"):
         ap.error("grade mode does not match generation backend")
-    if not meta["sessions"] or meta["sessions"][-1]["status"] != "finished":
+    # A stopped fixed development batch is never resumed or replenished. Its
+    # already completed pairs can be graded after vLLM is gone, while the task
+    # accounting report marks every other manifest task as incomplete.
+    if not generation_is_gradable(meta, real=args.real):
         ap.error("generation did not finish; no partial grading")
     label_path = out / "bounded_hidden_labels.jsonl"
     if label_path.exists():
