@@ -43,6 +43,7 @@ PILOT_MAX_RUN_SECONDS = 9000  # 2.5 h; external GPU deletion deadline is 3 h
 PILOT_GPU_RATE_ASSUMPTION = 3.2004
 PILOT_GPU_LIFETIME_HOURS = 3.0
 PILOT_TOTAL_BUDGET_USD = 20.0
+MAX_CONSECUTIVE_INVALID_ADVICE = 3
 
 
 def validate_pilot_limits(args):
@@ -74,6 +75,7 @@ class AdviceReply:
     usd_reported: float | None
     usd_computed: float | None
     latency_ms: float
+    finish_reason: str = "stop"
 
 
 class MockWorker:
@@ -115,21 +117,25 @@ class MockVisible:
 
 
 class MockAdviser:
-    def __init__(self):
+    def __init__(self, case="valid"):
         self.calls = 0
+        self.case = case
 
     def ask(self, messages, *, task_id, sample):
         self.calls += 1
-        return AdviceReply("The draft returns the input unchanged. Add one to x in the returned value.",
+        content = {"valid": "The draft returns the input unchanged. Add one to x in the returned value.",
+                   "overlength": "word " * 121, "empty": "", "truncated": "Check the edge case.",
+                   "reasoning-only": None}[self.case]
+        return AdviceReply(content,
                            "ok", f"mock-{self.calls}", "mock-adviser", "mock-provider",
                            len(messages[0]["content"].split()),
-                           15, 0.0, 0.0, 1.0)
+                           15, 0.0, 0.0, 1.0, "length" if self.case == "truncated" else "stop")
 
 
 class BoundedAdviser:
     """One pinned OpenRouter request per eligible pair, with a ledger guard."""
 
-    def __init__(self, ledger: CostLedger, limit_usd: float):
+    def __init__(self, ledger: CostLedger, limit_usd: float, exchanges: CostLedger):
         from system1.eval.ledger import usd_for
         prices = load_prices()
         entry = prices["models"][FRONTIER_MODEL]
@@ -139,7 +145,7 @@ class BoundedAdviser:
         if not key:
             raise RuntimeError("OPENROUTER_API_KEY is missing")
         self.client = httpx.Client(timeout=300, headers={"Authorization": f"Bearer {key}"})
-        self.ledger, self.limit_usd, self.prices = ledger, limit_usd, prices
+        self.ledger, self.exchanges, self.limit_usd, self.prices = ledger, exchanges, limit_usd, prices
         self.p_in, self.p_out = entry["usd_per_m_input"], entry["usd_per_m_output"]
         self.usd_for = usd_for
 
@@ -166,15 +172,39 @@ class BoundedAdviser:
         t0 = time.perf_counter()
         status = "ok"
         parsed = parse_reply(None)
+        response_body = None
+        status_code = None
+        request_body = {"model": FRONTIER_MODEL, "messages": messages,
+            "max_tokens": PLAN_MAX_OUTPUT_TOKENS, "reasoning": REASONING,
+            "provider": PROVIDER, "usage": {"include": True}}
         try:
-            response = self.client.post(API_URL, json={"model": FRONTIER_MODEL, "messages": messages,
-                "max_tokens": PLAN_MAX_OUTPUT_TOKENS, "reasoning": REASONING,
-                "provider": PROVIDER, "usage": {"include": True}})
+            response = self.client.post(API_URL, json=request_body)
+            status_code = response.status_code
             try:
-                parsed = parse_reply(response.json())
+                response_body = response.json()
+                parsed = parse_reply(response_body)
             except ValueError:
                 parsed = parse_reply(None)
             status = parsed["status"] if response.is_success else f"http:{response.status_code}"
+            if response.is_success and isinstance(response_body, dict):
+                choices = response_body.get("choices")
+                if isinstance(choices, list) and choices and isinstance(choices[0], dict):
+                    message = choices[0].get("message")
+                    content = message.get("content") if isinstance(message, dict) else None
+                    if content is not None and not isinstance(content, str):
+                        status = "protocol:non-string content"
+                if parsed["input_tokens"] is None or parsed["output_tokens"] is None:
+                    status = "protocol:missing usage"
+                if parsed["finish_reason"] not in ("stop", "length", "content_filter"):
+                    status = "protocol:unresolved finish reason"
+                if parsed["output_tokens"] is not None and parsed["output_tokens"] > PLAN_MAX_OUTPUT_TOKENS:
+                    status = "protocol:completion exceeds request cap"
+                if parsed["model_returned"] not in (FRONTIER_MODEL, "anthropic/claude-sonnet-5.5"):
+                    status = "protocol:unexpected returned model"
+                if parsed["provider_returned"] is not None and parsed["provider_returned"].lower() != "anthropic":
+                    status = "protocol:unexpected returned provider"
+                if status == "protocol:empty content" and parsed["input_tokens"] is not None and parsed["output_tokens"] is not None:
+                    status = "ok"  # ordinary failed delivery; the pair records and retains it
         except httpx.TransportError as e:
             status = f"transport:{type(e).__name__}"
         cost = self.usd_for(self.prices, FRONTIER_MODEL, parsed["input_tokens"], parsed["output_tokens"])
@@ -184,11 +214,22 @@ class BoundedAdviser:
             input_tokens=parsed["input_tokens"], output_tokens=parsed["output_tokens"],
             reasoning_tokens=parsed["reasoning_tokens"], usd_reported=parsed["usd_reported"],
             usd_computed=cost, latency_ms=elapsed, model_returned=parsed["model_returned"]))
+        # Append the credential-free request body and full provider response even
+        # when parsing fails, so a billed rejection can be reproduced offline.
+        self.exchanges.append_obj({"call_id": call_id, "task_id": task_id, "sample": sample,
+            "request_body": request_body, "http_status": status_code,
+            "response_body": response_body, "status": status})
         if status != "ok":
             raise RuntimeError(f"frontier call {call_id} stopped with {status}")
+        actual_spend = sum(float(r.get("usd_reported") if r.get("usd_reported") is not None else
+                                 r.get("usd_computed") if r.get("usd_computed") is not None else reserve)
+                           for r in self.ledger.read()[0] if r.get("component") == "frontier")
+        if actual_spend > self.limit_usd:
+            raise RuntimeError(f"frontier spending violation: ${actual_spend:.4f} > ${self.limit_usd:.4f}")
         return AdviceReply(parsed["content"], status, call_id, parsed["model_returned"],
                            parsed["provider_returned"],
-                           parsed["input_tokens"], parsed["output_tokens"], parsed["usd_reported"], cost, elapsed)
+                           parsed["input_tokens"], parsed["output_tokens"], parsed["usd_reported"], cost, elapsed,
+                           parsed["finish_reason"])
 
 
 def git_state():
@@ -206,6 +247,8 @@ def mock_tasks():
 async def run(args):
     if args.mock == args.real:
         raise SystemExit("choose exactly one of --mock or --real")
+    if args.real and getattr(args, "mock_advice_case", "valid") != "valid":
+        raise SystemExit("--mock-advice-case is only for mock runs")
     if args.real and (not args.operator_approved or args.limit_usd is None or args.limit_usd <= 0):
         raise SystemExit("real inference needs --operator-approved and a positive --limit-usd")
     if args.real and (not args.max_wall_seconds or not args.max_worker_http_requests
@@ -225,7 +268,7 @@ async def run(args):
         raise SystemExit("real protocol run needs a clean committed tree")
     if args.mock:
         tasks, ids = mock_tasks(), list(mock_tasks())
-        worker, visible, adviser = MockWorker(), MockVisible(), MockAdviser()
+        worker, visible, adviser = MockWorker(), MockVisible(), MockAdviser(getattr(args, "mock_advice_case", "valid"))
         server_identity = {"mock": True}
     else:
         try:
@@ -245,7 +288,6 @@ async def run(args):
         visible = VisibleRunner(max_concurrent=1)
         worker = None  # constructed inside the HTTP client context
         adviser = None
-    ids = ids[:args.limit] if args.limit else ids
     task_file_sha256 = None
     if args.tasks_file:
         if args.mock:
@@ -264,17 +306,21 @@ async def run(args):
         ids = selected
         import hashlib
         task_file_sha256 = hashlib.sha256(raw).hexdigest()
+    ids = ids[:args.limit] if args.limit else ids
     if args.real and len(ids) * args.attempts > PILOT_MAX_PAIRS:
         raise SystemExit("pilot exceeds 120 paired units")
     out = RESULTS / "runs" / args.run_id
     if out.exists() and not args.resume:
         raise SystemExit(f"{out} exists; use a fresh run id, or explicit --resume after a stopped job")
     out.mkdir(parents=True, exist_ok=True)
-    proto = {"experiment": "bounded-guidance-v1", "backend": "mock" if args.mock else "real",
+    proto = {"experiment": "bounded-guidance-v1", "amendment": "invalid-advice-v1a-20261027",
+             "backend": "mock" if args.mock else "real",
+             "mock_advice_case": getattr(args, "mock_advice_case", "valid") if args.mock else None,
              "split": args.split, "task_ids": ids, "attempts": args.attempts,
              "shared_drafts": 1, "continuations_per_arm": 1, "advice_for_first_pass": True,
              "plan_max_words": PLAN_MAX_WORDS, "plan_max_chars": PLAN_MAX_CHARS,
              "plan_max_output_tokens": PLAN_MAX_OUTPUT_TOKENS, "worker_model": WORKER_MODEL,
+             "max_consecutive_invalid_advice": MAX_CONSECUTIVE_INVALID_ADVICE,
              "worker_revision": REVISION, "frontier_model": FRONTIER_MODEL,
              "excluded_tasks_sha256": excluded["sha256"] if args.real else None,
              "task_file_sha256": task_file_sha256,
@@ -291,6 +337,8 @@ async def run(args):
         meta = {"run_id": args.run_id, "protocol": proto, "sessions": []}
     pairs = CostLedger(out / "pairs.jsonl")
     plans = CostLedger(out / "plans.jsonl")
+    exchanges = CostLedger(out / "frontier_exchanges.jsonl")
+    checkpoints = CostLedger(out / "checkpoints.jsonl")
     calls = CostLedger(out / "worker_calls.jsonl")
     failures = CostLedger(out / "failures.jsonl")
     ledger = CostLedger(out / "ledger.jsonl")
@@ -298,6 +346,11 @@ async def run(args):
     if bad:
         raise SystemExit("damaged pair data; stopping before any inference")
     completed = {(r["task_id"], r["attempt"]) for r in done}
+    invalid_streak = 0
+    for old_pair in reversed(done):
+        if old_pair.get("advice_delivery") != "invalid":
+            break
+        invalid_streak += 1
     session = {"started": datetime.now(timezone.utc).isoformat(), "limit_usd": args.limit_usd,
                "max_wall_seconds": args.max_wall_seconds,
                "max_worker_http_requests": args.max_worker_http_requests,
@@ -309,10 +362,13 @@ async def run(args):
     start_time = time.monotonic()
 
     async def body(worker, adviser):
+        nonlocal invalid_streak
         for task_id in ids:
             for attempt in range(args.attempts):
                 if (task_id, attempt) in completed:
                     continue
+                if invalid_streak >= MAX_CONSECUTIVE_INVALID_ADVICE:
+                    raise RuntimeError("three consecutive invalid advice deliveries; stop before another paid pair")
                 if args.real:
                     # Reserve the maximum for a whole pair before it starts:
                     # three two-phase Qwen generations and one plan request.
@@ -326,16 +382,17 @@ async def run(args):
                         raise RuntimeError("wall-time ceiling reached before next pair")
                 try:
                     result = await run_pair(tasks[task_id], attempt, worker, visible, adviser,
-                                            on_worker_call=calls.append_obj)
+                                            on_worker_call=calls.append_obj, on_advice=plans.append_obj,
+                                            on_checkpoint=checkpoints.append_obj)
                     # The unit is committed only when both branches finish.
-                    if result.plan:
-                        plans.append_obj(result.plan)
                     pairs.append_obj({"pair_id": result.pair_id, "task_id": task_id,
                         "benchmark": tasks[task_id].benchmark, "attempt": attempt,
                         "first_visible_pass": result.rows[0]["visible_pass"],
+                        "advice_delivery": result.plan["delivery_status"],
                         "plan_call_id": result.plan["call_id"] if result.plan else None,
                         "rows": result.rows, "final_checkpoint_ids": {
                             arm: rec["checkpoint_id"] for arm, rec in result.final.items()}})
+                    invalid_streak = invalid_streak + 1 if result.plan["delivery_status"] == "invalid" else 0
                     print(f"{task_id} a{attempt}: first pass={result.rows[0]['visible_pass']}, "
                           f"final={[result.final[a]['visible_pass'] for a in ('control', 'guidance')]}", flush=True)
                 except Exception as e:
@@ -351,7 +408,7 @@ async def run(args):
             async with httpx.AsyncClient() as client:
                 worker = Generator(client, load_tokenizer(),
                                    url=args.server_url.rstrip("/") + "/v1/completions")
-                adviser = BoundedAdviser(ledger, args.limit_usd)
+                adviser = BoundedAdviser(ledger, args.limit_usd, exchanges)
                 try:
                     await body(worker, adviser)
                 finally:
@@ -371,6 +428,8 @@ def main():
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--run-id", required=True)
     ap.add_argument("--mock", action="store_true")
+    ap.add_argument("--mock-advice-case", choices=("valid", "overlength", "empty", "truncated", "reasoning-only"),
+                    default="valid", help="mock-only response shape for integration checks")
     ap.add_argument("--real", action="store_true")
     ap.add_argument("--operator-approved", action="store_true")
     ap.add_argument("--limit-usd", type=float)

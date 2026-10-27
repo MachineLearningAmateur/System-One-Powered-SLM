@@ -2,13 +2,14 @@
 
 import asyncio
 import sys
+import httpx
 from argparse import Namespace
 from dataclasses import replace
 from pathlib import Path
 
 import pytest
 
-from system1.bounded_guidance import InvalidPlan, run_pair, validate_plan
+from system1.bounded_guidance import InvalidPlan, plan_messages, run_pair, validate_plan
 from system1.loop.tasks import TaskSpec
 from system1.eval.ledger import CostLedger
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
@@ -50,8 +51,13 @@ def test_first_visible_pass_still_receives_the_same_budgeted_intervention():
     assert pair.rows[0]["visible_pass"]
 
 
-def test_plan_bounds_stop_pair_without_silent_control_fallback():
+def test_plan_bounds_and_invalid_delivery_remains_in_treatment():
+    instruction = plan_messages(TASK, "def add_one(x): return x", "visible fail")[0]["content"]
+    assert "120 whitespace-separated words and 900 characters" in instruction
+    assert "after trimming leading and trailing whitespace" in instruction
     assert validate_plan("  Check the edge case.  ") == "Check the edge case."
+    assert validate_plan("x" * 900) == "x" * 900
+    assert len(validate_plan("word " * 120).split()) == 120
     for bad in (None, "", "word " * 121, "x" * 901, "```python\nx=1\n```"):
         with pytest.raises(InvalidPlan):
             validate_plan(bad)
@@ -60,10 +66,115 @@ def test_plan_bounds_stop_pair_without_silent_control_fallback():
         def ask(self, *args, **kwargs):
             return replace(super().ask(*args, **kwargs), content="```python\nx=1\n```")
 
-    worker = MockWorker()
-    with pytest.raises(InvalidPlan):
-        asyncio.run(run_pair(TASK, 0, worker, MockVisible(), BadAdviser()))
-    assert worker.calls == 1
+    worker, saved = MockWorker(), []
+    pair = asyncio.run(run_pair(TASK, 0, worker, MockVisible(), BadAdviser(), on_advice=saved.append))
+    assert worker.calls == 3 and len(pair.rows) == 3
+    assert pair.plan["delivery_status"] == "invalid"
+    assert pair.plan["invalid_reason"] == "adviser response contains a code fence"
+    assert saved == [pair.plan]
+    assert pair.final["control"]["prompt_messages"] == pair.final["guidance"]["prompt_messages"]
+
+
+@pytest.mark.parametrize("content,finish,expected", [
+    ("Check the edge case.", "stop", "delivered"),
+    ("word " * 121, "stop", "invalid"),
+    ("", "stop", "invalid"),
+    ("Check the edge case.", "length", "invalid"),
+    (None, "stop", "invalid"),  # reasoning-only response has no visible content
+])
+def test_advice_response_classes(content, finish, expected):
+    class Adviser(MockAdviser):
+        def ask(self, *args, **kwargs):
+            return replace(super().ask(*args, **kwargs), content=content, finish_reason=finish)
+
+    pair = asyncio.run(run_pair(TASK, 0, MockWorker(), MockVisible(), Adviser()))
+    assert pair.plan["delivery_status"] == expected
+    if expected == "invalid":
+        assert pair.final["control"]["prompt_messages"] == pair.final["guidance"]["prompt_messages"]
+    else:
+        assert pair.final["control"]["prompt_messages"] != pair.final["guidance"]["prompt_messages"]
+
+
+def test_reasoning_only_provider_response_is_saved_and_charged(tmp_path):
+    response_body = {"id": "fake-id", "model": "anthropic/claude-sonnet-5.5",
+        "choices": [{"finish_reason": "stop", "message": {"content": None,
+                     "reasoning": "internal text is not advice"}}],
+        "usage": {"prompt_tokens": 50, "completion_tokens": 30, "cost": 0.0004,
+                  "completion_tokens_details": {"reasoning_tokens": 30}}}
+
+    class Client:
+        def post(self, url, json):
+            self.request = json
+            return httpx.Response(200, json=response_body)
+
+    adviser = BoundedAdviser.__new__(BoundedAdviser)
+    adviser.client = Client()
+    adviser.ledger = CostLedger(tmp_path / "ledger.jsonl")
+    adviser.exchanges = CostLedger(tmp_path / "exchanges.jsonl")
+    adviser.limit_usd = 0.01
+    adviser.p_in, adviser.p_out = 2.0, 10.0
+    adviser.prices = {}
+    adviser.usd_for = lambda prices, model, inp, out: 0.0004
+    reply = adviser.ask([{"role": "user", "content": "task"}], task_id="T", sample=0)
+    assert reply.content is None and reply.finish_reason == "stop"
+    exchange = adviser.exchanges.read()[0][0]
+    assert exchange["response_body"]["choices"][0]["message"]["reasoning"] == "internal text is not advice"
+    assert exchange["request_body"]["max_tokens"] == 512
+    assert "Authorization" not in str(exchange)
+    assert adviser.ledger.read()[0][0]["usd_reported"] == 0.0004
+
+
+@pytest.mark.parametrize("change,expected", [
+    ({"usage": {}}, "missing usage"),
+    ({"choices": [{"finish_reason": "unknown", "message": {"content": "Fix x."}}]}, "finish reason"),
+    ({"model": "other/model"}, "returned model"),
+    ({"provider": "other"}, "returned provider"),
+    ({"choices": [{"finish_reason": "stop", "message": {"content": ["Fix x."]}}]}, "non-string content"),
+])
+def test_provider_integrity_failures_log_and_stop(tmp_path, change, expected):
+    body = {"model": "anthropic/claude-sonnet-5.5",
+            "choices": [{"finish_reason": "stop", "message": {"content": "Fix x."}}],
+            "usage": {"prompt_tokens": 50, "completion_tokens": 30, "cost": 0.0004}}
+    body.update(change)
+
+    class Client:
+        def post(self, url, json):
+            return httpx.Response(200, json=body)
+
+    adviser = BoundedAdviser.__new__(BoundedAdviser)
+    adviser.client = Client()
+    adviser.ledger = CostLedger(tmp_path / "ledger.jsonl")
+    adviser.exchanges = CostLedger(tmp_path / "exchanges.jsonl")
+    adviser.limit_usd = 0.01
+    adviser.p_in, adviser.p_out = 2.0, 10.0
+    adviser.prices = {}
+    adviser.usd_for = lambda prices, model, inp, out: 0.0004
+    with pytest.raises(RuntimeError, match=expected):
+        adviser.ask([{"role": "user", "content": "task"}], task_id="T", sample=0)
+    assert len(adviser.ledger.read()[0]) == len(adviser.exchanges.read()[0]) == 1
+
+
+def test_reported_spend_violation_stops_after_charge_is_logged(tmp_path):
+    body = {"model": "anthropic/claude-sonnet-5.5",
+            "choices": [{"finish_reason": "stop", "message": {"content": "Fix x."}}],
+            "usage": {"prompt_tokens": 50, "completion_tokens": 30, "cost": 0.02}}
+
+    class Client:
+        def post(self, url, json):
+            return httpx.Response(200, json=body)
+
+    adviser = BoundedAdviser.__new__(BoundedAdviser)
+    adviser.client = Client()
+    adviser.ledger = CostLedger(tmp_path / "ledger.jsonl")
+    adviser.exchanges = CostLedger(tmp_path / "exchanges.jsonl")
+    adviser.limit_usd = 0.01
+    adviser.p_in, adviser.p_out = 2.0, 10.0
+    adviser.prices = {}
+    adviser.usd_for = lambda prices, model, inp, out: 0.0004
+    with pytest.raises(RuntimeError, match="spending violation"):
+        adviser.ask([{"role": "user", "content": "task"}], task_id="T", sample=0)
+    assert adviser.ledger.read()[0][0]["usd_reported"] == 0.02
+    assert len(adviser.exchanges.read()[0]) == 1
 
 
 def test_grader_rejects_code_hash_mismatch_and_paired_bootstrap_keeps_tasks():

@@ -21,7 +21,7 @@ from system1.config import RESULTS
 from system1.eval.ledger import read_jsonl
 
 
-def load_pairs(run_dir):
+def load_pairs(run_dir, *, require_delivery=False):
     pairs, damaged = read_jsonl(run_dir / "pairs.jsonl")
     labels, bad_labels = read_jsonl(run_dir / "bounded_hidden_labels.jsonl")
     if damaged or bad_labels or not pairs or len(labels) != 2 * len(pairs):
@@ -34,10 +34,13 @@ def load_pairs(run_dir):
         by_key[key] = label
     records = []
     for pair in pairs:
+        if require_delivery and pair.get("advice_delivery") not in ("delivered", "invalid"):
+            raise ValueError("missing or invalid advice delivery in amended pair")
         row_by_id = {r["checkpoint_id"]: r for r in pair["rows"]}
         entry = {"pair_id": pair["pair_id"], "task_id": pair["task_id"],
                  "benchmark": pair["benchmark"], "attempt": pair["attempt"],
-                 "first_visible_pass": pair["first_visible_pass"], "plan_call_id": pair["plan_call_id"]}
+                 "first_visible_pass": pair["first_visible_pass"], "plan_call_id": pair["plan_call_id"],
+                 "advice_delivery": pair.get("advice_delivery", "delivered")}
         for arm in ("control", "guidance"):
             label = by_key[(pair["pair_id"], arm)]
             row = row_by_id[pair["final_checkpoint_ids"][arm]]
@@ -89,18 +92,35 @@ def main():
                     help="modeled GPU rate for a future run; not a measured invoice")
     args = ap.parse_args()
     out = RESULTS / "runs" / args.run_id
-    records = load_pairs(out)
+    meta = json.loads((out / "run_meta.json").read_text())
+    amended = meta["protocol"].get("amendment") == "invalid-advice-v1a-20261027"
+    records = load_pairs(out, require_delivery=amended)
     result = stats(records)
     result["task_cluster_bootstrap_95pct"] = task_bootstrap(records)
-    meta = json.loads((out / "run_meta.json").read_text())
     calls, bad_calls = read_jsonl(out / "worker_calls.jsonl")
     plans, bad_plans = read_jsonl(out / "plans.jsonl")
     ledger, bad_ledger = read_jsonl(out / "ledger.jsonl")
     if bad_calls or bad_plans or bad_ledger:
         raise ValueError("damaged call or plan log")
-    if len(plans) != result["n_pairs"]:
-        raise ValueError("exactly one advice request is required per pair")
-    result["request_counts"] = {"qwen_http": len(calls), "frontier_plan": len(plans),
+    completed_ids = {r["pair_id"] for r in records}
+    completed_plans = [p for p in plans if p["pair_id"] in completed_ids]
+    if len(completed_plans) != result["n_pairs"]:
+        raise ValueError("exactly one advice delivery is required per completed pair")
+    plan_by_pair = {p["pair_id"]: p for p in completed_plans}
+    if len(plan_by_pair) != len(completed_plans):
+        raise ValueError("duplicate advice delivery record")
+    for record in records:
+        plan = plan_by_pair.get(record["pair_id"])
+        if amended and (plan is None or plan.get("delivery_status") not in ("delivered", "invalid")):
+            raise ValueError("missing or invalid advice delivery in amended plan")
+        if (plan is None or plan["call_id"] != record["plan_call_id"]
+                or plan.get("delivery_status", "delivered") != record["advice_delivery"]):
+            raise ValueError("advice delivery join mismatch")
+    result["advice_delivery"] = {"delivered": sum(p.get("delivery_status", "delivered") == "delivered" for p in completed_plans),
+                                 "invalid": sum(p.get("delivery_status", "delivered") == "invalid" for p in completed_plans),
+                                 "orphaned_after_incomplete_pair": len(plans) - len(completed_plans)}
+    result["request_counts"] = {"qwen_http": len(calls),
+                                 "frontier_plan": sum(r.get("component") == "frontier" for r in ledger) if meta["protocol"]["backend"] == "real" else len(plans),
                                  "mock_or_real": meta["protocol"]["backend"]}
     unknown_cost = sum(r.get("component") == "frontier" and r.get("usd_reported") is None
                        and r.get("usd_computed") is None for r in ledger)

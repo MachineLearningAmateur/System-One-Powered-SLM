@@ -19,7 +19,7 @@ from system1.loop.tasks import TaskSpec, first_round_messages, format_test_repor
 
 PLAN_MAX_WORDS = 120
 PLAN_MAX_CHARS = 900
-PLAN_MAX_OUTPUT_TOKENS = 512  # includes any provider reasoning tokens
+PLAN_MAX_OUTPUT_TOKENS = 512  # total completion, including provider reasoning
 ARMS = ("control", "guidance")
 
 
@@ -45,7 +45,9 @@ def plan_messages(task: TaskSpec, code: str | None, report: str) -> list[dict]:
     shown = first_round_messages(task)[0]["content"]
     return [{"role": "user", "content": (
         "Give the Qwen coding assistant one short repair plan for the task below. "
-        f"Use at most {PLAN_MAX_WORDS} words. State the likely defect and concrete steps to fix it. "
+        f"Use at most {PLAN_MAX_WORDS} whitespace-separated words and {PLAN_MAX_CHARS} characters "
+        "after trimming leading and trailing whitespace. "
+        "State the likely defect and concrete steps to fix it. "
         "Do not write code, a patch, hidden tests, or a final answer. "
         "If the visible result gives insufficient evidence, say what to check.\n\n"
         f"Task and visible examples:\n{shown}\n"
@@ -87,11 +89,12 @@ class PairResult:
 
 
 async def run_pair(task: TaskSpec, attempt: int, worker: Worker, visible: Visible,
-                   adviser: Adviser, *, on_worker_call=None) -> PairResult:
+                   adviser: Adviser, *, on_worker_call=None, on_advice=None,
+                   on_checkpoint=None) -> PairResult:
     """Run one paired unit: one shared draft and one continuation per arm.
 
-    A failed adviser call or invalid plan stops the pair. No silent fallback to
-    control is allowed, because it would change the treatment definition.
+    Invalid advice is a charged, recorded treatment delivery failure. Provider,
+    configuration, accounting, and integrity errors still stop the pair.
     """
     pair_id = uuid.uuid4().hex
     rows: list[dict] = []
@@ -138,23 +141,46 @@ async def run_pair(task: TaskSpec, attempt: int, worker: Worker, visible: Visibl
                               "cap_hit": g.cap_hit, "effective_cap": g.effective_cap},
                "worker_calls": calls}
         rows.append(row)
+        if on_checkpoint is not None:
+            on_checkpoint(row)
         return row
 
     first = await checkpoint("shared", 1, first_round_messages(task))
     req = plan_messages(task, first["code"], first["visible_report"])
     reply = adviser.ask(req, task_id=task.task_id, sample=attempt)
     if reply.status != "ok":
-        raise InvalidPlan(f"adviser returned {reply.status}")
-    plan = validate_plan(reply.content)
+        raise RuntimeError(f"adviser returned {reply.status}")
+    finish_reason = getattr(reply, "finish_reason", None)
+    if finish_reason not in ("stop", "length", "content_filter"):
+        raise RuntimeError(f"unresolved adviser finish reason: {finish_reason}")
+    visible_text = reply.content.strip() if isinstance(reply.content, str) else ""
+    char_count, word_count = len(visible_text), len(visible_text.split())
+    plan = None
+    invalid_reason = None
+    if finish_reason == "length":
+        invalid_reason = "truncated_completion"
+    elif finish_reason == "content_filter":
+        invalid_reason = "filtered_completion"
+    else:
+        try:
+            plan = validate_plan(reply.content)
+        except InvalidPlan as exc:
+            invalid_reason = str(exc)
     plan_record = {"pair_id": pair_id, "task_id": task.task_id, "attempt": attempt,
                    "request_messages": req,
                    "request_sha256": hashlib.sha256(json.dumps(req, sort_keys=True).encode()).hexdigest(),
-                   "plan": plan, "call_id": reply.call_id, "status": reply.status,
+                   "plan": plan, "visible_content": reply.content,
+                   "visible_chars": char_count, "visible_words": word_count,
+                   "delivery_status": "delivered" if plan is not None else "invalid",
+                   "invalid_reason": invalid_reason, "finish_reason": finish_reason,
+                   "call_id": reply.call_id, "status": reply.status,
                    "model_returned": reply.model_returned,
                    "provider_returned": getattr(reply, "provider_returned", None),
                    "input_tokens": reply.input_tokens,
                    "output_tokens": reply.output_tokens, "usd_reported": reply.usd_reported,
                    "usd_computed": reply.usd_computed, "latency_ms": reply.latency_ms}
+    if on_advice is not None:
+        on_advice(plan_record)
     final: dict[str, dict] = {}
     # Balance temporal ordering without consulting any outcome or hidden label.
     order = ARMS if int(hashlib.sha256(f"{task.task_id}:{attempt}".encode()).hexdigest(), 16) % 2 == 0 else ARMS[::-1]
