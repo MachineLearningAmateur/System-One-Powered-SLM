@@ -99,7 +99,7 @@ def parse_reply(data: Any) -> dict:
     return out
 
 
-def ledger_spend(path, worst_case_usd: float) -> tuple[float, int]:
+def ledger_spend(path, worst_case_usd: float, conservative_unknown: bool = False) -> tuple[float, int]:
     """(dollars spent, rows without any cost). A row with no reported or computed cost
     counts at the worst case, so unknown cost never lowers the total."""
     rows, _ = read_jsonl(path)
@@ -110,7 +110,7 @@ def ledger_spend(path, worst_case_usd: float) -> tuple[float, int]:
         usd = r.get("usd_reported")
         usd = r.get("usd_computed") if usd is None else usd
         if usd is None:
-            if (r.get("status") or "").startswith(("transport:", "http:")) and r.get("output_tokens") is None:
+            if not conservative_unknown and (r.get("status") or "").startswith(("transport:", "http:")) and r.get("output_tokens") is None:
                 continue  # a request that never reached the model is not billed
             unknown += 1
             usd = worst_case_usd
@@ -121,7 +121,8 @@ def ledger_spend(path, worst_case_usd: float) -> tuple[float, int]:
 class FrontierClient:
     def __init__(self, ledger: CostLedger, prices: dict, limit_usd: float, api_key: str | None = None,
                  model: str = MODEL, max_tokens: int = MAX_TOKENS, timeout: float = 300.0, max_retries: int = 4,
-                 transport: httpx.BaseTransport | None = None, sleep: Callable[[float], None] = time.sleep):
+                 transport: httpx.BaseTransport | None = None, sleep: Callable[[float], None] = time.sleep,
+                 strict_cap: bool = False):
         key = api_key or os.environ.get("OPENROUTER_API_KEY")
         if not key:
             raise RuntimeError("OPENROUTER_API_KEY is not set; see .env.example")
@@ -132,6 +133,7 @@ class FrontierClient:
             raise ValueError("limit_usd must be > 0")
         self.ledger, self.prices, self.limit_usd = ledger, prices, limit_usd
         self.model, self.max_tokens, self.max_retries = model, max_tokens, max_retries
+        self.strict_cap = strict_cap
         self._sleep = sleep
         self._lock = threading.Lock()
         self._inflight = 0.0  # worst-case cost of calls that have not ended
@@ -156,10 +158,16 @@ class FrontierClient:
                 "provider": PROVIDER, "usage": {"include": True}}
 
     def ask(self, messages: list[dict], *, task_id: str, sample: int) -> FrontierReply:
-        # A generous input estimate: 1 token per 3 characters, plus the chat overhead.
-        reserve = self.worst_case_usd(sum(len(m["content"]) for m in messages) // 3 + 50)
+        # Strict mode reserves every allowed HTTP attempt, including a billed
+        # error before a retry. UTF-8 bytes plus overhead is a conservative
+        # input-token bound for these short text-only task prompts.
+        input_bound = (sum(len(m["content"].encode("utf-8")) for m in messages) + 200 if self.strict_cap
+                       else sum(len(m["content"]) for m in messages) // 3 + 50)
+        reserve_per_attempt = self.worst_case_usd(input_bound)
+        reserve = reserve_per_attempt * (self.max_retries + 1) if self.strict_cap else reserve_per_attempt
         with self._lock:  # concurrent calls reserve their worst case before they start
-            spent, _ = ledger_spend(self.ledger.path, reserve)
+            spent, _ = ledger_spend(self.ledger.path, reserve_per_attempt,
+                                    conservative_unknown=self.strict_cap)
             if spent + self._inflight + reserve > self.limit_usd:
                 raise SpendLimitReached(f"spent ${spent:.4f} (+${self._inflight:.4f} in flight); the next call "
                                         f"could cost up to ${reserve:.4f}; limit ${self.limit_usd:.2f}")

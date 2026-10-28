@@ -50,12 +50,15 @@ def git_state() -> tuple[str, bool]:
     return commit, bool(status.strip())
 
 
-def protocol(dirty: bool) -> dict:
-    return {"mode": "takeover_from_scratch", "model": MODEL, "provider": PROVIDER, "reasoning": REASONING,
+def protocol(dirty: bool, manifest_sha256: str | None = None, strict_spend: bool = False) -> dict:
+    p = {"mode": "takeover_from_scratch", "model": MODEL, "provider": PROVIDER, "reasoning": REASONING,
             "max_tokens": MAX_TOKENS, "temperature": "provider default", "messages": "loop.tasks.first_round_messages",
             "visible_tests_sha256": file_sha256(VISIBLE_TESTS_PATH), "split_sha256": file_sha256(SPLIT_PATH),
             "client_sha256": file_sha256(ROOT / "src" / "system1" / "frontier" / "client.py"),
             "git_dirty": dirty}
+    if manifest_sha256 is not None:
+        p.update({"frozen_manifest_sha256": manifest_sha256, "strict_spend": strict_spend})
+    return p
 
 
 def main() -> int:
@@ -68,6 +71,8 @@ def main() -> int:
     ap.add_argument("--concurrency", type=int, default=4)
     ap.add_argument("--confirm-test", action="store_true")
     ap.add_argument("--allow-dirty", action="store_true", help="smoke runs only; marks the run as not protocol")
+    ap.add_argument("--frozen-manifest", help="extension manifest: verify source hashes, tasks and prompts before calls")
+    ap.add_argument("--strict-spend", action="store_true", help="reserve all allowed HTTP retries at a conservative token bound")
     args = ap.parse_args()
     if args.split == "test" and not args.confirm_test:
         print("--split test needs --confirm-test (only after the protocol freeze)")
@@ -83,9 +88,31 @@ def main() -> int:
     if args.limit:
         ids = random.Random(SELECT_SEED).sample(ids, len(ids))[: args.limit]
 
+    manifest_sha = None
+    if args.frozen_manifest:
+        mp = ROOT / args.frozen_manifest
+        manifest = json.loads(mp.read_text(encoding="utf-8"))
+        if not args.strict_spend or args.limit or args.split != "test" or args.run_id != manifest["frontier_run"]:
+            print("STOP: frozen extension requires strict spend, all test tasks, and the frozen run id")
+            return 2
+        if args.samples != manifest["frontier"]["samples_per_task"] or sorted(ids) != manifest["task_ids"]:
+            print("STOP: frontier sample/task grid differs from the frozen manifest")
+            return 2
+        for rel, old_sha in manifest["source_hashes"].items():
+            if file_sha256(ROOT / rel) != old_sha:
+                print(f"STOP: frozen source changed: {rel}")
+                return 2
+        for tid in ids:
+            messages = first_round_messages(tasks[tid])
+            canonical = hashlib.sha256(json.dumps(messages, sort_keys=True, separators=(",", ":")).encode()).hexdigest()
+            if canonical != manifest["task_prompt_sha256"][tid]:
+                print(f"STOP: frozen frontier prompt changed: {tid}")
+                return 2
+        manifest_sha = file_sha256(mp)
+
     out = RESULTS / "runs" / args.run_id
     out.mkdir(parents=True, exist_ok=True)
-    proto = protocol(dirty)
+    proto = protocol(dirty, manifest_sha, args.strict_spend)
     meta_path = out / "run_meta.json"
     if meta_path.exists():
         old = json.loads(meta_path.read_text(encoding="utf-8"))
@@ -130,7 +157,7 @@ def main() -> int:
 
     n_ok = n_fail = 0
     stopped = None
-    with FrontierClient(ledger, prices, args.limit_usd) as client, ThreadPoolExecutor(args.concurrency) as pool:
+    with FrontierClient(ledger, prices, args.limit_usd, strict_cap=args.strict_spend) as client, ThreadPoolExecutor(args.concurrency) as pool:
         futs = {pool.submit(one, t, s): (t, s) for t, s in todo}
         for f in as_completed(futs):
             try:

@@ -60,6 +60,36 @@ def test_spend_guard_stops_before_any_request(tmp_path):
     assert calls == []
 
 
+def test_strict_spend_reserves_every_http_retry_before_first_request(tmp_path):
+    calls = []
+
+    def handler(request):
+        calls.append(1)
+        return httpx.Response(200, json=reply())
+
+    # One output at the 8K cap could cost $0.08; five HTTP attempts could
+    # cost over $0.40. The old one-attempt guard would permit this limit.
+    c, _, _ = make(tmp_path, handler, limit=0.30, strict_cap=True, max_retries=4)
+    with pytest.raises(F.SpendLimitReached):
+        c.ask(MSG, task_id="T", sample=0)
+    assert calls == []
+
+
+def test_strict_spend_counts_unknown_transport_attempt_as_potentially_billed(tmp_path):
+    calls = []
+
+    def handler(request):
+        calls.append(1)
+        return httpx.Response(200, json=reply())
+
+    c, ledger, _ = make(tmp_path, handler, limit=0.10, strict_cap=True, max_retries=0)
+    ledger.append(LedgerRow(component="frontier", model=F.MODEL, provider="openrouter",
+                            status="transport:ReadTimeout"))
+    with pytest.raises(F.SpendLimitReached):
+        c.ask(MSG, task_id="T", sample=0)
+    assert calls == []
+
+
 def test_unknown_cost_counts_at_the_worst_case_and_unsent_requests_are_free(tmp_path):
     path = tmp_path / "l.jsonl"
     led = CostLedger(path)
