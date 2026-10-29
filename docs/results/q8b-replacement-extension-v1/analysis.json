@@ -1,0 +1,325 @@
+{
+  "version": "q8b-replacement-extension-v1",
+  "frontier_run": "q8b-frontier-replacement-v1",
+  "frontier_info": {
+    "replicates": 2,
+    "calls_with_unknown_cost": 0,
+    "grade_session": "20261028T031807-8665fb",
+    "answers_of_excluded_tasks": 0
+  },
+  "manifest_sha256": "149a405deea353b8f4503791b83fa6c61840d7c784af578494ce6262f3464e7a",
+  "n_attempts": 1620,
+  "n_tasks": 324,
+  "n_forced": 40,
+  "source_grade_session": "20261024T055712-5f1aa3",
+  "frontier_recorded_collection_usd": 1.2788279999999996,
+  "policies": [
+    {
+      "policy": "cheap",
+      "pass": 0.8734567901234568,
+      "pass_by_replicate": [
+        0.8753086419753087,
+        0.8716049382716049
+      ],
+      "q_vp": 0.25,
+      "q_total": 0.26851851851851855,
+      "frontier_calls_per_attempt": 0.26851851851851855,
+      "optional_calls_per_attempt": 0.24382716049382716,
+      "forced_calls_per_attempt": 0.024691358024691357,
+      "rescues_per_attempt": 0.06172839506172839,
+      "harms_per_attempt": 0.009259259259259259,
+      "n_attempts": 1620,
+      "n_decisions": 1580,
+      "optional_count": 395,
+      "forced_count": 40,
+      "frontier_calls_per_1620_attempts": 435.0,
+      "modeled_qwen_usd_total": 30.197270396261423,
+      "modeled_jev_usd_total": 0.0,
+      "recorded_frontier_usd_if_deployed": 1.258243,
+      "modeled_deployment_usd_total": 31.455513396261424,
+      "rescue_count": 100.0,
+      "harm_count": 15.0,
+      "escalated_already_correct_count": 267.0,
+      "escalated_unrescued_count": 68.0
+    },
+    {
+      "policy": "fitted",
+      "pass": 0.875,
+      "pass_by_replicate": [
+        0.8771604938271605,
+        0.8728395061728395
+      ],
+      "q_vp": 0.25,
+      "q_total": 0.26851851851851855,
+      "frontier_calls_per_attempt": 0.26851851851851855,
+      "optional_calls_per_attempt": 0.24382716049382716,
+      "forced_calls_per_attempt": 0.024691358024691357,
+      "rescues_per_attempt": 0.06388888888888888,
+      "harms_per_attempt": 0.009876543209876543,
+      "n_attempts": 1620,
+      "n_decisions": 1580,
+      "optional_count": 395,
+      "forced_count": 40,
+      "frontier_calls_per_1620_attempts": 435.0,
+      "modeled_qwen_usd_total": 30.197270396261423,
+      "modeled_jev_usd_total": 0.273763476,
+      "recorded_frontier_usd_if_deployed": 1.2749139999999999,
+      "modeled_deployment_usd_total": 31.745947872261425,
+      "rescue_count": 103.5,
+      "harm_count": 16.0,
+      "escalated_already_correct_count": 258.0,
+      "escalated_unrescued_count": 73.5
+    },
+    {
+      "policy": "direct_jev",
+      "pass": 0.8848765432098765,
+      "pass_by_replicate": [
+        0.8858024691358025,
+        0.8839506172839506
+      ],
+      "q_vp": 0.25,
+      "q_total": 0.26851851851851855,
+      "frontier_calls_per_attempt": 0.26851851851851855,
+      "optional_calls_per_attempt": 0.24382716049382716,
+      "forced_calls_per_attempt": 0.024691358024691357,
+      "rescues_per_attempt": 0.07037037037037037,
+      "harms_per_attempt": 0.006481481481481481,
+      "n_attempts": 1620,
+      "n_decisions": 1580,
+      "optional_count": 395,
+      "forced_count": 40,
+      "frontier_calls_per_1620_attempts": 435.0,
+      "modeled_qwen_usd_total": 30.197270396261423,
+      "modeled_jev_usd_total": 0.047551224,
+      "recorded_frontier_usd_if_deployed": 1.1885750000000002,
+      "modeled_deployment_usd_total": 31.433396620261423,
+      "rescue_count": 114.0,
+      "harm_count": 10.5,
+      "escalated_already_correct_count": 234.0,
+      "escalated_unrescued_count": 87.0
+    },
+    {
+      "policy": "strong4",
+      "pass": 0.883641975308642,
+      "pass_by_replicate": [
+        0.8851851851851852,
+        0.8820987654320988
+      ],
+      "q_vp": 0.25,
+      "q_total": 0.26851851851851855,
+      "frontier_calls_per_attempt": 0.26851851851851855,
+      "optional_calls_per_attempt": 0.24382716049382716,
+      "forced_calls_per_attempt": 0.024691358024691357,
+      "rescues_per_attempt": 0.07222222222222222,
+      "harms_per_attempt": 0.009567901234567902,
+      "n_attempts": 1620,
+      "n_decisions": 1580,
+      "optional_count": 395,
+      "forced_count": 40,
+      "frontier_calls_per_1620_attempts": 435.0,
+      "modeled_qwen_usd_total": 30.197270396261423,
+      "modeled_jev_usd_total": 0.273763476,
+      "recorded_frontier_usd_if_deployed": 1.230696,
+      "modeled_deployment_usd_total": 31.701729872261424,
+      "rescue_count": 117.0,
+      "harm_count": 15.5,
+      "escalated_already_correct_count": 230.0,
+      "escalated_unrescued_count": 88.0
+    },
+    {
+      "policy": "random",
+      "pass": 0.8555555555555555,
+      "pass_by_replicate": [
+        0.8563271604938272,
+        0.854783950617284
+      ],
+      "q_vp": 0.25,
+      "q_total": 0.26851851851851855,
+      "frontier_calls_per_attempt": 0.26851851851851855,
+      "optional_calls_per_attempt": 0.24382716049382716,
+      "forced_calls_per_attempt": 0.024691358024691357,
+      "rescues_per_attempt": 0.040123456790123455,
+      "harms_per_attempt": 0.005555555555555556,
+      "n_attempts": 1620,
+      "n_decisions": 1580,
+      "optional_count": 395.0,
+      "forced_count": 40,
+      "frontier_calls_per_1620_attempts": 435.0,
+      "modeled_qwen_usd_total": 30.197270396261423,
+      "modeled_jev_usd_total": 0.0,
+      "recorded_frontier_usd_if_deployed": 0.9154935,
+      "modeled_deployment_usd_total": 31.112763896261423,
+      "rescue_count": 65.0,
+      "harm_count": 9.0,
+      "escalated_already_correct_count": 333.25,
+      "escalated_unrescued_count": 36.75
+    },
+    {
+      "policy": "always-small",
+      "pass": 0.8209876543209876,
+      "pass_by_replicate": [
+        0.8209876543209876,
+        0.8209876543209876
+      ],
+      "q_vp": 0.0,
+      "q_total": 0.0,
+      "frontier_calls_per_attempt": 0.0,
+      "optional_calls_per_attempt": 0.0,
+      "forced_calls_per_attempt": 0.0,
+      "rescues_per_attempt": 0.0,
+      "harms_per_attempt": 0.0,
+      "n_attempts": 1620,
+      "n_decisions": 1580,
+      "optional_count": 0,
+      "forced_count": 0,
+      "frontier_calls_per_1620_attempts": 0.0,
+      "modeled_qwen_usd_total": 30.197270396261423,
+      "modeled_jev_usd_total": 0.0,
+      "recorded_frontier_usd_if_deployed": 0.0,
+      "modeled_deployment_usd_total": 30.197270396261423,
+      "rescue_count": 0.0,
+      "harm_count": 0.0,
+      "escalated_already_correct_count": 0.0,
+      "escalated_unrescued_count": 0.0
+    },
+    {
+      "policy": "always-frontier",
+      "pass": 0.8981481481481481,
+      "pass_by_replicate": [
+        0.9012345679012346,
+        0.8950617283950617
+      ],
+      "q_vp": 0.0,
+      "q_total": 1.0,
+      "frontier_calls_per_attempt": 1.0,
+      "optional_calls_per_attempt": 0.0,
+      "forced_calls_per_attempt": 0.024691358024691357,
+      "rescues_per_attempt": 0.09938271604938272,
+      "harms_per_attempt": 0.022222222222222223,
+      "n_attempts": 1620,
+      "n_decisions": 1580,
+      "optional_count": 0,
+      "forced_count": 0,
+      "frontier_calls_per_1620_attempts": 1620.0,
+      "modeled_qwen_usd_total": 0.0,
+      "modeled_jev_usd_total": 0.0,
+      "recorded_frontier_usd_if_deployed": 3.19707,
+      "modeled_deployment_usd_total": 3.19707,
+      "rescue_count": 161.0,
+      "harm_count": 36.0,
+      "escalated_already_correct_count": 1330.0,
+      "escalated_unrescued_count": 129.0
+    }
+  ],
+  "comparisons": [
+    {
+      "policy": "fitted",
+      "vs": "cheap",
+      "pass_difference": 0.0015432098765432098,
+      "ci_low": -0.004629629629629629,
+      "ci_high": 0.007407407407407408,
+      "bootstrap_tasks": 324
+    },
+    {
+      "policy": "direct_jev",
+      "vs": "cheap",
+      "pass_difference": 0.011419753086419753,
+      "ci_low": -0.005864197530864198,
+      "ci_high": 0.029320987654320986,
+      "bootstrap_tasks": 324
+    },
+    {
+      "policy": "strong4",
+      "vs": "cheap",
+      "pass_difference": 0.010185185185185186,
+      "ci_low": -0.005864197530864198,
+      "ci_high": 0.026859567901234456,
+      "bootstrap_tasks": 324
+    },
+    {
+      "policy": "random",
+      "vs": "cheap",
+      "pass_difference": -0.017901234567901235,
+      "ci_low": -0.03217592592592593,
+      "ci_high": -0.00485918209876546,
+      "bootstrap_tasks": 324
+    },
+    {
+      "policy": "always-small",
+      "vs": "cheap",
+      "pass_difference": -0.05246913580246913,
+      "ci_low": -0.07746913580246914,
+      "ci_high": -0.030246913580246913,
+      "bootstrap_tasks": 324
+    },
+    {
+      "policy": "always-frontier",
+      "vs": "cheap",
+      "pass_difference": 0.024691358024691357,
+      "ci_low": 0.005555555555555556,
+      "ci_high": 0.044753086419753084,
+      "bootstrap_tasks": 324
+    }
+  ],
+  "frozen_threshold_sensitivity": [
+    {
+      "policy": "cheap",
+      "optional_count": 383,
+      "optional_rate": 0.24240506329113923,
+      "forced_count": 40,
+      "pass": 0.8728395061728395,
+      "frontier_call_rate": 0.2611111111111111,
+      "modeled_deployment_usd_total": 31.42770939626142
+    },
+    {
+      "policy": "fitted",
+      "optional_count": 344,
+      "optional_rate": 0.21772151898734177,
+      "forced_count": 40,
+      "pass": 0.8734567901234568,
+      "frontier_call_rate": 0.23703703703703705,
+      "modeled_deployment_usd_total": 31.625933872261427
+    },
+    {
+      "policy": "strong4",
+      "optional_count": 367,
+      "optional_rate": 0.23227848101265822,
+      "forced_count": 40,
+      "pass": 0.8830246913580246,
+      "frontier_call_rate": 0.25123456790123455,
+      "modeled_deployment_usd_total": 31.647774872261422
+    }
+  ],
+  "discordant_optional": [
+    {
+      "policy": "fitted",
+      "jev_only_count": 58,
+      "cheap_only_count": 58,
+      "sum_gain_policy_only": 5.5,
+      "sum_gain_cheap_only": 3.0,
+      "pass_difference": 0.0015432098765432098
+    },
+    {
+      "policy": "direct_jev",
+      "jev_only_count": 222,
+      "cheap_only_count": 222,
+      "sum_gain_policy_only": 33.5,
+      "sum_gain_cheap_only": 15.0,
+      "pass_difference": 0.011419753086419753
+    },
+    {
+      "policy": "strong4",
+      "jev_only_count": 179,
+      "cheap_only_count": 179,
+      "sum_gain_policy_only": 23.5,
+      "sum_gain_cheap_only": 7.0,
+      "pass_difference": 0.010185185185185186
+    }
+  ],
+  "cost_limitations": [
+    "Qwen Azure price and app lifetime are modeled from the prior report, not an invoice.",
+    "Visible-test host CPU time was not separately recorded or priced.",
+    "Jev is modeled at a public rate; direct account charges are unconfirmed.",
+    "Frontier deployment cost uses mean recorded cost of two samples, not both calls per escalation."
+  ]
+}

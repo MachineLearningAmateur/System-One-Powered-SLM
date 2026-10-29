@@ -1,0 +1,4 @@
+policy,jev_only_count,cheap_only_count,sum_gain_policy_only,sum_gain_cheap_only,pass_difference
+fitted,58,58,5.5,3.0,0.0015432098765432098
+direct_jev,222,222,33.5,15.0,0.011419753086419753
+strong4,179,179,23.5,7.0,0.010185185185185186

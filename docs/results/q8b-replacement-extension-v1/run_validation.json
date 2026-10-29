@@ -1,0 +1,39 @@
+{
+  "label": "exploratory_extension_of_already_inspected_q8b_evaluation",
+  "freeze_commit": "4606dbccd64484d54c091fbd6f9e502824e21d6f",
+  "manifest_sha256": "149a405deea353b8f4503791b83fa6c61840d7c784af578494ce6262f3464e7a",
+  "source_labels_sha256_after": "47857f079df2cbfa85cdfed922cde6f411542b45375dcf9d8505ed01635429f5",
+  "source_grade_session": "20261024T055712-5f1aa3",
+  "frontier_grade_session": "20261028T031807-8665fb",
+  "frontier_answers": 648,
+  "distinct_tasks": 324,
+  "http_attempts": 648,
+  "retries": 0,
+  "frontier_statuses": {
+    "ok": 648
+  },
+  "grade_labels": {
+    "pass": 582,
+    "fail": 66,
+    "invalid": 0,
+    "no_code": 0
+  },
+  "distinct_graded_codes": 450,
+  "recorded_usd": 1.278828,
+  "computed_usd": 1.278828,
+  "checks": {
+    "full_grid": true,
+    "all_http_attempts_recorded": true,
+    "all_responses_ok": true,
+    "all_http_attempts_ok": true,
+    "all_costs_reported": true,
+    "grader_code_match": true,
+    "dataset_cache_match": true,
+    "grader_version_match": true,
+    "grader_settings_match": true,
+    "sandbox_container_match": true,
+    "source_baseline_preserved": true,
+    "rescue_harm_identity": true,
+    "constant_router_calls": true
+  }
+}
