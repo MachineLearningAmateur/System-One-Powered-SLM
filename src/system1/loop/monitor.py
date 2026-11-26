@@ -115,6 +115,25 @@ def remote_vllm_server_identity(expected: dict[str, str], manifest: dict,
             "azure_revision": revision, "server_kind": "azure-container-app"}
 
 
+def deepinfra_server_identity(model: str, api_key: str,
+                              models_url: str = "https://api.deepinfra.com/v1/openai/models") -> dict:
+    """Check that DeepInfra lists `model` before a hosted generation run. Fails closed.
+
+    DeepInfra manages the weights and their precision, so no revision or dtype can be
+    checked here; the fingerprint says so. Only fields that stay the same between
+    sessions go into it, so that a resumed run compares equal."""
+    try:
+        response = httpx.get(models_url, headers={"Authorization": f"Bearer {api_key}"}, timeout=30.0)
+        response.raise_for_status()
+        ids = {m["id"] for m in response.json()["data"]}
+    except (httpx.HTTPError, KeyError, ValueError, TypeError) as e:
+        raise ServerMismatch(f"DeepInfra does not answer: {type(e).__name__}") from e
+    if model not in ids:
+        raise ServerMismatch(f"DeepInfra does not list {model}")
+    return {"server_kind": "deepinfra", "deepinfra_model": model, "weights_pinned": False,
+            "vllm_image_id": None, "vllm_cmd": None}
+
+
 def gpu_sample() -> dict | None:
     try:
         r = subprocess.run(["nvidia-smi", f"--query-gpu={POWER_QUERY}", "--format=csv,noheader,nounits"],

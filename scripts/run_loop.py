@@ -3,6 +3,17 @@
     docker compose build sandbox && docker compose up -d vllm
     uv run python scripts/run_loop.py --run-id pilot --split dev --attempts 1
 
+Hosted worker (Qwen3.5-9B study): DeepInfra's text-completions endpoint, with
+DEEPINFRA_API_KEY in .env. The calls are billed per token; no GPU power or
+vLLM counters exist for this backend, so the run records them as missing.
+
+    uv run python scripts/run_loop.py --backend deepinfra --run-id q9b-smoke --split dev \\
+        --benchmark humaneval+ --limit 2 --attempts 1 --allow-dirty --max-billed-tokens 200000
+
+--max-billed-tokens (needed for DeepInfra) is a guard on input plus output
+tokens of this session: after it is reached, no new attempt starts. Attempts
+that already run finish, so the total can go past it. It is not a dollar cap.
+
 Outputs go to results/runs/<run-id>/: trajectories.jsonl (one record per
 checkpoint), ledger.jsonl (one row per vLLM call), failures.jsonl,
 logprobs/*.npz, power.jsonl (GPU power samples) and run_meta.json (with each
@@ -24,6 +35,7 @@ import argparse
 import asyncio
 import hashlib
 import json
+import os
 import subprocess
 import sys
 import time
@@ -35,15 +47,17 @@ import httpx
 from system1.config import RESULTS, ROOT
 from system1.eval.ledger import CostLedger
 from system1.eval.split import SPLIT_PATH, file_sha256, load_split
-from system1.loop.generate import (CODE_TOKENS, MAX_MODEL_LEN, MODEL, REVISION, SAMPLING, SEED_TAG, THINK_CAP,
-                                   TOP_LOGPROBS, Generator, load_tokenizer)
+from system1.loop.generate import (CODE_TOKENS, DEEPINFRA_URL, MAX_MODEL_LEN, MODEL, REVISION, SAMPLING, SEED_TAG,
+                                   THINK_CAP, TOP_LOGPROBS, Generator, load_tokenizer)
 from system1.loop import monitor
 from system1.loop.runner import MAX_ROUNDS, VISIBLE_TIMEOUT_S, AttemptFailed, RunContext, complete_executions, run_attempt
 from system1.loop.sandbox import VisibleRunner
 from system1.loop.tasks import VISIBLE_TESTS_PATH, load_tasks
 
 
-FREEZE_TAG = "q8b-protocol-freeze-v1"
+FREEZE_TAG = "q9b-protocol-freeze-v1"
+DEEPINFRA_RETRIES = 4  # transient HTTP errors (429, 5xx) only; every try is a ledger row
+DEEPINFRA_TOP_LOGPROBS = 1  # DeepInfra returns only the top-1 alternative (checked 2026-11-26)
 
 
 def finished(store: CostLedger) -> set[tuple[str, int]]:
@@ -65,17 +79,24 @@ EXPECTED_SERVER = {"--model": MODEL, "--revision": REVISION, "--max-model-len": 
 
 def protocol(tokenizer, visible: VisibleRunner, dirty: bool, commit: str, concurrency: int,
              think_cap: int = THINK_CAP, remote_manifest: dict | None = None,
-             server_url: str = "http://localhost:8000") -> dict:
+             server_url: str = "http://localhost:8000", backend: str = "vllm", api_key: str = "") -> dict:
     template = tokenizer.chat_template if tokenizer is not None else None
-    identity = (monitor.remote_vllm_server_identity(EXPECTED_SERVER, remote_manifest,
-                                                     f"{server_url}/v1/models") if remote_manifest is not None
-                else monitor.vllm_server_identity(EXPECTED_SERVER))
+    if backend == "deepinfra":
+        identity = monitor.deepinfra_server_identity(MODEL, api_key)
+    elif remote_manifest is not None:
+        identity = monitor.remote_vllm_server_identity(EXPECTED_SERVER, remote_manifest, f"{server_url}/v1/models")
+    else:
+        identity = monitor.vllm_server_identity(EXPECTED_SERVER)
     return {"model": MODEL, "revision": REVISION, **identity,
-            "server_url": server_url,
+            "backend": backend, "server_url": server_url,
             "generation_concurrency": concurrency,
             "chat_template_sha256": hashlib.sha256(template.encode()).hexdigest() if template else None,
             "sampling": SAMPLING, "seed_tag": SEED_TAG, "think_cap": think_cap, "code_tokens": CODE_TOKENS,
-            "max_model_len": MAX_MODEL_LEN, "top_logprobs": TOP_LOGPROBS, "max_rounds": MAX_ROUNDS,
+            "max_model_len": MAX_MODEL_LEN,
+            "top_logprobs": DEEPINFRA_TOP_LOGPROBS if backend == "deepinfra" else TOP_LOGPROBS,
+            "confidence_top_k": DEEPINFRA_TOP_LOGPROBS if backend == "deepinfra" else TOP_LOGPROBS,
+            "stop_reason_source": "last_token" if backend == "deepinfra" else "server",
+            "max_rounds": MAX_ROUNDS,
             "visible_timeout_s": VISIBLE_TIMEOUT_S, **visible.protocol(),
             "split_sha256": file_sha256(SPLIT_PATH), "visible_tests_sha256": file_sha256(VISIBLE_TESTS_PATH),
             "git_commit": commit, "git_dirty": dirty}
@@ -100,10 +121,23 @@ async def main_async(args) -> int:
     out = RESULTS / "runs" / args.run_id
     out.mkdir(parents=True, exist_ok=True)
     remote_path = getattr(args, "remote_manifest", "")
-    server_url = getattr(args, "server_url", "http://localhost:8000").rstrip("/")
-    if bool(remote_path) != (server_url != "http://localhost:8000"):
-        print("--remote-manifest and a nonlocal --server-url must be provided together")
-        return 2
+    backend = getattr(args, "backend", "vllm")
+    api_key = ""
+    if backend == "deepinfra":
+        if remote_path or getattr(args, "server_url", "http://localhost:8000") != "http://localhost:8000":
+            print("--backend deepinfra takes no --remote-manifest or --server-url")
+            return 2
+        server_url = DEEPINFRA_URL.removesuffix("/completions")
+        api_key = os.environ.get("DEEPINFRA_API_KEY", "")
+        if not api_key:
+            print("DEEPINFRA_API_KEY is not set in .env")
+            return 2
+        print(f"DEEPINFRA_API_KEY length: {len(api_key)}")
+    else:
+        server_url = getattr(args, "server_url", "http://localhost:8000").rstrip("/")
+        if bool(remote_path) != (server_url != "http://localhost:8000"):
+            print("--remote-manifest and a nonlocal --server-url must be provided together")
+            return 2
     try:
         remote_manifest = json.loads(Path(remote_path).read_text(encoding="utf-8")) if remote_path else None
     except (OSError, ValueError) as e:
@@ -114,7 +148,7 @@ async def main_async(args) -> int:
     try:
         # Compared as stored: a JSON round trip turns tuples into lists.
         proto = json.loads(json.dumps(protocol(tokenizer, visible, dirty, commit, args.concurrency,
-                                               args.think_cap, remote_manifest, server_url)))
+                                               args.think_cap, remote_manifest, server_url, backend, api_key)))
     except monitor.ServerMismatch as e:
         print(f"STOP: {e}")
         return 2
@@ -141,25 +175,49 @@ async def main_async(args) -> int:
     meta_path.write_text(json.dumps(meta, indent=1), encoding="utf-8")
     print(f"{len(jobs)} attempts to run ({len(done)} already done)", flush=True)
 
+    hosted = backend == "deepinfra"
     metrics_url = f"{server_url}/metrics"
-    metrics_start = monitor.vllm_metrics(metrics_url) if remote_manifest else monitor.vllm_metrics()
-    sampler = None if remote_manifest else monitor.PowerSampler(out / "power.jsonl").start()
+
+    def metrics() -> dict | None:
+        if hosted:
+            return None  # DeepInfra exposes no vLLM counters
+        return monitor.vllm_metrics(metrics_url) if remote_manifest else monitor.vllm_metrics()
+
+    metrics_start = metrics()
+    sampler = None if (remote_manifest or hosted) else monitor.PowerSampler(out / "power.jsonl").start()
     sem = asyncio.Semaphore(args.concurrency)
     t0 = time.perf_counter()
-    n_done, n_failed = 0, 0
+    n_done, n_failed, n_guard = 0, 0, 0
+    max_billed = getattr(args, "max_billed_tokens", 0)
     outcome = "interrupted"
+    ctx = None
     try:
-        async with httpx.AsyncClient() as client:
-            generator = (Generator(client, tokenizer, url=f"{server_url}/v1/completions", think_cap=args.think_cap)
-                         if remote_manifest else Generator(client, tokenizer, think_cap=args.think_cap))
+        headers = {"Authorization": f"Bearer {api_key}"} if hosted else None
+        async with httpx.AsyncClient(headers=headers) as client:
+            if hosted:
+                generator = Generator(client, tokenizer, url=DEEPINFRA_URL, think_cap=args.think_cap,
+                                      max_retries=DEEPINFRA_RETRIES, top_logprobs=DEEPINFRA_TOP_LOGPROBS,
+                                      infer_missing_stop_reason=True)
+                provider = "deepinfra"
+            elif remote_manifest:
+                generator = Generator(client, tokenizer, url=f"{server_url}/v1/completions", think_cap=args.think_cap)
+                provider = "azure-container-app-vllm"
+            else:
+                generator = Generator(client, tokenizer, think_cap=args.think_cap)
+                provider = "local-vllm"
             ctx = RunContext(run_id=args.run_id, split=args.split, generator=generator,
                              visible=visible, store=store, ledger=ledger, failures=failures,
-                             logprob_dir=out / "logprobs",
-                             provider="azure-container-app-vllm" if remote_manifest else "local-vllm")
+                             logprob_dir=out / "logprobs", provider=provider)
 
             async def one(tid: str, attempt: int) -> None:
-                nonlocal n_done, n_failed
+                nonlocal n_done, n_failed, n_guard
                 async with sem:
+                    used = getattr(ctx.generator, "tokens_used", None)
+                    if max_billed and used and used["input"] + used["output"] >= max_billed:
+                        n_guard += 1  # not started; a resume runs it
+                        if n_guard == 1:
+                            print(f"token guard reached ({used}); no new attempts start", flush=True)
+                        return
                     try:
                         recs = await run_attempt(ctx, tasks[tid], attempt)
                     except Exception as e:  # one failed attempt must not stop the run
@@ -181,9 +239,10 @@ async def main_async(args) -> int:
         outcome = "finished"
     finally:  # also on Ctrl+C: the session keeps its time, energy and counters
         elapsed = round(time.perf_counter() - t0, 1)
-        metrics_end = monitor.vllm_metrics(metrics_url) if remote_manifest else monitor.vllm_metrics()
+        metrics_end = metrics()
         session.update({"ended": datetime.now(timezone.utc).isoformat(), "outcome": outcome, "elapsed_s": elapsed,
-                        "n_failed": n_failed,
+                        "n_failed": n_failed, "n_not_started_guard": n_guard, "max_billed_tokens": max_billed,
+                        "tokens_used": getattr(ctx.generator, "tokens_used", None) if ctx else None,
                         **(sampler.stop() if sampler else {"power_samples": 0, "energy_wh": None, "mean_power_w": None}),
                         "vllm_metrics_start": metrics_start,
                         "vllm_metrics_end": metrics_end, "vllm_delta": monitor.metrics_delta(metrics_start, metrics_end)})
@@ -207,13 +266,20 @@ def main() -> int:
     ap.add_argument("--think-cap", type=int, default=THINK_CAP,
                     help="thinking tokens per round; only for the cap comparison (part of the protocol)")
     ap.add_argument("--concurrency", type=int, default=3)
+    ap.add_argument("--max-billed-tokens", type=int, default=0,
+                    help="DeepInfra: no new attempt starts after this many input + output tokens (0 = no guard)")
     ap.add_argument("--visible-workers", type=int, default=4, help="visible-check containers at the same time")
     ap.add_argument("--allow-dirty", action="store_true", help="smoke runs only: the run is marked non-protocol")
+    ap.add_argument("--backend", choices=["vllm", "deepinfra"], default="vllm",
+                    help="vllm: local or Azure vLLM; deepinfra: hosted, billed per token (DEEPINFRA_API_KEY)")
     ap.add_argument("--server-url", default="http://localhost:8000", help="vLLM base URL (HTTPS for Azure)")
     ap.add_argument("--remote-manifest", default="", help="Azure deployment identity JSON for remote vLLM")
     args = ap.parse_args()
     if not 0 < args.think_cap <= MAX_MODEL_LEN - CODE_TOKENS:
         print(f"--think-cap must be in 1..{MAX_MODEL_LEN - CODE_TOKENS}")
+        return 2
+    if args.backend == "deepinfra" and args.max_billed_tokens <= 0:
+        print("--backend deepinfra needs --max-billed-tokens (a guard for the billed calls)")
         return 2
     if args.split == "test":
         # Test tasks get generation only after the protocol freeze (docs/research-plan.md): the freeze

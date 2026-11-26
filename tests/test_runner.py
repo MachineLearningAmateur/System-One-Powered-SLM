@@ -543,3 +543,96 @@ def test_driver_think_cap_reaches_the_generator_and_the_protocol(driver, tmp_pat
     asyncio.run(drv.main_async(args))
     meta = json.loads((tmp_path / "runs" / "r" / "run_meta.json").read_text(encoding="utf-8"))
     assert caps == [12_288] and meta["protocol"]["think_cap"] == 12_288
+
+
+def test_driver_deepinfra_backend_uses_the_hosted_endpoint_and_key(driver, tmp_path, monkeypatch, capsys):
+    drv, args = driver
+    args.backend = "deepinfra"
+    monkeypatch.delenv("DEEPINFRA_API_KEY", raising=False)
+    assert asyncio.run(drv.main_async(args)) == 2 and "DEEPINFRA_API_KEY is not set" in capsys.readouterr().out
+
+    monkeypatch.setenv("DEEPINFRA_API_KEY", "secret-value")
+    seen = {}
+
+    def identity(model, api_key):
+        seen["identity"] = (model, api_key)
+        return {"server_kind": "deepinfra", "deepinfra_model": model, "weights_pinned": False,
+                "vllm_image_id": None, "vllm_cmd": None}
+
+    def gen(client, tok, url, think_cap, max_retries, top_logprobs, infer_missing_stop_reason):
+        seen["gen"] = (url, max_retries, client.headers.get("Authorization"), top_logprobs, infer_missing_stop_reason)
+        return DriverGen([])
+
+    def no_power(path):
+        raise AssertionError("no GPU power is sampled for a hosted backend")
+
+    monkeypatch.setattr(drv.monitor, "deepinfra_server_identity", identity)
+    monkeypatch.setattr(drv.monitor, "PowerSampler", no_power)
+    monkeypatch.setattr(drv.monitor, "vllm_metrics", lambda *a: pytest.fail("no vLLM counters for DeepInfra"))
+    monkeypatch.setattr(drv, "Generator", gen)
+    asyncio.run(drv.main_async(args))
+    out = capsys.readouterr().out
+    assert "secret-value" not in out and "DEEPINFRA_API_KEY length: 12" in out
+    assert seen["identity"] == (drv.MODEL, "secret-value")
+    assert seen["gen"] == (drv.DEEPINFRA_URL, drv.DEEPINFRA_RETRIES, "Bearer secret-value", 1, True)
+    meta_text = (tmp_path / "runs" / "r" / "run_meta.json").read_text(encoding="utf-8")
+    assert "secret-value" not in meta_text  # the key never reaches the run files
+    meta = json.loads(meta_text)
+    assert meta["protocol"]["backend"] == "deepinfra" and meta["protocol"]["weights_pinned"] is False
+    assert meta["protocol"]["confidence_top_k"] == 1 and meta["protocol"]["top_logprobs"] == 1
+    assert meta["protocol"]["stop_reason_source"] == "last_token"
+    assert meta["sessions"][0]["energy_wh"] is None and meta["sessions"][0]["vllm_metrics_start"] is None
+    rows, _ = CostLedger(tmp_path / "runs" / "r" / "ledger.jsonl").read()
+    assert rows and {r["provider"] for r in rows if r["component"] == "small_model"} <= {"deepinfra"}
+
+
+def test_driver_deepinfra_backend_refuses_vllm_flags(driver, monkeypatch, capsys):
+    drv, args = driver
+    monkeypatch.setenv("DEEPINFRA_API_KEY", "k")
+    args.backend, args.server_url = "deepinfra", "https://example.test"
+    assert asyncio.run(drv.main_async(args)) == 2 and "takes no --remote-manifest" in capsys.readouterr().out
+
+
+def test_driver_token_guard_starts_no_attempt_after_the_limit(driver, tmp_path, monkeypatch, capsys):
+    drv, args = driver
+    args.backend, args.max_billed_tokens = "deepinfra", 100
+    monkeypatch.setenv("DEEPINFRA_API_KEY", "k")
+    monkeypatch.setattr(drv.monitor, "deepinfra_server_identity",
+                        lambda model, api_key: {"server_kind": "deepinfra", "weights_pinned": False})
+    started = []
+
+    class Spent(DriverGen):
+        tokens_used = {"input": 60, "output": 40}  # the guard is already reached
+
+        async def generate(self, *a, **k):
+            started.append(a)
+            return await super().generate(*a, **k)
+
+    monkeypatch.setattr(drv, "Generator", lambda client, tok, **kw: Spent([]))
+    assert asyncio.run(drv.main_async(args)) == 1 and started == []
+    assert "token guard reached" in capsys.readouterr().out
+    meta = json.loads((tmp_path / "runs" / "r" / "run_meta.json").read_text(encoding="utf-8"))
+    s = meta["sessions"][0]
+    assert s["n_not_started_guard"] == 6 and s["max_billed_tokens"] == 100
+    assert s["tokens_used"] == {"input": 60, "output": 40}
+
+
+def test_driver_deepinfra_needs_a_token_guard(monkeypatch, capsys):
+    drv = load_script("run_loop")
+    monkeypatch.setattr("sys.argv", ["run_loop.py", "--run-id", "x", "--backend", "deepinfra"])
+    monkeypatch.setattr(drv.asyncio, "run", lambda coro: pytest.fail("must not start"))
+    assert drv.main() == 2 and "needs --max-billed-tokens" in capsys.readouterr().out
+
+
+def test_generator_counts_billed_tokens():
+    async def go():
+        async with httpx.AsyncClient(transport=httpx.MockTransport(lambda r: httpx.Response(200, json={
+                "choices": [{"text": "a b", "finish_reason": "stop", "stop_reason": None,
+                             "logprobs": {"token_logprobs": [-0.1, -0.2], "top_logprobs": [{"a": -0.1}, {"b": -0.2}]}}],
+                "usage": {"prompt_tokens": 7, "completion_tokens": 2}}))) as c:
+            from system1.loop.generate import Generator
+            gen = Generator(c, None, url="http://x/v1/completions")
+            await gen._complete("p", 5, 1, None, "answer", None)
+            await gen._complete("p", 5, 1, None, "answer", None)
+            return gen.tokens_used
+    assert asyncio.run(go()) == {"input": 14, "output": 4}

@@ -1,8 +1,8 @@
-"""Export the 8B model's test-run thinking traces for review.
+"""Export the 9B model's test-run thinking traces for review.
 
-    uv run python scripts/export_traces.py --run-id q8b-test-v1 [--force]
+    uv run python scripts/export_traces.py --run-id q9b-test-v1 [--force]
 
-Writes docs/traces-q8b/:
+Writes docs/traces-q9b/:
   * README.md, an index of every task with links and a hidden-test indicator per task;
   * <benchmark>/<task>/README.md, one page per task: the prompt the model saw, the visible tests
     and a table of its attempts with the hidden-test result of each final code;
@@ -30,7 +30,7 @@ from system1.config import RESULTS, ROOT
 from system1.eval.exclusions import load_exclusions
 from system1.eval.labels import load_labelled
 
-OUT = ROOT / "docs" / "traces-q8b"
+OUT = ROOT / "docs" / "traces-q9b"
 FIELDS = ("checkpoint_id", "task_id", "benchmark", "attempt", "round", "thinking", "answer", "code",
           "visible_pass", "visible_report")
 GEN = ("prompt_tokens", "thinking_tokens", "answer_tokens", "cap_hit", "think_closed")
@@ -170,7 +170,7 @@ def main() -> int:
 
     index = ["# Thinking traces of the test run", "",
              f"Every checkpoint of run `{args.run_id}`: {len(by_task)} test tasks, {len(rows):,} checkpoints. "
-             "Each task page shows the prompt the small model (Qwen3-8B) saw and the visible tests, and links to "
+             "Each task page shows the prompt the small model (Qwen3.5-9B) saw and the visible tests, and links to "
              "one page per attempt with the thinking, the code, the visible-test report and the hidden-test result "
              "of each round. Jev and Pinocchio scores are not included. Made by `scripts/export_traces.py`; "
              f"machine-readable copy: [{args.run_id}_traces.jsonl.gz]({args.run_id}_traces.jsonl.gz). "

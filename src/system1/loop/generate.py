@@ -13,6 +13,20 @@ whose logprobs do not match its token count is an error, never filled in.
 
 Every HTTP call is reported through `on_call` as soon as it ends (also when it
 fails), so the cost ledger keeps calls whose checkpoint never finishes.
+
+Qwen3.5: its chat template opens a <think> block itself (Qwen3 did not), so
+the reply starts inside the thinking. The rendered prompt tells which case applies.
+A hosted backend (DeepInfra) can ask for retries of transient HTTP errors; each
+try is a separate ledger call.
+
+DeepInfra (checked 2026-11-26) differs from vLLM in two ways. (1) Its replies
+have no stop_reason field. The last entry of logprobs.tokens then tells the
+cause: "</think>" is the stop string, "<|im_end|>" or "<|endoftext|>" is the
+end of the reply. Any other last token is an error, never a guess. (2) It
+returns at most the top-1 alternative per token (plus the sampled token), for
+any requested count. The DeepInfra backend therefore asks for 1 and uses top-1
+confidence (conf_k=1); the top-5 DeepConf values of the vLLM studies do not
+exist for it.
 """
 
 from __future__ import annotations
@@ -30,9 +44,12 @@ import numpy as np
 
 from system1.config import ROOT
 
-MODEL = "Qwen/Qwen3-8B"
-REVISION = "b968826d9c46dd6066d109eabc6255188de91218"
+MODEL = "Qwen/Qwen3.5-9B"
+REVISION = "c202236235762e1c871ad0ccb60c8ee5ba337b9a"  # tokenizer and template; DeepInfra does not pin weights
 VLLM_URL = "http://localhost:8000/v1/completions"
+DEEPINFRA_URL = "https://api.deepinfra.com/v1/openai/completions"
+RETRY_STATUS = {408, 429, 500, 502, 503, 504}
+END_TOKENS = {"<|im_end|>", "<|endoftext|>"}  # the reply ended by itself (no stop string)
 MAX_MODEL_LEN = 16_384
 THINK_CAP = 8_192
 CODE_TOKENS = 2_048
@@ -58,26 +75,42 @@ def render_prompt(tokenizer, messages: list[dict]) -> str:
     return tokenizer.apply_chat_template(messages, tokenize=False, add_generation_prompt=True, enable_thinking=True)
 
 
+def template_opens_think(prompt: str) -> bool:
+    """True when the rendered prompt itself ends inside an open <think> block (Qwen3.5)."""
+    return prompt.rstrip().endswith("<think>")
+
+
 def request_seed(*parts: Any) -> int:
     return int(hashlib.sha256(":".join(map(str, parts)).encode()).hexdigest()[:8], 16)
 
 
-def token_confidence(top: dict[str, float]) -> float:
+def token_confidence(top: dict[str, float], k: int = TOP_LOGPROBS) -> float:
     """DeepConf token confidence: minus the mean of the k largest logprobs. vLLM can add the
     sampled token as an extra entry when it is outside the top k, so only the k largest count."""
     if not top:
         return 0.0
-    return -float(np.mean(sorted(top.values(), reverse=True)[:TOP_LOGPROBS]))
+    return -float(np.mean(sorted(top.values(), reverse=True)[:k]))
+
+
+def infer_stop_reason(choice: dict) -> str | None:
+    """stop_reason for a backend that omits it, from the last returned token (see the module text)."""
+    tokens = (choice.get("logprobs") or {}).get("tokens") or []
+    last = tokens[-1] if tokens else None
+    if last == "</think>":
+        return "</think>"
+    if last in END_TOKENS:
+        return None
+    raise ValueError(f"cannot tell why the reply stopped: last token {last!r}")
 
 
 def confidence_summary(top_logprobs: list[dict[str, float]], token_logprobs: list[float],
-                       window: int = CONF_WINDOW) -> dict[str, float | int | None]:
+                       window: int = CONF_WINDOW, k: int = TOP_LOGPROBS) -> dict[str, float | int | None]:
     """Prespecified summaries; None when there are no tokens."""
     n = len(token_logprobs)
     if n == 0:
         return {"n_tokens": 0, "mean_logprob": None, "mean_conf": None, "tail_conf": None,
                 "lowest_group_conf": None, "bottom10_group_conf": None}
-    conf = np.array([token_confidence(t) for t in top_logprobs], dtype=float)
+    conf = np.array([token_confidence(t, k) for t in top_logprobs], dtype=float)
     lp = np.array(token_logprobs, dtype=float)
     w = min(window, n)
     groups = np.convolve(conf, np.ones(w) / w, mode="valid")  # sliding-window mean confidence
@@ -184,7 +217,9 @@ CallHook = Callable[[dict], None]
 class Generator:
     def __init__(self, client: httpx.AsyncClient, tokenizer, url: str = VLLM_URL, think_cap: int = THINK_CAP,
                  code_tokens: int = CODE_TOKENS, max_model_len: int = MAX_MODEL_LEN,
-                 allow_terminal_token_without_logprob: bool = False):
+                 allow_terminal_token_without_logprob: bool = False, max_retries: int = 0,
+                 retry_base_s: float = 2.0, top_logprobs: int = TOP_LOGPROBS,
+                 infer_missing_stop_reason: bool = False):
         self.client = client
         self.tokenizer = tokenizer
         self.url = url
@@ -192,12 +227,32 @@ class Generator:
         self.code_tokens = code_tokens
         self.max_model_len = max_model_len
         self.allow_terminal_token_without_logprob = allow_terminal_token_without_logprob
+        self.max_retries = max_retries
+        self.retry_base_s = retry_base_s
+        self.tokens_used = {"input": 0, "output": 0}  # all replies with usage, for a billed backend's guard
+        self.top_logprobs = top_logprobs  # requested alternatives per token, and the confidence k
+        self.infer_missing_stop_reason = infer_missing_stop_reason
 
     async def _complete(self, prompt: str, max_tokens: int, seed: int, stop: list[str] | None,
-                        phase: str, on_call: CallHook | None) -> tuple[dict, list[dict], list[float]]:
+                        phase: str, on_call: CallHook | None,
+                        opened: bool = False) -> tuple[dict, list[dict], list[float]]:
+        """One call, with up to max_retries more tries after a transient HTTP error."""
+        for n in range(self.max_retries + 1):
+            try:
+                return await self._complete_once(prompt, max_tokens, seed, stop, phase, on_call, opened)
+            except (httpx.HTTPStatusError, httpx.TransportError) as e:
+                status = e.response.status_code if isinstance(e, httpx.HTTPStatusError) else None
+                if n == self.max_retries or (status is not None and status not in RETRY_STATUS):
+                    raise
+                await asyncio.sleep(self.retry_base_s * 2 ** n)
+        raise AssertionError("unreachable")
+
+    async def _complete_once(self, prompt: str, max_tokens: int, seed: int, stop: list[str] | None,
+                             phase: str, on_call: CallHook | None,
+                             opened: bool) -> tuple[dict, list[dict], list[float]]:
         """One HTTP call. It is reported to on_call when it ends, before any later step."""
         body = {"model": MODEL, "prompt": prompt, "max_tokens": max_tokens, "seed": seed,
-                "logprobs": TOP_LOGPROBS, **SAMPLING}
+                "logprobs": self.top_logprobs, **SAMPLING}
         if stop:
             body["stop"] = stop
         t0 = time.perf_counter()
@@ -209,13 +264,21 @@ class Generator:
             d = r.json()
             usage = d.get("usage") or {}
             call["input_tokens"], call["output_tokens"] = usage.get("prompt_tokens"), usage.get("completion_tokens")
+            for k, v in (("input", call["input_tokens"]), ("output", call["output_tokens"])):
+                if isinstance(v, int) and not isinstance(v, bool):
+                    self.tokens_used[k] += v
             c = d["choices"][0]
             # Same rule as generate(): phase-1 text without <think> (and no cap hit) is a direct answer.
-            is_thinking = phase == "thinking" and (c.get("text", "").lstrip().startswith("<think>")
+            is_thinking = phase == "thinking" and (opened or c.get("text", "").lstrip().startswith("<think>")
                                                    or c.get("finish_reason") == "length")
             call["reasoning_tokens"] = call["output_tokens"] if is_thinking else 0
             top, tok = _logprob_parts(c, usage, allow_terminal_token_without_logprob=
                                       self.allow_terminal_token_without_logprob)
+            if any(len(t) > self.top_logprobs + 1 for t in top):
+                raise ValueError("the reply has more logprob alternatives than requested")
+            if self.infer_missing_stop_reason and c.get("finish_reason") == "stop" and "stop_reason" not in c:
+                c["stop_reason"] = infer_stop_reason(c)
+                c["stop_reason_inferred"] = True
             return d, top, tok
         except httpx.HTTPStatusError as e:
             call["status"] = f"http:{e.response.status_code}"
@@ -236,6 +299,7 @@ class Generator:
         if cap <= 0:
             raise ValueError(f"prompt of {n_prompt} tokens leaves no room for thinking")
         seed = request_seed(*seed_parts)
+        opened = template_opens_think(prompt)
         t0 = time.perf_counter()
         phases: list[dict] = []
 
@@ -244,15 +308,18 @@ class Generator:
             if on_call is not None:
                 on_call(call)
 
-        d1, top1, lp1 = await self._complete(prompt, cap, seed, ["</think>"], "thinking", hook)
+        d1, top1, lp1 = await self._complete(prompt, cap, seed, ["</think>"], "thinking", hook, opened)
         c1 = d1["choices"][0]
         think_text = c1["text"]
         finish1 = c1.get("finish_reason")
+        if finish1 == "stop" and "stop_reason" not in c1:
+            raise ValueError("the backend reply has no stop_reason: '</think>' and the end of the reply "
+                             "cannot be told apart")
         cap_hit = finish1 == "length"
         stopped_on_close = finish1 == "stop" and c1.get("stop_reason") == "</think>"
-        # The template opens no <think> block itself, so text that does not start
-        # with one is a direct answer without thinking.
-        skipped = not think_text.lstrip().startswith("<think>")
+        # Qwen3's template opens no <think> block, so its text that does not start with
+        # one is a direct answer without thinking. Qwen3.5's template opens the block.
+        skipped = not opened and not think_text.lstrip().startswith("<think>")
 
         answer, top2, lp2, answer_finish, think_closed = "", [], [], None, False
         if skipped and not cap_hit:
@@ -260,7 +327,7 @@ class Generator:
             answer_finish = finish1
         elif cap_hit or stopped_on_close:
             prefix = prompt + think_text + ("\n</think>\n\n" if cap_hit else "</think>\n\n")
-            d2, top2, lp2 = await self._complete(prefix, self.code_tokens, seed + 1, None, "answer", hook)
+            d2, top2, lp2 = await self._complete(prefix, self.code_tokens, seed + 1, None, "answer", hook, False)
             c2 = d2["choices"][0]
             answer = c2["text"]
             answer_finish = c2.get("finish_reason")
@@ -281,13 +348,14 @@ class Generator:
         if code is not None:
             code, added = add_missing_imports(code, prompt_imports(task_prompt))
 
-        conf1, conf2 = (np.array([token_confidence(t) for t in tp], dtype=np.float16) for tp in (top1, top2))
+        k = self.top_logprobs
+        conf1, conf2 = (np.array([token_confidence(t, k) for t in tp], dtype=np.float16) for tp in (top1, top2))
         return Generation(
             prompt_sha256=hashlib.sha256(prompt.encode("utf-8")).hexdigest(),
             prompt_tokens=n_prompt, thinking=thinking, answer=answer, code=code, imports_added=added,
             thinking_tokens=len(lp1), answer_tokens=len(lp2), effective_cap=cap, cap_hit=cap_hit,
             think_closed=think_closed, latency_ms=latency_ms, seed=seed,
-            confidence={"thinking": confidence_summary(top1, lp1), "answer": confidence_summary(top2, lp2)},
+            confidence={"thinking": confidence_summary(top1, lp1, k=k), "answer": confidence_summary(top2, lp2, k=k)},
             arrays={"thinking_logprob": np.array(lp1, dtype=np.float16),
                     "thinking_conf": conf1,
                     "answer_logprob": np.array(lp2, dtype=np.float16),

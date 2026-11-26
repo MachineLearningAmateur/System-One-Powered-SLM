@@ -13,6 +13,7 @@ from system1.loop.generate import (
     confidence_summary,
     extract_code,
     prompt_imports,
+    template_opens_think,
     token_confidence,
 )
 from system1.loop.tasks import (
@@ -223,6 +224,113 @@ def test_cap_shrinks_for_long_prompts():
         asyncio.run(go())
 
 
+# --- Qwen3.5 template and the hosted backend ---------------------------------------
+
+class OpenThinkTokenizer(FakeTokenizer):
+    """Like the Qwen3.5 template: the generation prompt opens the <think> block itself."""
+
+    def apply_chat_template(self, messages, **kw):
+        return super().apply_chat_template(messages, **kw) + "<think>\n"
+
+
+def hosted(replies, seen):
+    """Replies are (status, text, finish, stop_reason); stop_reason "absent" leaves the field out."""
+    it = iter(replies)
+
+    def handler(request):
+        body = json.loads(request.content)
+        seen.append(body)
+        status, text, finish, stop_reason = next(it)
+        if status != 200:
+            return httpx.Response(status, json={"error": "busy"})
+        n = max(1, len(text.split()))
+        choice = {"text": text, "finish_reason": finish,
+                  "logprobs": {"token_logprobs": [-0.5] * n, "top_logprobs": [{"x": -0.5}] * n}}
+        if stop_reason != "absent":
+            choice["stop_reason"] = stop_reason
+        return httpx.Response(200, json={"choices": [choice], "usage": {"prompt_tokens": len(body["prompt"].split()),
+                                                                         "completion_tokens": n}})
+    return handler
+
+
+def generate_hosted(replies, tokenizer=None, max_retries=0, calls=None):
+    seen = []
+
+    async def go():
+        async with httpx.AsyncClient(transport=httpx.MockTransport(hosted(replies, seen))) as c:
+            gen = Generator(c, tokenizer or OpenThinkTokenizer(), url="http://hosted/v1/openai/completions",
+                            think_cap=100, code_tokens=50, max_model_len=1000, max_retries=max_retries,
+                            retry_base_s=0.0)
+            return await gen.generate([{"role": "user", "content": "task"}], HE_PROMPT, "has_close_elements",
+                                      "run", "t", 0, 1, on_call=calls.append if calls is not None else None)
+    return asyncio.run(go()), seen
+
+
+def test_template_opens_think_only_for_an_open_block():
+    assert template_opens_think("<|im_start|>assistant\n<think>\n")
+    assert not template_opens_think("<|im_start|>assistant\n")
+    assert not template_opens_think("<|im_start|>assistant\n<think>\n\n</think>\n\n")  # thinking turned off
+
+
+def test_open_think_template_reply_is_thinking_not_a_direct_answer():
+    calls = []
+    g, seen = generate_hosted([(200, "plan the loop", "stop", "</think>"), (200, SOLUTION, "stop", None)],
+                              calls=calls)
+    assert len(seen) == 2 and not g.thinking_skipped and g.think_closed and g.thinking == "plan the loop"
+    assert seen[1]["prompt"].endswith("<think>\nplan the loop</think>\n\n")
+    assert g.code is not None and g.thinking_tokens == 3
+    assert calls[0]["reasoning_tokens"] == 3 and calls[1]["reasoning_tokens"] == 0
+
+
+def test_open_think_template_end_inside_thinking_gives_no_code():
+    g, seen = generate_hosted([(200, "maybe\n" + SOLUTION, "stop", None)])
+    assert len(seen) == 1 and not g.thinking_skipped and not g.think_closed
+    assert g.code is None and g.no_code_reason == "no_close"
+
+
+def test_open_think_template_cap_hit_closes_thinking():
+    g, seen = generate_hosted([(200, "wait wait", "length", None), (200, SOLUTION, "stop", None)])
+    assert g.cap_hit and g.think_closed and seen[1]["prompt"].endswith("<think>\nwait wait\n</think>\n\n")
+
+
+def test_reply_without_stop_reason_is_an_error():
+    with pytest.raises(ValueError, match="no stop_reason"):
+        generate_hosted([(200, "plan the loop", "stop", "absent")])
+
+
+def test_transient_http_error_is_retried_and_each_try_reported():
+    calls = []
+    g, seen = generate_hosted([(429, "", None, None), (200, "plan", "stop", "</think>"),
+                               (503, "", None, None), (200, SOLUTION, "stop", None)], max_retries=2, calls=calls)
+    assert g.code is not None and len(seen) == 4 and seen[0] == seen[1]  # the same request again
+    assert [(c["phase"], c["status"]) for c in calls] == [
+        ("thinking", "http:429"), ("thinking", "ok"), ("answer", "http:503"), ("answer", "ok")]
+
+
+def test_retries_stop_after_the_limit_and_skip_client_errors():
+    calls = []
+    with pytest.raises(httpx.HTTPStatusError):
+        generate_hosted([(429, "", None, None), (429, "", None, None)], max_retries=1, calls=calls)
+    assert [c["status"] for c in calls] == ["http:429", "http:429"]
+    calls = []
+    with pytest.raises(httpx.HTTPStatusError):
+        generate_hosted([(401, "", None, None)], max_retries=3, calls=calls)
+    assert [c["status"] for c in calls] == ["http:401"]  # a bad key is not retried
+
+
+def test_deepinfra_identity_checks_the_model_list(monkeypatch):
+    from system1.loop import monitor
+
+    def fake_get(url, headers, timeout):
+        assert headers["Authorization"] == "Bearer k" and url.endswith("/v1/openai/models")
+        return httpx.Response(200, json={"data": [{"id": "Qwen/Qwen3.5-9B"}]}, request=httpx.Request("GET", url))
+    monkeypatch.setattr(monitor.httpx, "get", fake_get)
+    ident = monitor.deepinfra_server_identity("Qwen/Qwen3.5-9B", "k")
+    assert ident["server_kind"] == "deepinfra" and ident["weights_pinned"] is False
+    with pytest.raises(monitor.ServerMismatch, match="does not list"):
+        monitor.deepinfra_server_identity("Qwen/Qwen3-8B", "k")
+
+
 # --- telemetry -------------------------------------------------------------------
 
 def rnd(code, statuses, thinking="plan", tokens=10):
@@ -263,3 +371,71 @@ def test_marker_and_loop_flag():
     assert loop_flag(" ".join(["a b c d e f g h"] * 7)) and not loop_flag("one two three")
 
 
+
+
+def deepinfra_like(replies, seen):
+    """DeepInfra layout: no stop_reason; logprobs.tokens ends with the token that stopped the reply."""
+    it = iter(replies)
+
+    def handler(request):
+        body = json.loads(request.content)
+        seen.append(body)
+        text, finish, last = next(it)
+        toks = text.split() + ([last] if last else [])
+        n = max(1, len(toks))
+        toks = toks or ["x"]
+        return httpx.Response(200, json={"choices": [{
+            "text": text, "finish_reason": finish, "token_ids": [],
+            "logprobs": {"tokens": toks, "token_logprobs": [-0.5] * n,
+                         "top_logprobs": [{"x": -0.2, "y": -0.5}] * n}}],
+            "usage": {"prompt_tokens": len(body["prompt"].split()), "completion_tokens": n}})
+    return handler
+
+
+def generate_deepinfra(replies):
+    seen = []
+
+    async def go():
+        async with httpx.AsyncClient(transport=httpx.MockTransport(deepinfra_like(replies, seen))) as c:
+            gen = Generator(c, OpenThinkTokenizer(), url="http://di/v1/openai/completions", think_cap=100,
+                            code_tokens=50, max_model_len=1000, top_logprobs=1, infer_missing_stop_reason=True)
+            return await gen.generate([{"role": "user", "content": "task"}], HE_PROMPT, "has_close_elements",
+                                      "run", "t", 0, 1)
+    return asyncio.run(go()), seen
+
+
+def test_deepinfra_stop_at_think_close_is_found_from_the_last_token():
+    g, seen = generate_deepinfra([("plan the loop", "stop", "</think>"), (SOLUTION, "stop", "<|im_end|>")])
+    assert g.think_closed and g.code is not None and g.phase1_finish == "stop:</think>"
+    assert all(b["logprobs"] == 1 for b in seen)  # asks only for what DeepInfra serves
+
+
+def test_deepinfra_end_of_reply_inside_thinking_gives_no_code():
+    g, seen = generate_deepinfra([("maybe " + SOLUTION, "stop", "<|im_end|>")])
+    assert len(seen) == 1 and not g.think_closed and g.no_code_reason == "no_close"
+    assert g.phase1_finish == "stop:None"
+
+
+def test_deepinfra_unknown_last_token_is_an_error():
+    with pytest.raises(ValueError, match="cannot tell why"):
+        generate_deepinfra([("plan the", "stop", "loop")])
+
+
+def test_deepinfra_confidence_uses_the_top_1_value():
+    g, _ = generate_deepinfra([("plan the loop", "stop", "</think>"), (SOLUTION, "stop", "<|im_end|>")])
+    assert g.confidence["thinking"]["mean_conf"] == pytest.approx(0.2)  # -max, not the mean of both entries
+    assert float(g.arrays["thinking_conf"][0]) == pytest.approx(0.2, abs=1e-3)
+
+
+def test_more_alternatives_than_requested_is_an_error():
+    def handler(request):
+        return httpx.Response(200, json={"choices": [{"text": "a", "finish_reason": "length", "logprobs": {
+            "tokens": ["a"], "token_logprobs": [-0.1], "top_logprobs": [{"a": -0.1, "b": -1.0, "c": -2.0}]}}],
+            "usage": {"prompt_tokens": 1, "completion_tokens": 1}})
+
+    async def go():
+        async with httpx.AsyncClient(transport=httpx.MockTransport(handler)) as c:
+            gen = Generator(c, None, url="http://di/v1/openai/completions", top_logprobs=1)
+            await gen._complete("p", 1, 1, None, "thinking", None)
+    with pytest.raises(ValueError, match="more logprob alternatives"):
+        asyncio.run(go())

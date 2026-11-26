@@ -15,12 +15,13 @@ you run or change anything.
 3. **Secrets.** API keys live only in `.env` on the operator's own machine (copy `.env.example`). Never
    print a key, never commit it, and never copy it to a remote or rented machine. Check a key only by its
    length. Before every commit, scan the staged changes without printing them, for example
-   `git diff --cached | grep -cE "sk-or-v1-[A-Za-z0-9]{16}|sk-ant-[A-Za-z0-9_-]{16}|hf_[A-Za-z0-9]{30}|(TYPESAFE|OPENROUTER)_API_KEY=[^<\" ]"`
+   `git diff --cached | grep -cE "sk-or-v1-[A-Za-z0-9]{16}|sk-ant-[A-Za-z0-9_-]{16}|hf_[A-Za-z0-9]{30}|(TYPESAFE|OPENROUTER|DEEPINFRA)_API_KEY=[^<\" ]"`
    (a count of 0 is clean; the pattern does not match its own text). Run the scan as its own command and
    read the count before you commit. On a match, find the file with `grep -l`, not by printing lines.
 4. **Billed calls need the operator's approval first,** with a dollar limit: Jev (`scripts/score_jev.py`),
-   the frontier model (`scripts/run_frontier.py`) and any rented GPU. Give the expected cost before you ask,
-   and set a per-run guard (`score_jev.py --max-input-tokens`). A token guard is not a dollar cap: the last
+   the frontier model (`scripts/run_frontier.py`), the hosted worker (`scripts/run_loop.py --backend
+   deepinfra`) and any rented GPU. Give the expected cost before you ask, and set a per-run guard
+   (`score_jev.py --max-input-tokens`, `run_loop.py --max-billed-tokens`). A token guard is not a dollar cap: the last
    call can go past it.
 5. **Untrusted code runs only in the sandbox.** Code written by a generator or a frontier model for a
    benchmark task runs only in the evaluation sandbox (`docker/sandbox/`, no network), never on the host.
