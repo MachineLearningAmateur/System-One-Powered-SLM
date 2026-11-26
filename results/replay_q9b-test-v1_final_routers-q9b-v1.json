@@ -1,0 +1,2311 @@
+{
+ "runs": [
+  "q9b-test-v1"
+ ],
+ "frontier_run": "frontier-test-v1",
+ "split": "test",
+ "scores": "final",
+ "pinocchio_cpu": {
+  "elapsed_cpu_s_per_decision": 2.5264545454545453,
+  "elapsed_cpu_s_per_attempt": 2.418846296296296,
+  "decisions_scored": 1551,
+  "note": "not included in usd_owned / usd_cloud"
+ },
+ "routers_version": "routers-q9b-v1",
+ "n_attempts": 1620,
+ "n_decisions": 1551,
+ "forced_share": 0.04259259259259259,
+ "fallback_used": {
+  "cheap": 0,
+  "cheap+code": 0,
+  "cheap+code+thinking": 0,
+  "cheap+strong4": 0,
+  "strong4 mean": 0,
+  "pinocchio": 0,
+  "direct jev": 0
+ },
+ "frontier": {
+  "replicates": 3,
+  "calls_with_unknown_cost": 0,
+  "grade_session": "20261017T234655-ce0b09",
+  "answers_of_excluded_tasks": 0
+ },
+ "small_model_cost_complete": false,
+ "reconstructed_sessions": {
+  "q9b-test-v1": []
+ },
+ "excluded_checkpoints": {
+  "q9b-test-v1": [
+   "HumanEval/32/a0/r1",
+   "HumanEval/32/a1/r1",
+   "HumanEval/32/a1/r2",
+   "HumanEval/32/a2/r1",
+   "HumanEval/32/a3/r1",
+   "HumanEval/32/a4/r1"
+  ]
+ },
+ "excluded_share_of_run_cost": {
+  "q9b-test-v1": 0.0022127521066653832
+ },
+ "policies": [
+  {
+   "policy": "always-small",
+   "pass": 0.8166666666666667,
+   "pass_by_replicate": [
+    0.8166666666666667,
+    0.8166666666666667,
+    0.8166666666666667
+   ],
+   "q_vp": 0.0,
+   "q_total": 0.0,
+   "frontier_calls_per_attempt": 0.0,
+   "optional_calls_per_attempt": 0.0,
+   "forced_calls_per_attempt": 0.0,
+   "rescues_per_attempt": 0.0,
+   "harms_per_attempt": 0.0,
+   "n_attempts": 1620,
+   "n_decisions": 1551,
+   "usd_owned": 0.0,
+   "usd_cloud": 0.002983749110607244,
+   "usd_small_owned": 0.0,
+   "usd_small_cloud": 0.002983749110607244,
+   "usd_frontier": 0.0,
+   "usd_jev": 0.0,
+   "jev_price_note": "third-party $0.042/M input, unconfirmed",
+   "excludes": "Pinocchio CPU compute (reported separately as elapsed CPU seconds)",
+   "view": "endpoint"
+  },
+  {
+   "policy": "forced-failure-only",
+   "pass": 0.8462962962962963,
+   "pass_by_replicate": [
+    0.8462962962962963,
+    0.8438271604938271,
+    0.8487654320987654
+   ],
+   "q_vp": 0.0,
+   "q_total": 0.04259259259259259,
+   "frontier_calls_per_attempt": 0.04259259259259259,
+   "optional_calls_per_attempt": 0.0,
+   "forced_calls_per_attempt": 0.04259259259259259,
+   "rescues_per_attempt": 0.0,
+   "harms_per_attempt": 0.0,
+   "n_attempts": 1620,
+   "n_decisions": 1551,
+   "usd_owned": 0.00017116790123456789,
+   "usd_cloud": 0.003154917011841812,
+   "usd_small_owned": 0.0,
+   "usd_small_cloud": 0.002983749110607244,
+   "usd_frontier": 0.00017116790123456789,
+   "usd_jev": 0.0,
+   "jev_price_note": "third-party $0.042/M input, unconfirmed",
+   "excludes": "Pinocchio CPU compute (reported separately as elapsed CPU seconds)",
+   "view": "endpoint"
+  },
+  {
+   "policy": "always-frontier",
+   "pass": 0.9032921810699588,
+   "pass_by_replicate": [
+    0.9074074074074074,
+    0.8981481481481481,
+    0.904320987654321
+   ],
+   "q_vp": 0.0,
+   "q_total": 1.0,
+   "frontier_calls_per_attempt": 1.0,
+   "optional_calls_per_attempt": 0.0,
+   "forced_calls_per_attempt": 0.04259259259259259,
+   "rescues_per_attempt": 0.0,
+   "harms_per_attempt": 0.0,
+   "n_attempts": 1620,
+   "n_decisions": 1551,
+   "usd_owned": 0.0019562263374485597,
+   "usd_cloud": 0.0019562263374485597,
+   "usd_small_owned": 0.0,
+   "usd_small_cloud": 0.0,
+   "usd_frontier": 0.0019562263374485597,
+   "usd_jev": 0.0,
+   "jev_price_note": "third-party $0.042/M input, unconfirmed",
+   "excludes": "Pinocchio CPU compute (reported separately as elapsed CPU seconds)",
+   "view": "endpoint"
+  },
+  {
+   "policy": "oracle",
+   "pass": 0.9207818930041152,
+   "pass_by_replicate": [
+    0.9228395061728395,
+    0.9154320987654321,
+    0.924074074074074
+   ],
+   "q_vp": 0.07779926928863098,
+   "q_total": 0.11707818930041153,
+   "frontier_calls_per_attempt": 0.11707818930041153,
+   "optional_calls_per_attempt": 0.07448559670781893,
+   "forced_calls_per_attempt": 0.04259259259259259,
+   "rescues_per_attempt": 0.07448559670781893,
+   "harms_per_attempt": 0.0,
+   "n_attempts": 1620,
+   "n_decisions": 1551,
+   "usd_owned": 0.00036891399176954736,
+   "usd_cloud": 0.003352663102376791,
+   "usd_small_owned": 0.0,
+   "usd_small_cloud": 0.002983749110607244,
+   "usd_frontier": 0.00036891399176954736,
+   "usd_jev": 0.0,
+   "jev_price_note": "third-party $0.042/M input, unconfirmed",
+   "excludes": "Pinocchio CPU compute (reported separately as elapsed CPU seconds)",
+   "view": "endpoint"
+  },
+  {
+   "policy": "cheap | frozen | q=0.10",
+   "pass": 0.8631687242798355,
+   "pass_by_replicate": [
+    0.8660493827160494,
+    0.8592592592592593,
+    0.8641975308641975
+   ],
+   "q_vp": 0.09413281753707285,
+   "q_total": 0.13271604938271606,
+   "frontier_calls_per_attempt": 0.13271604938271606,
+   "optional_calls_per_attempt": 0.09012345679012346,
+   "forced_calls_per_attempt": 0.04259259259259259,
+   "rescues_per_attempt": 0.017695473251028805,
+   "harms_per_attempt": 0.0008230452674897119,
+   "n_attempts": 1620,
+   "n_decisions": 1551,
+   "usd_owned": 0.0004506037037037037,
+   "usd_cloud": 0.003434352814310947,
+   "usd_small_owned": 0.0,
+   "usd_small_cloud": 0.002983749110607244,
+   "usd_frontier": 0.0004506037037037037,
+   "usd_jev": 0.0,
+   "jev_price_note": "third-party $0.042/M input, unconfirmed",
+   "excludes": "Pinocchio CPU compute (reported separately as elapsed CPU seconds)",
+   "router": "cheap",
+   "view": "frozen",
+   "q_nominal": 0.1,
+   "gain_vs_random": [
+    0.011507244761775889,
+    0.004349660025045588,
+    0.019699368564097083
+   ],
+   "gain_vs_forced_only": [
+    0.016872427983539093,
+    0.008024691358024692,
+    0.026754115226337416
+   ],
+   "by_benchmark": {
+    "humaneval+": {
+     "pass": 0.9347079037800688,
+     "q_vp": 0.06369426751592357,
+     "gain_vs_random_within_benchmark": 0.0018911287674830914
+    },
+    "mbpp+": {
+     "pass": 0.8325991189427313,
+     "q_vp": 0.10740740740740741,
+     "gain_vs_random_within_benchmark": 0.015191167672812313
+    }
+   }
+  },
+  {
+   "policy": "cheap | top-k | q=0.10",
+   "pass": 0.8631687242798355,
+   "pass_by_replicate": [
+    0.8660493827160494,
+    0.8592592592592593,
+    0.8641975308641975
+   ],
+   "q_vp": 0.09993552546744036,
+   "q_total": 0.1382716049382716,
+   "frontier_calls_per_attempt": 0.1382716049382716,
+   "optional_calls_per_attempt": 0.09567901234567901,
+   "forced_calls_per_attempt": 0.04259259259259259,
+   "rescues_per_attempt": 0.01831275720164609,
+   "harms_per_attempt": 0.001440329218106996,
+   "n_attempts": 1620,
+   "n_decisions": 1551,
+   "usd_owned": 0.00046928065843621395,
+   "usd_cloud": 0.0034530297690434576,
+   "usd_small_owned": 0.0,
+   "usd_small_cloud": 0.002983749110607244,
+   "usd_frontier": 0.00046928065843621395,
+   "usd_jev": 0.0,
+   "jev_price_note": "third-party $0.042/M input, unconfirmed",
+   "excludes": "Pinocchio CPU compute (reported separately as elapsed CPU seconds)",
+   "router": "cheap",
+   "view": "top-k",
+   "q_nominal": 0.1,
+   "gain_vs_random": [
+    0.011176514289201444,
+    0.003573614236105007,
+    0.019495249186961133
+   ],
+   "gain_vs_forced_only": [
+    0.016872427983539093,
+    0.007608024691358024,
+    0.02736625514403292
+   ],
+   "by_benchmark": {
+    "humaneval+": {
+     "pass": 0.9347079037800688,
+     "q_vp": 0.06794055201698514,
+     "gain_vs_random_within_benchmark": 0.0017422899293015517
+    },
+    "mbpp+": {
+     "pass": 0.8325991189427313,
+     "q_vp": 0.11388888888888889,
+     "gain_vs_random_within_benchmark": 0.014760972426170664
+    }
+   }
+  },
+  {
+   "policy": "cheap | frozen | q=0.25",
+   "pass": 0.8748971193415638,
+   "pass_by_replicate": [
+    0.8783950617283951,
+    0.8697530864197531,
+    0.8765432098765432
+   ],
+   "q_vp": 0.21083172147001933,
+   "q_total": 0.24444444444444444,
+   "frontier_calls_per_attempt": 0.24444444444444444,
+   "optional_calls_per_attempt": 0.20185185185185187,
+   "forced_calls_per_attempt": 0.04259259259259259,
+   "rescues_per_attempt": 0.03230452674897119,
+   "harms_per_attempt": 0.003703703703703704,
+   "n_attempts": 1620,
+   "n_decisions": 1551,
+   "usd_owned": 0.0007310259259259258,
+   "usd_cloud": 0.0037147750365331693,
+   "usd_small_owned": 0.0,
+   "usd_small_cloud": 0.002983749110607244,
+   "usd_frontier": 0.0007310259259259258,
+   "usd_jev": 0.0,
+   "jev_price_note": "third-party $0.042/M input, unconfirmed",
+   "excludes": "Pinocchio CPU compute (reported separately as elapsed CPU seconds)",
+   "router": "cheap",
+   "view": "frozen",
+   "q_nominal": 0.25,
+   "gain_vs_random": [
+    0.01658428254172935,
+    0.006714792257551724,
+    0.027394384961361484
+   ],
+   "gain_vs_forced_only": [
+    0.028600823045267485,
+    0.01522633744855967,
+    0.04362139917695473
+   ],
+   "by_benchmark": {
+    "humaneval+": {
+     "pass": 0.938831615120275,
+     "q_vp": 0.10828025477707007,
+     "gain_vs_random_within_benchmark": 0.004452032306783111
+    },
+    "mbpp+": {
+     "pass": 0.8475770925110132,
+     "q_vp": 0.25555555555555554,
+     "gain_vs_random_within_benchmark": 0.020336107032142274
+    }
+   }
+  },
+  {
+   "policy": "cheap | top-k | q=0.25",
+   "pass": 0.8763374485596707,
+   "pass_by_replicate": [
+    0.8796296296296297,
+    0.8716049382716049,
+    0.8777777777777778
+   ],
+   "q_vp": 0.2501611863313991,
+   "q_total": 0.2820987654320988,
+   "frontier_calls_per_attempt": 0.2820987654320988,
+   "optional_calls_per_attempt": 0.23950617283950618,
+   "forced_calls_per_attempt": 0.04259259259259259,
+   "rescues_per_attempt": 0.03559670781893004,
+   "harms_per_attempt": 0.005555555555555556,
+   "n_attempts": 1620,
+   "n_decisions": 1551,
+   "usd_owned": 0.0008098399176954732,
+   "usd_cloud": 0.003793589028302717,
+   "usd_small_owned": 0.0,
+   "usd_small_cloud": 0.002983749110607244,
+   "usd_frontier": 0.0008098399176954732,
+   "usd_jev": 0.0,
+   "jev_price_note": "third-party $0.042/M input, unconfirmed",
+   "excludes": "Pinocchio CPU compute (reported separately as elapsed CPU seconds)",
+   "router": "cheap",
+   "view": "top-k",
+   "q_nominal": 0.25,
+   "gain_vs_random": [
+    0.015782994112387334,
+    0.006175439718473268,
+    0.026900305711905128
+   ],
+   "gain_vs_forced_only": [
+    0.030041152263374483,
+    0.015843621399176954,
+    0.04588477366255145
+   ],
+   "by_benchmark": {
+    "humaneval+": {
+     "pass": 0.938831615120275,
+     "q_vp": 0.11889596602972399,
+     "gain_vs_random_within_benchmark": 0.004079935211329262
+    },
+    "mbpp+": {
+     "pass": 0.849632892804699,
+     "q_vp": 0.3074074074074074,
+     "gain_vs_random_within_benchmark": 0.01895034535269484
+    }
+   }
+  },
+  {
+   "policy": "cheap | frozen | q=0.50",
+   "pass": 0.8849794238683126,
+   "pass_by_replicate": [
+    0.8901234567901235,
+    0.8796296296296297,
+    0.8851851851851852
+   ],
+   "q_vp": 0.4687298517085751,
+   "q_total": 0.49135802469135803,
+   "frontier_calls_per_attempt": 0.49135802469135803,
+   "optional_calls_per_attempt": 0.4487654320987654,
+   "forced_calls_per_attempt": 0.04259259259259259,
+   "rescues_per_attempt": 0.05246913580246913,
+   "harms_per_attempt": 0.013786008230452675,
+   "n_attempts": 1620,
+   "n_decisions": 1551,
+   "usd_owned": 0.0011911506172839507,
+   "usd_cloud": 0.0041748997278911945,
+   "usd_small_owned": 0.0,
+   "usd_small_cloud": 0.002983749110607244,
+   "usd_frontier": 0.0011911506172839507,
+   "usd_jev": 0.0,
+   "jev_price_note": "third-party $0.042/M input, unconfirmed",
+   "excludes": "Pinocchio CPU compute (reported separately as elapsed CPU seconds)",
+   "router": "cheap",
+   "view": "frozen",
+   "q_nominal": 0.5,
+   "gain_vs_random": [
+    0.011967454954058578,
+    0.002116759911971661,
+    0.022685721667255052
+   ],
+   "gain_vs_forced_only": [
+    0.03868312757201646,
+    0.018513374485596708,
+    0.0602880658436214
+   ],
+   "by_benchmark": {
+    "humaneval+": {
+     "pass": 0.9408934707903781,
+     "q_vp": 0.28874734607218683,
+     "gain_vs_random_within_benchmark": 0.000188237354170772
+    },
+    "mbpp+": {
+     "pass": 0.8610866372980911,
+     "q_vp": 0.5472222222222223,
+     "gain_vs_random_within_benchmark": 0.014486865720345894
+    }
+   }
+  },
+  {
+   "policy": "cheap | top-k | q=0.50",
+   "pass": 0.8870370370370371,
+   "pass_by_replicate": [
+    0.8919753086419753,
+    0.8814814814814815,
+    0.8876543209876543
+   ],
+   "q_vp": 0.5003223726627982,
+   "q_total": 0.5216049382716049,
+   "frontier_calls_per_attempt": 0.5216049382716049,
+   "optional_calls_per_attempt": 0.47901234567901235,
+   "forced_calls_per_attempt": 0.04259259259259259,
+   "rescues_per_attempt": 0.05452674897119342,
+   "harms_per_attempt": 0.013786008230452675,
+   "n_attempts": 1620,
+   "n_decisions": 1551,
+   "usd_owned": 0.0012360312757201646,
+   "usd_cloud": 0.004219780386327409,
+   "usd_small_owned": 0.0,
+   "usd_small_cloud": 0.002983749110607244,
+   "usd_frontier": 0.0012360312757201646,
+   "usd_jev": 0.0,
+   "jev_price_note": "third-party $0.042/M input, unconfirmed",
+   "excludes": "Pinocchio CPU compute (reported separately as elapsed CPU seconds)",
+   "router": "cheap",
+   "view": "top-k",
+   "q_nominal": 0.5,
+   "gain_vs_random": [
+    0.012224424438766441,
+    0.0025763347040952786,
+    0.022245591017423044
+   ],
+   "gain_vs_forced_only": [
+    0.040740740740740744,
+    0.020164609053497942,
+    0.0625565843621399
+   ],
+   "by_benchmark": {
+    "humaneval+": {
+     "pass": 0.9429553264604812,
+     "q_vp": 0.3248407643312102,
+     "gain_vs_random_within_benchmark": 0.0009849628997307775
+    },
+    "mbpp+": {
+     "pass": 0.8631424375917769,
+     "q_vp": 0.5768518518518518,
+     "gain_vs_random_within_benchmark": 0.01457605917224126
+    }
+   }
+  },
+  {
+   "policy": "cheap+code | frozen | q=0.10",
+   "pass": 0.8654320987654321,
+   "pass_by_replicate": [
+    0.8691358024691358,
+    0.8604938271604938,
+    0.8666666666666667
+   ],
+   "q_vp": 0.09993552546744036,
+   "q_total": 0.1382716049382716,
+   "frontier_calls_per_attempt": 0.1382716049382716,
+   "optional_calls_per_attempt": 0.09567901234567901,
+   "forced_calls_per_attempt": 0.04259259259259259,
+   "rescues_per_attempt": 0.020370370370370372,
+   "harms_per_attempt": 0.0012345679012345679,
+   "n_attempts": 1620,
+   "n_decisions": 1551,
+   "usd_owned": 0.0004986180102880659,
+   "usd_cloud": 0.0034823671208953095,
+   "usd_small_owned": 0.0,
+   "usd_small_cloud": 0.002983749110607244,
+   "usd_frontier": 0.0004657658436213992,
+   "usd_jev": 3.2852166666666664e-05,
+   "jev_price_note": "third-party $0.042/M input, unconfirmed",
+   "excludes": "Pinocchio CPU compute (reported separately as elapsed CPU seconds)",
+   "router": "cheap+code",
+   "view": "frozen",
+   "q_nominal": 0.1,
+   "gain_vs_random": [
+    0.013439888774798153,
+    0.005356496294689369,
+    0.02255056185740316
+   ],
+   "gain_vs_forced_only": [
+    0.0191358024691358,
+    0.009459876543209877,
+    0.030246913580246913
+   ],
+   "by_benchmark": {
+    "humaneval+": {
+     "pass": 0.9347079037800688,
+     "q_vp": 0.06369426751592357,
+     "gain_vs_random_within_benchmark": 0.0018911287674830914
+    },
+    "mbpp+": {
+     "pass": 0.8358296622613803,
+     "q_vp": 0.11574074074074074,
+     "gain_vs_random_within_benchmark": 0.01786860281720781
+    }
+   }
+  },
+  {
+   "policy": "cheap+code | top-k | q=0.10",
+   "pass": 0.8654320987654321,
+   "pass_by_replicate": [
+    0.8691358024691358,
+    0.8604938271604938,
+    0.8666666666666667
+   ],
+   "q_vp": 0.09993552546744036,
+   "q_total": 0.1382716049382716,
+   "frontier_calls_per_attempt": 0.1382716049382716,
+   "optional_calls_per_attempt": 0.09567901234567901,
+   "forced_calls_per_attempt": 0.04259259259259259,
+   "rescues_per_attempt": 0.020370370370370372,
+   "harms_per_attempt": 0.0012345679012345679,
+   "n_attempts": 1620,
+   "n_decisions": 1551,
+   "usd_owned": 0.0004986180102880659,
+   "usd_cloud": 0.0034823671208953095,
+   "usd_small_owned": 0.0,
+   "usd_small_cloud": 0.002983749110607244,
+   "usd_frontier": 0.0004657658436213992,
+   "usd_jev": 3.2852166666666664e-05,
+   "jev_price_note": "third-party $0.042/M input, unconfirmed",
+   "excludes": "Pinocchio CPU compute (reported separately as elapsed CPU seconds)",
+   "router": "cheap+code",
+   "view": "top-k",
+   "q_nominal": 0.1,
+   "gain_vs_random": [
+    0.013439888774798153,
+    0.005356496294689369,
+    0.02255056185740316
+   ],
+   "gain_vs_forced_only": [
+    0.0191358024691358,
+    0.009459876543209877,
+    0.030246913580246913
+   ],
+   "by_benchmark": {
+    "humaneval+": {
+     "pass": 0.9347079037800688,
+     "q_vp": 0.06369426751592357,
+     "gain_vs_random_within_benchmark": 0.0018911287674830914
+    },
+    "mbpp+": {
+     "pass": 0.8358296622613803,
+     "q_vp": 0.11574074074074074,
+     "gain_vs_random_within_benchmark": 0.01786860281720781
+    }
+   }
+  },
+  {
+   "policy": "cheap+code | frozen | q=0.25",
+   "pass": 0.8732510288065842,
+   "pass_by_replicate": [
+    0.8765432098765432,
+    0.8685185185185185,
+    0.8746913580246913
+   ],
+   "q_vp": 0.22308188265635073,
+   "q_total": 0.25617283950617287,
+   "frontier_calls_per_attempt": 0.25617283950617287,
+   "optional_calls_per_attempt": 0.21358024691358024,
+   "forced_calls_per_attempt": 0.04259259259259259,
+   "rescues_per_attempt": 0.030864197530864196,
+   "harms_per_attempt": 0.003909465020576132,
+   "n_attempts": 1620,
+   "n_decisions": 1551,
+   "usd_owned": 0.0007900357057613168,
+   "usd_cloud": 0.003773784816368561,
+   "usd_small_owned": 0.0,
+   "usd_small_cloud": 0.002983749110607244,
+   "usd_frontier": 0.0007571835390946501,
+   "usd_jev": 3.2852166666666664e-05,
+   "jev_price_note": "third-party $0.042/M input, unconfirmed",
+   "excludes": "Pinocchio CPU compute (reported separately as elapsed CPU seconds)",
+   "router": "cheap+code",
+   "view": "frozen",
+   "q_nominal": 0.25,
+   "gain_vs_random": [
+    0.014239983231314987,
+    0.005042383315434898,
+    0.02422561104948304
+   ],
+   "gain_vs_forced_only": [
+    0.026954732510288064,
+    0.014197530864197531,
+    0.040951646090534956
+   ],
+   "by_benchmark": {
+    "humaneval+": {
+     "pass": 0.9367697594501719,
+     "q_vp": 0.10828025477707007,
+     "gain_vs_random_within_benchmark": 0.0023901766366800172
+    },
+    "mbpp+": {
+     "pass": 0.8461086637298091,
+     "q_vp": 0.27314814814814814,
+     "gain_vs_random_within_benchmark": 0.017700005438625117
+    }
+   }
+  },
+  {
+   "policy": "cheap+code | top-k | q=0.25",
+   "pass": 0.8761316872427984,
+   "pass_by_replicate": [
+    0.8796296296296297,
+    0.8716049382716049,
+    0.8771604938271605
+   ],
+   "q_vp": 0.2501611863313991,
+   "q_total": 0.2820987654320988,
+   "frontier_calls_per_attempt": 0.2820987654320988,
+   "optional_calls_per_attempt": 0.23950617283950618,
+   "forced_calls_per_attempt": 0.04259259259259259,
+   "rescues_per_attempt": 0.03518518518518519,
+   "harms_per_attempt": 0.005349794238683128,
+   "n_attempts": 1620,
+   "n_decisions": 1551,
+   "usd_owned": 0.0008366521666666668,
+   "usd_cloud": 0.00382040127727391,
+   "usd_small_owned": 0.0,
+   "usd_small_cloud": 0.002983749110607244,
+   "usd_frontier": 0.0008038,
+   "usd_jev": 3.2852166666666664e-05,
+   "jev_price_note": "third-party $0.042/M input, unconfirmed",
+   "excludes": "Pinocchio CPU compute (reported separately as elapsed CPU seconds)",
+   "router": "cheap+code",
+   "view": "top-k",
+   "q_nominal": 0.25,
+   "gain_vs_random": [
+    0.015577232795514907,
+    0.005621563124259646,
+    0.02688505584734203
+   ],
+   "gain_vs_forced_only": [
+    0.029835390946502054,
+    0.015426954732510288,
+    0.045884773662551434
+   ],
+   "by_benchmark": {
+    "humaneval+": {
+     "pass": 0.9367697594501719,
+     "q_vp": 0.11252653927813164,
+     "gain_vs_random_within_benchmark": 0.0022413377984984778
+    },
+    "mbpp+": {
+     "pass": 0.8502202643171806,
+     "q_vp": 0.3101851851851852,
+     "gain_vs_random_within_benchmark": 0.019353347473758636
+    }
+   }
+  },
+  {
+   "policy": "cheap+code | frozen | q=0.50",
+   "pass": 0.8849794238683126,
+   "pass_by_replicate": [
+    0.8901234567901235,
+    0.8796296296296297,
+    0.8851851851851852
+   ],
+   "q_vp": 0.47130883301096066,
+   "q_total": 0.49382716049382713,
+   "frontier_calls_per_attempt": 0.49382716049382713,
+   "optional_calls_per_attempt": 0.45123456790123456,
+   "forced_calls_per_attempt": 0.04259259259259259,
+   "rescues_per_attempt": 0.05246913580246913,
+   "harms_per_attempt": 0.013786008230452675,
+   "n_attempts": 1620,
+   "n_decisions": 1551,
+   "usd_owned": 0.0012260073106995885,
+   "usd_cloud": 0.0042097564213068326,
+   "usd_small_owned": 0.0,
+   "usd_small_cloud": 0.002983749110607244,
+   "usd_frontier": 0.0011931551440329219,
+   "usd_jev": 3.2852166666666664e-05,
+   "jev_price_note": "third-party $0.042/M input, unconfirmed",
+   "excludes": "Pinocchio CPU compute (reported separately as elapsed CPU seconds)",
+   "router": "cheap+code",
+   "view": "frozen",
+   "q_nominal": 0.5,
+   "gain_vs_random": [
+    0.01182046363291438,
+    0.0021435103627214644,
+    0.02240619057525157
+   ],
+   "gain_vs_forced_only": [
+    0.03868312757201646,
+    0.018518518518518517,
+    0.06008230452674896
+   ],
+   "by_benchmark": {
+    "humaneval+": {
+     "pass": 0.9450171821305843,
+     "q_vp": 0.27176220806794055,
+     "gain_vs_random_within_benchmark": 0.004907304047103116
+    },
+    "mbpp+": {
+     "pass": 0.8593245227606462,
+     "q_vp": 0.5583333333333333,
+     "gain_vs_random_within_benchmark": 0.011987273617229562
+    }
+   }
+  },
+  {
+   "policy": "cheap+code | top-k | q=0.50",
+   "pass": 0.88559670781893,
+   "pass_by_replicate": [
+    0.8907407407407407,
+    0.8802469135802469,
+    0.8858024691358025
+   ],
+   "q_vp": 0.5003223726627982,
+   "q_total": 0.5216049382716049,
+   "frontier_calls_per_attempt": 0.5216049382716049,
+   "optional_calls_per_attempt": 0.47901234567901235,
+   "forced_calls_per_attempt": 0.04259259259259259,
+   "rescues_per_attempt": 0.05432098765432099,
+   "harms_per_attempt": 0.015020576131687243,
+   "n_attempts": 1620,
+   "n_decisions": 1551,
+   "usd_owned": 0.0012824834423868314,
+   "usd_cloud": 0.004266232552994075,
+   "usd_small_owned": 0.0,
+   "usd_small_cloud": 0.002983749110607244,
+   "usd_frontier": 0.0012496312757201645,
+   "usd_jev": 3.2852166666666664e-05,
+   "jev_price_note": "third-party $0.042/M input, unconfirmed",
+   "excludes": "Pinocchio CPU compute (reported separately as elapsed CPU seconds)",
+   "router": "cheap+code",
+   "view": "top-k",
+   "q_nominal": 0.5,
+   "gain_vs_random": [
+    0.010784095220659444,
+    0.0007510699240918073,
+    0.02134094363745895
+   ],
+   "gain_vs_forced_only": [
+    0.03930041152263374,
+    0.01810185185185185,
+    0.06152263374485596
+   ],
+   "by_benchmark": {
+    "humaneval+": {
+     "pass": 0.9429553264604812,
+     "q_vp": 0.31210191082802546,
+     "gain_vs_random_within_benchmark": 0.0014314794142753994
+    },
+    "mbpp+": {
+     "pass": 0.8610866372980911,
+     "q_vp": 0.5824074074074074,
+     "gain_vs_random_within_benchmark": 0.012151520095719803
+    }
+   }
+  },
+  {
+   "policy": "cheap+code+thinking | frozen | q=0.10",
+   "pass": 0.8697530864197531,
+   "pass_by_replicate": [
+    0.8734567901234568,
+    0.8648148148148148,
+    0.8709876543209877
+   ],
+   "q_vp": 0.10186976144422953,
+   "q_total": 0.14012345679012345,
+   "frontier_calls_per_attempt": 0.14012345679012345,
+   "optional_calls_per_attempt": 0.09753086419753086,
+   "forced_calls_per_attempt": 0.04259259259259259,
+   "rescues_per_attempt": 0.024691358024691357,
+   "harms_per_attempt": 0.0012345679012345679,
+   "n_attempts": 1620,
+   "n_decisions": 1551,
+   "usd_owned": 0.000597152624691358,
+   "usd_cloud": 0.003580901735298602,
+   "usd_small_owned": 0.0,
+   "usd_small_cloud": 0.002983749110607244,
+   "usd_frontier": 0.0004624024691358025,
+   "usd_jev": 0.00013475015555555557,
+   "jev_price_note": "third-party $0.042/M input, unconfirmed",
+   "excludes": "Pinocchio CPU compute (reported separately as elapsed CPU seconds)",
+   "router": "cheap+code+thinking",
+   "view": "frozen",
+   "q_nominal": 0.1,
+   "gain_vs_random": [
+    0.017650632938260993,
+    0.008922069139689721,
+    0.027532865632136673
+   ],
+   "gain_vs_forced_only": [
+    0.02345679012345679,
+    0.012752057613168723,
+    0.03539094650205761
+   ],
+   "by_benchmark": {
+    "humaneval+": {
+     "pass": 0.9367697594501719,
+     "q_vp": 0.05732484076433121,
+     "gain_vs_random_within_benchmark": 0.004176242694858494
+    },
+    "mbpp+": {
+     "pass": 0.841116005873715,
+     "q_vp": 0.12129629629629629,
+     "gain_vs_random_within_benchmark": 0.022786207646706916
+    }
+   }
+  },
+  {
+   "policy": "cheap+code+thinking | top-k | q=0.10",
+   "pass": 0.8697530864197531,
+   "pass_by_replicate": [
+    0.8734567901234568,
+    0.8648148148148148,
+    0.8709876543209877
+   ],
+   "q_vp": 0.09993552546744036,
+   "q_total": 0.1382716049382716,
+   "frontier_calls_per_attempt": 0.1382716049382716,
+   "optional_calls_per_attempt": 0.09567901234567901,
+   "forced_calls_per_attempt": 0.04259259259259259,
+   "rescues_per_attempt": 0.024691358024691357,
+   "harms_per_attempt": 0.0012345679012345679,
+   "n_attempts": 1620,
+   "n_decisions": 1551,
+   "usd_owned": 0.0005914904847736626,
+   "usd_cloud": 0.003575239595380906,
+   "usd_small_owned": 0.0,
+   "usd_small_cloud": 0.002983749110607244,
+   "usd_frontier": 0.000456740329218107,
+   "usd_jev": 0.00013475015555555557,
+   "jev_price_note": "third-party $0.042/M input, unconfirmed",
+   "excludes": "Pinocchio CPU compute (reported separately as elapsed CPU seconds)",
+   "router": "cheap+code+thinking",
+   "view": "top-k",
+   "q_nominal": 0.1,
+   "gain_vs_random": [
+    0.01776087642911914,
+    0.009028459131814163,
+    0.027668185291407327
+   ],
+   "gain_vs_forced_only": [
+    0.02345679012345679,
+    0.012752057613168723,
+    0.03539094650205761
+   ],
+   "by_benchmark": {
+    "humaneval+": {
+     "pass": 0.9367697594501719,
+     "q_vp": 0.055201698513800426,
+     "gain_vs_random_within_benchmark": 0.004250662113949263
+    },
+    "mbpp+": {
+     "pass": 0.841116005873715,
+     "q_vp": 0.11944444444444445,
+     "gain_vs_random_within_benchmark": 0.022909120574318806
+    }
+   }
+  },
+  {
+   "policy": "cheap+code+thinking | frozen | q=0.25",
+   "pass": 0.8765432098765432,
+   "pass_by_replicate": [
+    0.8802469135802469,
+    0.8722222222222222,
+    0.8771604938271605
+   ],
+   "q_vp": 0.22952933591231464,
+   "q_total": 0.2623456790123457,
+   "frontier_calls_per_attempt": 0.2623456790123457,
+   "optional_calls_per_attempt": 0.21975308641975308,
+   "forced_calls_per_attempt": 0.04259259259259259,
+   "rescues_per_attempt": 0.03477366255144033,
+   "harms_per_attempt": 0.004526748971193415,
+   "n_attempts": 1620,
+   "n_decisions": 1551,
+   "usd_owned": 0.0009124682625514403,
+   "usd_cloud": 0.0038962173731586836,
+   "usd_small_owned": 0.0,
+   "usd_small_cloud": 0.002983749110607244,
+   "usd_frontier": 0.0007777181069958846,
+   "usd_jev": 0.00013475015555555557,
+   "jev_price_note": "third-party $0.042/M input, unconfirmed",
+   "excludes": "Pinocchio CPU compute (reported separately as elapsed CPU seconds)",
+   "router": "cheap+code+thinking",
+   "view": "frozen",
+   "q_nominal": 0.25,
+   "gain_vs_random": [
+    0.01716468599841334,
+    0.0076135267182024695,
+    0.027938903548392194
+   ],
+   "gain_vs_forced_only": [
+    0.030246913580246913,
+    0.016872427983539093,
+    0.04526748971193415
+   ],
+   "by_benchmark": {
+    "humaneval+": {
+     "pass": 0.938831615120275,
+     "q_vp": 0.12951167728237792,
+     "gain_vs_random_within_benchmark": 0.0037078381158754136
+    },
+    "mbpp+": {
+     "pass": 0.8499265785609399,
+     "q_vp": 0.27314814814814814,
+     "gain_vs_random_within_benchmark": 0.021517920269755807
+    }
+   }
+  },
+  {
+   "policy": "cheap+code+thinking | top-k | q=0.25",
+   "pass": 0.8788065843621399,
+   "pass_by_replicate": [
+    0.8820987654320988,
+    0.8746913580246913,
+    0.8796296296296297
+   ],
+   "q_vp": 0.2501611863313991,
+   "q_total": 0.2820987654320988,
+   "frontier_calls_per_attempt": 0.2820987654320988,
+   "optional_calls_per_attempt": 0.23950617283950618,
+   "forced_calls_per_attempt": 0.04259259259259259,
+   "rescues_per_attempt": 0.037448559670781895,
+   "harms_per_attempt": 0.0049382716049382715,
+   "n_attempts": 1620,
+   "n_decisions": 1551,
+   "usd_owned": 0.0009596176452674898,
+   "usd_cloud": 0.003943366755874733,
+   "usd_small_owned": 0.0,
+   "usd_small_cloud": 0.002983749110607244,
+   "usd_frontier": 0.0008248674897119343,
+   "usd_jev": 0.00013475015555555557,
+   "jev_price_note": "third-party $0.042/M input, unconfirmed",
+   "excludes": "Pinocchio CPU compute (reported separately as elapsed CPU seconds)",
+   "router": "cheap+code+thinking",
+   "view": "top-k",
+   "q_nominal": 0.25,
+   "gain_vs_random": [
+    0.01825212991485647,
+    0.00832449072936451,
+    0.02885103839813208
+   ],
+   "gain_vs_forced_only": [
+    0.03251028806584362,
+    0.018724279835390944,
+    0.04835905349794237
+   ],
+   "by_benchmark": {
+    "humaneval+": {
+     "pass": 0.9408934707903781,
+     "q_vp": 0.1464968152866242,
+     "gain_vs_random_within_benchmark": 0.005174338433252349
+    },
+    "mbpp+": {
+     "pass": 0.8522760646108664,
+     "q_vp": 0.2953703703703704,
+     "gain_vs_random_within_benchmark": 0.022392451188339588
+    }
+   }
+  },
+  {
+   "policy": "cheap+code+thinking | frozen | q=0.50",
+   "pass": 0.8890946502057613,
+   "pass_by_replicate": [
+    0.8925925925925926,
+    0.8845679012345679,
+    0.8901234567901235
+   ],
+   "q_vp": 0.4526112185686654,
+   "q_total": 0.4759259259259259,
+   "frontier_calls_per_attempt": 0.4759259259259259,
+   "optional_calls_per_attempt": 0.43333333333333335,
+   "forced_calls_per_attempt": 0.04259259259259259,
+   "rescues_per_attempt": 0.05308641975308642,
+   "harms_per_attempt": 0.0102880658436214,
+   "n_attempts": 1620,
+   "n_decisions": 1551,
+   "usd_owned": 0.001298675258436214,
+   "usd_cloud": 0.004282424369043458,
+   "usd_small_owned": 0.0,
+   "usd_small_cloud": 0.002983749110607244,
+   "usd_frontier": 0.0011639251028806583,
+   "usd_jev": 0.00013475015555555557,
+   "jev_price_note": "third-party $0.042/M input, unconfirmed",
+   "excludes": "Pinocchio CPU compute (reported separately as elapsed CPU seconds)",
+   "router": "cheap+code+thinking",
+   "view": "frozen",
+   "q_nominal": 0.5,
+   "gain_vs_random": [
+    0.017001377048658374,
+    0.0068371692835222896,
+    0.02777073435178593
+   ],
+   "gain_vs_forced_only": [
+    0.04279835390946503,
+    0.023657407407407405,
+    0.06316872427983537
+   ],
+   "by_benchmark": {
+    "humaneval+": {
+     "pass": 0.9532646048109965,
+     "q_vp": 0.28874734607218683,
+     "gain_vs_random_within_benchmark": 0.01255937137478933
+    },
+    "mbpp+": {
+     "pass": 0.8616740088105727,
+     "q_vp": 0.524074074074074,
+     "gain_vs_random_within_benchmark": 0.01661064882797629
+    }
+   }
+  },
+  {
+   "policy": "cheap+code+thinking | top-k | q=0.50",
+   "pass": 0.889917695473251,
+   "pass_by_replicate": [
+    0.8938271604938272,
+    0.8851851851851852,
+    0.8907407407407407
+   ],
+   "q_vp": 0.5003223726627982,
+   "q_total": 0.5216049382716049,
+   "frontier_calls_per_attempt": 0.5216049382716049,
+   "optional_calls_per_attempt": 0.47901234567901235,
+   "forced_calls_per_attempt": 0.04259259259259259,
+   "rescues_per_attempt": 0.05555555555555555,
+   "harms_per_attempt": 0.011934156378600824,
+   "n_attempts": 1620,
+   "n_decisions": 1551,
+   "usd_owned": 0.0013863118839506172,
+   "usd_cloud": 0.004370060994557861,
+   "usd_small_owned": 0.0,
+   "usd_small_cloud": 0.002983749110607244,
+   "usd_frontier": 0.0012515617283950617,
+   "usd_jev": 0.00013475015555555557,
+   "jev_price_note": "third-party $0.042/M input, unconfirmed",
+   "excludes": "Pinocchio CPU compute (reported separately as elapsed CPU seconds)",
+   "router": "cheap+code+thinking",
+   "view": "top-k",
+   "q_nominal": 0.5,
+   "gain_vs_random": [
+    0.015105082874980429,
+    0.005610694918044119,
+    0.025281506540475528
+   ],
+   "gain_vs_forced_only": [
+    0.04362139917695473,
+    0.023863168724279835,
+    0.06522633744855967
+   ],
+   "by_benchmark": {
+    "humaneval+": {
+     "pass": 0.9512027491408934,
+     "q_vp": 0.3503184713375796,
+     "gain_vs_random_within_benchmark": 0.008339352551053912
+    },
+    "mbpp+": {
+     "pass": 0.8637298091042585,
+     "q_vp": 0.5657407407407408,
+     "gain_vs_random_within_benchmark": 0.0159009082503943
+    }
+   }
+  },
+  {
+   "policy": "cheap+strong4 | frozen | q=0.10",
+   "pass": 0.8670781893004115,
+   "pass_by_replicate": [
+    0.8709876543209877,
+    0.8623456790123457,
+    0.8679012345679012
+   ],
+   "q_vp": 0.09800128949065119,
+   "q_total": 0.13641975308641976,
+   "frontier_calls_per_attempt": 0.13641975308641976,
+   "optional_calls_per_attempt": 0.09382716049382717,
+   "forced_calls_per_attempt": 0.04259259259259259,
+   "rescues_per_attempt": 0.022016460905349793,
+   "harms_per_attempt": 0.0012345679012345679,
+   "n_attempts": 1620,
+   "n_decisions": 1551,
+   "usd_owned": 0.0005898094148148147,
+   "usd_cloud": 0.0035735585254220584,
+   "usd_small_owned": 0.0,
+   "usd_small_cloud": 0.002983749110607244,
+   "usd_frontier": 0.00045505925925925925,
+   "usd_jev": 0.00013475015555555557,
+   "jev_price_note": "third-party $0.042/M input, unconfirmed",
+   "excludes": "Pinocchio CPU compute (reported separately as elapsed CPU seconds)",
+   "router": "cheap+strong4",
+   "view": "frozen",
+   "q_nominal": 0.1,
+   "gain_vs_random": [
+    0.015196222800635725,
+    0.00668589502066675,
+    0.02474389141778536
+   ],
+   "gain_vs_forced_only": [
+    0.020781893004115225,
+    0.010288065843621397,
+    0.03210390946502055
+   ],
+   "by_benchmark": {
+    "humaneval+": {
+     "pass": 0.9347079037800688,
+     "q_vp": 0.05732484076433121,
+     "gain_vs_random_within_benchmark": 0.002114387024755401
+    },
+    "mbpp+": {
+     "pass": 0.8381791483113069,
+     "q_vp": 0.11574074074074074,
+     "gain_vs_random_within_benchmark": 0.02021808886713439
+    }
+   }
+  },
+  {
+   "policy": "cheap+strong4 | top-k | q=0.10",
+   "pass": 0.8670781893004115,
+   "pass_by_replicate": [
+    0.8709876543209877,
+    0.8623456790123457,
+    0.8679012345679012
+   ],
+   "q_vp": 0.09993552546744036,
+   "q_total": 0.1382716049382716,
+   "frontier_calls_per_attempt": 0.1382716049382716,
+   "optional_calls_per_attempt": 0.09567901234567901,
+   "forced_calls_per_attempt": 0.04259259259259259,
+   "rescues_per_attempt": 0.022016460905349793,
+   "harms_per_attempt": 0.0012345679012345679,
+   "n_attempts": 1620,
+   "n_decisions": 1551,
+   "usd_owned": 0.0005934456288065844,
+   "usd_cloud": 0.003577194739413828,
+   "usd_small_owned": 0.0,
+   "usd_small_cloud": 0.002983749110607244,
+   "usd_frontier": 0.0004586954732510288,
+   "usd_jev": 0.00013475015555555557,
+   "jev_price_note": "third-party $0.042/M input, unconfirmed",
+   "excludes": "Pinocchio CPU compute (reported separately as elapsed CPU seconds)",
+   "router": "cheap+strong4",
+   "view": "top-k",
+   "q_nominal": 0.1,
+   "gain_vs_random": [
+    0.015085979309777576,
+    0.006594696459108077,
+    0.024638165620972107
+   ],
+   "gain_vs_forced_only": [
+    0.020781893004115225,
+    0.010288065843621397,
+    0.03210390946502055
+   ],
+   "by_benchmark": {
+    "humaneval+": {
+     "pass": 0.9347079037800688,
+     "q_vp": 0.05732484076433121,
+     "gain_vs_random_within_benchmark": 0.002114387024755401
+    },
+    "mbpp+": {
+     "pass": 0.8381791483113069,
+     "q_vp": 0.11851851851851852,
+     "gain_vs_random_within_benchmark": 0.02003371947571654
+    }
+   }
+  },
+  {
+   "policy": "cheap+strong4 | frozen | q=0.25",
+   "pass": 0.8806584362139916,
+   "pass_by_replicate": [
+    0.8839506172839506,
+    0.8759259259259259,
+    0.8820987654320988
+   ],
+   "q_vp": 0.24177949709864605,
+   "q_total": 0.2740740740740741,
+   "frontier_calls_per_attempt": 0.2740740740740741,
+   "optional_calls_per_attempt": 0.23148148148148148,
+   "forced_calls_per_attempt": 0.04259259259259259,
+   "rescues_per_attempt": 0.03888888888888889,
+   "harms_per_attempt": 0.004526748971193415,
+   "n_attempts": 1620,
+   "n_decisions": 1551,
+   "usd_owned": 0.0009418497440329219,
+   "usd_cloud": 0.003925598854640166,
+   "usd_small_owned": 0.0,
+   "usd_small_cloud": 0.002983749110607244,
+   "usd_frontier": 0.0008070995884773663,
+   "usd_jev": 0.00013475015555555557,
+   "jev_price_note": "third-party $0.042/M input, unconfirmed",
+   "excludes": "Pinocchio CPU compute (reported separately as elapsed CPU seconds)",
+   "router": "cheap+strong4",
+   "view": "frozen",
+   "q_nominal": 0.25,
+   "gain_vs_random": [
+    0.02058170356042696,
+    0.01054984901109189,
+    0.03179408709963843
+   ],
+   "gain_vs_forced_only": [
+    0.034362139917695475,
+    0.020164609053497942,
+    0.050617283950617285
+   ],
+   "by_benchmark": {
+    "humaneval+": {
+     "pass": 0.9408934707903781,
+     "q_vp": 0.1316348195329087,
+     "gain_vs_random_within_benchmark": 0.0056952743668877365
+    },
+    "mbpp+": {
+     "pass": 0.8549192364170338,
+     "q_vp": 0.2898148148148148,
+     "gain_vs_random_within_benchmark": 0.02540436177734269
+    }
+   }
+  },
+  {
+   "policy": "cheap+strong4 | top-k | q=0.25",
+   "pass": 0.8818930041152262,
+   "pass_by_replicate": [
+    0.8851851851851852,
+    0.8771604938271605,
+    0.8833333333333333
+   ],
+   "q_vp": 0.2501611863313991,
+   "q_total": 0.2820987654320988,
+   "frontier_calls_per_attempt": 0.2820987654320988,
+   "optional_calls_per_attempt": 0.23950617283950618,
+   "forced_calls_per_attempt": 0.04259259259259259,
+   "rescues_per_attempt": 0.040123456790123455,
+   "harms_per_attempt": 0.004526748971193415,
+   "n_attempts": 1620,
+   "n_decisions": 1551,
+   "usd_owned": 0.0009616797851851851,
+   "usd_cloud": 0.003945428895792429,
+   "usd_small_owned": 0.0,
+   "usd_small_cloud": 0.002983749110607244,
+   "usd_frontier": 0.0008269296296296296,
+   "usd_jev": 0.00013475015555555557,
+   "jev_price_note": "third-party $0.042/M input, unconfirmed",
+   "excludes": "Pinocchio CPU compute (reported separately as elapsed CPU seconds)",
+   "router": "cheap+strong4",
+   "view": "top-k",
+   "q_nominal": 0.25,
+   "gain_vs_random": [
+    0.021338549667942894,
+    0.01109699851663059,
+    0.032611086123675095
+   ],
+   "gain_vs_forced_only": [
+    0.03559670781893004,
+    0.02119341563786008,
+    0.05205761316872428
+   ],
+   "by_benchmark": {
+    "humaneval+": {
+     "pass": 0.9408934707903781,
+     "q_vp": 0.14437367303609341,
+     "gain_vs_random_within_benchmark": 0.005248757852343118
+    },
+    "mbpp+": {
+     "pass": 0.8566813509544787,
+     "q_vp": 0.2962962962962963,
+     "gain_vs_random_within_benchmark": 0.026736281068145972
+    }
+   }
+  },
+  {
+   "policy": "cheap+strong4 | frozen | q=0.50",
+   "pass": 0.8903292181069958,
+   "pass_by_replicate": [
+    0.8938271604938272,
+    0.8858024691358025,
+    0.891358024691358
+   ],
+   "q_vp": 0.4616376531270148,
+   "q_total": 0.4845679012345679,
+   "frontier_calls_per_attempt": 0.4845679012345679,
+   "optional_calls_per_attempt": 0.4419753086419753,
+   "forced_calls_per_attempt": 0.04259259259259259,
+   "rescues_per_attempt": 0.05432098765432099,
+   "harms_per_attempt": 0.0102880658436214,
+   "n_attempts": 1620,
+   "n_decisions": 1551,
+   "usd_owned": 0.0013202036534979424,
+   "usd_cloud": 0.004303952764105186,
+   "usd_small_owned": 0.0,
+   "usd_small_cloud": 0.002983749110607244,
+   "usd_frontier": 0.0011854534979423867,
+   "usd_jev": 0.00013475015555555557,
+   "jev_price_note": "third-party $0.042/M input, unconfirmed",
+   "excludes": "Pinocchio CPU compute (reported separately as elapsed CPU seconds)",
+   "router": "cheap+strong4",
+   "view": "frozen",
+   "q_nominal": 0.5,
+   "gain_vs_random": [
+    0.01772147532588825,
+    0.007903533734302515,
+    0.028261317752046256
+   ],
+   "gain_vs_forced_only": [
+    0.04403292181069959,
+    0.024691358024691357,
+    0.06502057613168724
+   ],
+   "by_benchmark": {
+    "humaneval+": {
+     "pass": 0.9532646048109965,
+     "q_vp": 0.28662420382165604,
+     "gain_vs_random_within_benchmark": 0.0126337907938801
+    },
+    "mbpp+": {
+     "pass": 0.8634361233480177,
+     "q_vp": 0.537962962962963,
+     "gain_vs_random_within_benchmark": 0.017450916408331973
+    }
+   }
+  },
+  {
+   "policy": "cheap+strong4 | top-k | q=0.50",
+   "pass": 0.8905349794238682,
+   "pass_by_replicate": [
+    0.8944444444444445,
+    0.8858024691358025,
+    0.891358024691358
+   ],
+   "q_vp": 0.5003223726627982,
+   "q_total": 0.5216049382716049,
+   "frontier_calls_per_attempt": 0.5216049382716049,
+   "optional_calls_per_attempt": 0.47901234567901235,
+   "forced_calls_per_attempt": 0.04259259259259259,
+   "rescues_per_attempt": 0.05617283950617284,
+   "harms_per_attempt": 0.011934156378600824,
+   "n_attempts": 1620,
+   "n_decisions": 1551,
+   "usd_owned": 0.0013930448057613168,
+   "usd_cloud": 0.00437679391636856,
+   "usd_small_owned": 0.0,
+   "usd_small_cloud": 0.002983749110607244,
+   "usd_frontier": 0.0012582946502057613,
+   "usd_jev": 0.00013475015555555557,
+   "jev_price_note": "third-party $0.042/M input, unconfirmed",
+   "excludes": "Pinocchio CPU compute (reported separately as elapsed CPU seconds)",
+   "router": "cheap+strong4",
+   "view": "top-k",
+   "q_nominal": 0.5,
+   "gain_vs_random": [
+    0.015722366825597713,
+    0.006132009164024231,
+    0.025880865838896063
+   ],
+   "gain_vs_forced_only": [
+    0.04423868312757201,
+    0.023868312757201644,
+    0.0662551440329218
+   ],
+   "by_benchmark": {
+    "humaneval+": {
+     "pass": 0.9491408934707903,
+     "q_vp": 0.3333333333333333,
+     "gain_vs_random_within_benchmark": 0.006872852233676975
+    },
+    "mbpp+": {
+     "pass": 0.8654919236417035,
+     "q_vp": 0.5731481481481482,
+     "gain_vs_random_within_benchmark": 0.017171371077391636
+    }
+   }
+  },
+  {
+   "policy": "strong4 mean | frozen | q=0.10",
+   "pass": 0.8602880658436213,
+   "pass_by_replicate": [
+    0.8641975308641975,
+    0.8549382716049383,
+    0.8617283950617284
+   ],
+   "q_vp": 0.06963249516441006,
+   "q_total": 0.10925925925925926,
+   "frontier_calls_per_attempt": 0.10925925925925926,
+   "optional_calls_per_attempt": 0.06666666666666667,
+   "forced_calls_per_attempt": 0.04259259259259259,
+   "rescues_per_attempt": 0.017078189300411523,
+   "harms_per_attempt": 0.0030864197530864196,
+   "n_attempts": 1620,
+   "n_decisions": 1551,
+   "usd_owned": 0.0005117143530864198,
+   "usd_cloud": 0.003495463463693663,
+   "usd_small_owned": 0.0,
+   "usd_small_cloud": 0.002983749110607244,
+   "usd_frontier": 0.00037696419753086415,
+   "usd_jev": 0.00013475015555555557,
+   "jev_price_note": "third-party $0.042/M input, unconfirmed",
+   "excludes": "Pinocchio CPU compute (reported separately as elapsed CPU seconds)",
+   "router": "strong4 mean",
+   "view": "frozen",
+   "q_nominal": 0.1,
+   "gain_vs_random": [
+    0.010023003876431773,
+    0.0027200063993654,
+    0.017594225450022222
+   ],
+   "gain_vs_forced_only": [
+    0.013991769547325101,
+    0.005555555555555556,
+    0.023251028806584362
+   ],
+   "by_benchmark": {
+    "humaneval+": {
+     "pass": 0.9408934707903781,
+     "q_vp": 0.03397027600849257,
+     "gain_vs_random_within_benchmark": 0.009118567645063148
+    },
+    "mbpp+": {
+     "pass": 0.8258443465491923,
+     "q_vp": 0.08518518518518518,
+     "gain_vs_random_within_benchmark": 0.009911350410616197
+    }
+   }
+  },
+  {
+   "policy": "strong4 mean | top-k | q=0.10",
+   "pass": 0.8641975308641975,
+   "pass_by_replicate": [
+    0.8679012345679012,
+    0.858641975308642,
+    0.8660493827160494
+   ],
+   "q_vp": 0.09993552546744036,
+   "q_total": 0.1382716049382716,
+   "frontier_calls_per_attempt": 0.1382716049382716,
+   "optional_calls_per_attempt": 0.09567901234567901,
+   "forced_calls_per_attempt": 0.04259259259259259,
+   "rescues_per_attempt": 0.021810699588477367,
+   "harms_per_attempt": 0.003909465020576132,
+   "n_attempts": 1620,
+   "n_decisions": 1551,
+   "usd_owned": 0.0005963024189300411,
+   "usd_cloud": 0.0035800515295372846,
+   "usd_small_owned": 0.0,
+   "usd_small_cloud": 0.002983749110607244,
+   "usd_frontier": 0.0004615522633744856,
+   "usd_jev": 0.00013475015555555557,
+   "jev_price_note": "third-party $0.042/M input, unconfirmed",
+   "excludes": "Pinocchio CPU compute (reported separately as elapsed CPU seconds)",
+   "router": "strong4 mean",
+   "view": "top-k",
+   "q_nominal": 0.1,
+   "gain_vs_random": [
+    0.012205320873563586,
+    0.004011660721397456,
+    0.020673839933338312
+   ],
+   "gain_vs_forced_only": [
+    0.017901234567901235,
+    0.008230452674897118,
+    0.028395061728395062
+   ],
+   "by_benchmark": {
+    "humaneval+": {
+     "pass": 0.9450171821305843,
+     "q_vp": 0.06369426751592357,
+     "gain_vs_random_within_benchmark": 0.012200407117998555
+    },
+    "mbpp+": {
+     "pass": 0.8296622613803232,
+     "q_vp": 0.11574074074074074,
+     "gain_vs_random_within_benchmark": 0.01170120193615054
+    }
+   }
+  },
+  {
+   "policy": "strong4 mean | frozen | q=0.25",
+   "pass": 0.884156378600823,
+   "pass_by_replicate": [
+    0.8882716049382716,
+    0.8777777777777778,
+    0.8864197530864197
+   ],
+   "q_vp": 0.25918762088974856,
+   "q_total": 0.29074074074074074,
+   "frontier_calls_per_attempt": 0.29074074074074074,
+   "optional_calls_per_attempt": 0.24814814814814815,
+   "forced_calls_per_attempt": 0.04259259259259259,
+   "rescues_per_attempt": 0.04609053497942387,
+   "harms_per_attempt": 0.00823045267489712,
+   "n_attempts": 1620,
+   "n_decisions": 1551,
+   "usd_owned": 0.0009764423366255145,
+   "usd_cloud": 0.003960191447232758,
+   "usd_small_owned": 0.0,
+   "usd_small_cloud": 0.002983749110607244,
+   "usd_frontier": 0.0008416921810699588,
+   "usd_jev": 0.00013475015555555557,
+   "jev_price_note": "third-party $0.042/M input, unconfirmed",
+   "excludes": "Pinocchio CPU compute (reported separately as elapsed CPU seconds)",
+   "router": "strong4 mean",
+   "view": "frozen",
+   "q_nominal": 0.25,
+   "gain_vs_random": [
+    0.023087454529534906,
+    0.011890991863701201,
+    0.03428351292618245
+   ],
+   "gain_vs_forced_only": [
+    0.03786008230452675,
+    0.021399176954732507,
+    0.055766460905349764
+   ],
+   "by_benchmark": {
+    "humaneval+": {
+     "pass": 0.9697594501718213,
+     "q_vp": 0.2484076433121019,
+     "gain_vs_random_within_benchmark": 0.030468185698338698
+    },
+    "mbpp+": {
+     "pass": 0.8475770925110132,
+     "q_vp": 0.2638888888888889,
+     "gain_vs_random_within_benchmark": 0.019782998857888725
+    }
+   }
+  },
+  {
+   "policy": "strong4 mean | top-k | q=0.25",
+   "pass": 0.8823045267489712,
+   "pass_by_replicate": [
+    0.8864197530864197,
+    0.8759259259259259,
+    0.8845679012345679
+   ],
+   "q_vp": 0.2501611863313991,
+   "q_total": 0.2820987654320988,
+   "frontier_calls_per_attempt": 0.2820987654320988,
+   "optional_calls_per_attempt": 0.23950617283950618,
+   "forced_calls_per_attempt": 0.04259259259259259,
+   "rescues_per_attempt": 0.044238683127572016,
+   "harms_per_attempt": 0.00823045267489712,
+   "n_attempts": 1620,
+   "n_decisions": 1551,
+   "usd_owned": 0.0009583201144032921,
+   "usd_cloud": 0.0039420692250105365,
+   "usd_small_owned": 0.0,
+   "usd_small_cloud": 0.002983749110607244,
+   "usd_frontier": 0.0008235699588477366,
+   "usd_jev": 0.00013475015555555557,
+   "jev_price_note": "third-party $0.042/M input, unconfirmed",
+   "excludes": "Pinocchio CPU compute (reported separately as elapsed CPU seconds)",
+   "router": "strong4 mean",
+   "view": "top-k",
+   "q_nominal": 0.25,
+   "gain_vs_random": [
+    0.02175007230168775,
+    0.010581516844057103,
+    0.033038762879658345
+   ],
+   "gain_vs_forced_only": [
+    0.0360082304526749,
+    0.019958847736625512,
+    0.05349794238683127
+   ],
+   "by_benchmark": {
+    "humaneval+": {
+     "pass": 0.9656357388316151,
+     "q_vp": 0.24203821656050956,
+     "gain_vs_random_within_benchmark": 0.02656773261540482
+    },
+    "mbpp+": {
+     "pass": 0.8466960352422908,
+     "q_vp": 0.2537037037037037,
+     "gain_vs_random_within_benchmark": 0.019577962691031705
+    }
+   }
+  },
+  {
+   "policy": "strong4 mean | frozen | q=0.50",
+   "pass": 0.8989711934156378,
+   "pass_by_replicate": [
+    0.9030864197530865,
+    0.8925925925925926,
+    0.9012345679012346
+   ],
+   "q_vp": 0.47453255963894264,
+   "q_total": 0.49691358024691357,
+   "frontier_calls_per_attempt": 0.49691358024691357,
+   "optional_calls_per_attempt": 0.454320987654321,
+   "forced_calls_per_attempt": 0.04259259259259259,
+   "rescues_per_attempt": 0.0639917695473251,
+   "harms_per_attempt": 0.01131687242798354,
+   "n_attempts": 1620,
+   "n_decisions": 1551,
+   "usd_owned": 0.001362530402469136,
+   "usd_cloud": 0.00434627951307638,
+   "usd_small_owned": 0.0,
+   "usd_small_cloud": 0.002983749110607244,
+   "usd_frontier": 0.0012277802469135802,
+   "usd_jev": 0.00013475015555555557,
+   "jev_price_note": "third-party $0.042/M input, unconfirmed",
+   "excludes": "Pinocchio CPU compute (reported separately as elapsed CPU seconds)",
+   "router": "strong4 mean",
+   "view": "frozen",
+   "q_nominal": 0.5,
+   "gain_vs_random": [
+    0.025628494028809234,
+    0.01487366095845803,
+    0.03700139528561377
+   ],
+   "gain_vs_forced_only": [
+    0.05267489711934156,
+    0.03168724279835391,
+    0.07633744855967077
+   ],
+   "by_benchmark": {
+    "humaneval+": {
+     "pass": 0.9697594501718213,
+     "q_vp": 0.4416135881104034,
+     "gain_vs_random_within_benchmark": 0.02369601856107864
+    },
+    "mbpp+": {
+     "pass": 0.8687224669603524,
+     "q_vp": 0.4888888888888889,
+     "gain_vs_random_within_benchmark": 0.025994452602382114
+    }
+   }
+  },
+  {
+   "policy": "strong4 mean | top-k | q=0.50",
+   "pass": 0.8989711934156378,
+   "pass_by_replicate": [
+    0.9030864197530865,
+    0.8925925925925926,
+    0.9012345679012346
+   ],
+   "q_vp": 0.5003223726627982,
+   "q_total": 0.5216049382716049,
+   "frontier_calls_per_attempt": 0.5216049382716049,
+   "optional_calls_per_attempt": 0.47901234567901235,
+   "forced_calls_per_attempt": 0.04259259259259259,
+   "rescues_per_attempt": 0.0639917695473251,
+   "harms_per_attempt": 0.01131687242798354,
+   "n_attempts": 1620,
+   "n_decisions": 1551,
+   "usd_owned": 0.0014051974806584362,
+   "usd_cloud": 0.00438894659126568,
+   "usd_small_owned": 0.0,
+   "usd_small_cloud": 0.002983749110607244,
+   "usd_frontier": 0.0012704473251028807,
+   "usd_jev": 0.00013475015555555557,
+   "jev_price_note": "third-party $0.042/M input, unconfirmed",
+   "excludes": "Pinocchio CPU compute (reported separately as elapsed CPU seconds)",
+   "router": "strong4 mean",
+   "view": "top-k",
+   "q_nominal": 0.5,
+   "gain_vs_random": [
+    0.02415858081736726,
+    0.0137270511771238,
+    0.03496526621113335
+   ],
+   "gain_vs_forced_only": [
+    0.05267489711934156,
+    0.03168724279835391,
+    0.07633744855967077
+   ],
+   "by_benchmark": {
+    "humaneval+": {
+     "pass": 0.9697594501718213,
+     "q_vp": 0.47558386411889597,
+     "gain_vs_random_within_benchmark": 0.022505307855626322
+    },
+    "mbpp+": {
+     "pass": 0.8687224669603524,
+     "q_vp": 0.5111111111111111,
+     "gain_vs_random_within_benchmark": 0.024519497471039327
+    }
+   }
+  },
+  {
+   "policy": "pinocchio | frozen | q=0.10",
+   "pass": 0.8569958847736626,
+   "pass_by_replicate": [
+    0.858641975308642,
+    0.8537037037037037,
+    0.858641975308642
+   ],
+   "q_vp": 0.1154094132817537,
+   "q_total": 0.15308641975308643,
+   "frontier_calls_per_attempt": 0.15308641975308643,
+   "optional_calls_per_attempt": 0.11049382716049383,
+   "forced_calls_per_attempt": 0.04259259259259259,
+   "rescues_per_attempt": 0.016049382716049384,
+   "harms_per_attempt": 0.005349794238683128,
+   "n_attempts": 1620,
+   "n_decisions": 1551,
+   "usd_owned": 0.00048606460905349793,
+   "usd_cloud": 0.0034698137196607416,
+   "usd_small_owned": 0.0,
+   "usd_small_cloud": 0.002983749110607244,
+   "usd_frontier": 0.00048606460905349793,
+   "usd_jev": 0.0,
+   "jev_price_note": "third-party $0.042/M input, unconfirmed",
+   "excludes": "Pinocchio CPU compute (reported separately as elapsed CPU seconds)",
+   "router": "pinocchio",
+   "view": "frozen",
+   "q_nominal": 0.1,
+   "gain_vs_random": [
+    0.0041217268561634214,
+    -0.006324909679144375,
+    0.014891738573540533
+   ],
+   "gain_vs_forced_only": [
+    0.010699588477366254,
+    -0.0012345679012345679,
+    0.02345679012345679
+   ],
+   "by_benchmark": {
+    "humaneval+": {
+     "pass": 0.9408934707903781,
+     "q_vp": 0.21443736730360935,
+     "gain_vs_random_within_benchmark": 0.0027929170223477138
+    },
+    "mbpp+": {
+     "pass": 0.8211453744493392,
+     "q_vp": 0.07222222222222222,
+     "gain_vs_random_within_benchmark": 0.006072768804046337
+    }
+   }
+  },
+  {
+   "policy": "pinocchio | top-k | q=0.10",
+   "pass": 0.8545267489711935,
+   "pass_by_replicate": [
+    0.8561728395061728,
+    0.8512345679012345,
+    0.8561728395061728
+   ],
+   "q_vp": 0.09993552546744036,
+   "q_total": 0.1382716049382716,
+   "frontier_calls_per_attempt": 0.1382716049382716,
+   "optional_calls_per_attempt": 0.09567901234567901,
+   "forced_calls_per_attempt": 0.04259259259259259,
+   "rescues_per_attempt": 0.013580246913580247,
+   "harms_per_attempt": 0.005349794238683128,
+   "n_attempts": 1620,
+   "n_decisions": 1551,
+   "usd_owned": 0.0004518098765432099,
+   "usd_cloud": 0.0034355589871504534,
+   "usd_small_owned": 0.0,
+   "usd_small_cloud": 0.002983749110607244,
+   "usd_frontier": 0.0004518098765432099,
+   "usd_jev": 0.0,
+   "jev_price_note": "third-party $0.042/M input, unconfirmed",
+   "excludes": "Pinocchio CPU compute (reported separately as elapsed CPU seconds)",
+   "router": "pinocchio",
+   "view": "top-k",
+   "q_nominal": 0.1,
+   "gain_vs_random": [
+    0.0025345389805594694,
+    -0.007703541463157685,
+    0.012981631300467504
+   ],
+   "gain_vs_forced_only": [
+    0.008230452674897118,
+    -0.003086419753086421,
+    0.020576131687242795
+   ],
+   "by_benchmark": {
+    "humaneval+": {
+     "pass": 0.938831615120275,
+     "q_vp": 0.1910828025477707,
+     "gain_vs_random_within_benchmark": 0.0015496749622430895
+    },
+    "mbpp+": {
+     "pass": 0.8185022026431719,
+     "q_vp": 0.06018518518518518,
+     "gain_vs_random_within_benchmark": 0.0042285310273562846
+    }
+   }
+  },
+  {
+   "policy": "pinocchio | frozen | q=0.25",
+   "pass": 0.8660493827160494,
+   "pass_by_replicate": [
+    0.8697530864197531,
+    0.8617283950617284,
+    0.8666666666666667
+   ],
+   "q_vp": 0.22179239200515796,
+   "q_total": 0.25493827160493826,
+   "frontier_calls_per_attempt": 0.25493827160493826,
+   "optional_calls_per_attempt": 0.2123456790123457,
+   "forced_calls_per_attempt": 0.04259259259259259,
+   "rescues_per_attempt": 0.026131687242798355,
+   "harms_per_attempt": 0.006378600823045267,
+   "n_attempts": 1620,
+   "n_decisions": 1551,
+   "usd_owned": 0.0007267971193415637,
+   "usd_cloud": 0.0037105462299488073,
+   "usd_small_owned": 0.0,
+   "usd_small_cloud": 0.002983749110607244,
+   "usd_frontier": 0.0007267971193415637,
+   "usd_jev": 0.0,
+   "jev_price_note": "third-party $0.042/M input, unconfirmed",
+   "excludes": "Pinocchio CPU compute (reported separately as elapsed CPU seconds)",
+   "router": "pinocchio",
+   "view": "frozen",
+   "q_nominal": 0.25,
+   "gain_vs_random": [
+    0.007111832801352109,
+    -0.004061027909916087,
+    0.018851479905175255
+   ],
+   "gain_vs_forced_only": [
+    0.019753086419753086,
+    0.005349794238683127,
+    0.03477366255144033
+   ],
+   "by_benchmark": {
+    "humaneval+": {
+     "pass": 0.9450171821305843,
+     "q_vp": 0.3630573248407643,
+     "gain_vs_random_within_benchmark": 0.0017072690262000146
+    },
+    "mbpp+": {
+     "pass": 0.8323054331864905,
+     "q_vp": 0.16018518518518518,
+     "gain_vs_random_within_benchmark": 0.011394463479632348
+    }
+   }
+  },
+  {
+   "policy": "pinocchio | top-k | q=0.25",
+   "pass": 0.8685185185185185,
+   "pass_by_replicate": [
+    0.8722222222222222,
+    0.8641975308641975,
+    0.8691358024691358
+   ],
+   "q_vp": 0.2501611863313991,
+   "q_total": 0.2820987654320988,
+   "frontier_calls_per_attempt": 0.2820987654320988,
+   "optional_calls_per_attempt": 0.23950617283950618,
+   "forced_calls_per_attempt": 0.04259259259259259,
+   "rescues_per_attempt": 0.029218106995884775,
+   "harms_per_attempt": 0.0069958847736625515,
+   "n_attempts": 1620,
+   "n_decisions": 1551,
+   "usd_owned": 0.0007810831275720164,
+   "usd_cloud": 0.00376483223817926,
+   "usd_small_owned": 0.0,
+   "usd_small_cloud": 0.002983749110607244,
+   "usd_frontier": 0.0007810831275720164,
+   "usd_jev": 0.0,
+   "jev_price_note": "third-party $0.042/M input, unconfirmed",
+   "excludes": "Pinocchio CPU compute (reported separately as elapsed CPU seconds)",
+   "router": "pinocchio",
+   "view": "top-k",
+   "q_nominal": 0.25,
+   "gain_vs_random": [
+    0.007964064071235072,
+    -0.003743340287212127,
+    0.02013350070628417
+   ],
+   "gain_vs_forced_only": [
+    0.022222222222222223,
+    0.007201646090534978,
+    0.03868312757201646
+   ],
+   "by_benchmark": {
+    "humaneval+": {
+     "pass": 0.9429553264604812,
+     "q_vp": 0.3970276008492569,
+     "gain_vs_random_within_benchmark": -0.0015452973493553957
+    },
+    "mbpp+": {
+     "pass": 0.8367107195301029,
+     "q_vp": 0.18611111111111112,
+     "gain_vs_random_within_benchmark": 0.014078968836678085
+    }
+   }
+  },
+  {
+   "policy": "pinocchio | frozen | q=0.50",
+   "pass": 0.8796296296296297,
+   "pass_by_replicate": [
+    0.8833333333333333,
+    0.8740740740740741,
+    0.8814814814814815
+   ],
+   "q_vp": 0.49709864603481624,
+   "q_total": 0.5185185185185185,
+   "frontier_calls_per_attempt": 0.5185185185185185,
+   "optional_calls_per_attempt": 0.4759259259259259,
+   "forced_calls_per_attempt": 0.04259259259259259,
+   "rescues_per_attempt": 0.04259259259259259,
+   "harms_per_attempt": 0.009259259259259259,
+   "n_attempts": 1620,
+   "n_decisions": 1551,
+   "usd_owned": 0.0012338008230452675,
+   "usd_cloud": 0.004217549933652511,
+   "usd_small_owned": 0.0,
+   "usd_small_cloud": 0.002983749110607244,
+   "usd_frontier": 0.0012338008230452675,
+   "usd_jev": 0.0,
+   "jev_price_note": "third-party $0.042/M input, unconfirmed",
+   "excludes": "Pinocchio CPU compute (reported separately as elapsed CPU seconds)",
+   "router": "pinocchio",
+   "view": "frozen",
+   "q_nominal": 0.5,
+   "gain_vs_random": [
+    0.00500075618278928,
+    -0.00602270516462651,
+    0.01690100039365871
+   ],
+   "gain_vs_forced_only": [
+    0.03333333333333333,
+    0.01522633744855967,
+    0.053703703703703705
+   ],
+   "by_benchmark": {
+    "humaneval+": {
+     "pass": 0.9408934707903781,
+     "q_vp": 0.6284501061571125,
+     "gain_vs_random_within_benchmark": -0.011718869700352397
+    },
+    "mbpp+": {
+     "pass": 0.8534508076358297,
+     "q_vp": 0.4398148148148148,
+     "gain_vs_random_within_benchmark": 0.013979985859574696
+    }
+   }
+  },
+  {
+   "policy": "pinocchio | top-k | q=0.50",
+   "pass": 0.8796296296296297,
+   "pass_by_replicate": [
+    0.8833333333333333,
+    0.8740740740740741,
+    0.8814814814814815
+   ],
+   "q_vp": 0.5003223726627982,
+   "q_total": 0.5216049382716049,
+   "frontier_calls_per_attempt": 0.5216049382716049,
+   "optional_calls_per_attempt": 0.47901234567901235,
+   "forced_calls_per_attempt": 0.04259259259259259,
+   "rescues_per_attempt": 0.04259259259259259,
+   "harms_per_attempt": 0.009259259259259259,
+   "n_attempts": 1620,
+   "n_decisions": 1551,
+   "usd_owned": 0.001239567489711934,
+   "usd_cloud": 0.004223316600319178,
+   "usd_small_owned": 0.0,
+   "usd_small_cloud": 0.002983749110607244,
+   "usd_frontier": 0.001239567489711934,
+   "usd_jev": 0.0,
+   "jev_price_note": "third-party $0.042/M input, unconfirmed",
+   "excludes": "Pinocchio CPU compute (reported separately as elapsed CPU seconds)",
+   "router": "pinocchio",
+   "view": "top-k",
+   "q_nominal": 0.5,
+   "gain_vs_random": [
+    0.004817017031359031,
+    -0.006197500877634321,
+    0.01678656108179156
+   ],
+   "gain_vs_forced_only": [
+    0.03333333333333333,
+    0.01522633744855967,
+    0.053703703703703705
+   ],
+   "by_benchmark": {
+    "humaneval+": {
+     "pass": 0.9408934707903781,
+     "q_vp": 0.6305732484076433,
+     "gain_vs_random_within_benchmark": -0.011793289119443166
+    },
+    "mbpp+": {
+     "pass": 0.8534508076358297,
+     "q_vp": 0.44351851851851853,
+     "gain_vs_random_within_benchmark": 0.013734160004350899
+    }
+   }
+  },
+  {
+   "policy": "direct jev | frozen | q=0.10",
+   "pass": 0.8627572016460906,
+   "pass_by_replicate": [
+    0.8635802469135803,
+    0.8580246913580247,
+    0.8666666666666667
+   ],
+   "q_vp": 0.059961315280464215,
+   "q_total": 0.1,
+   "frontier_calls_per_attempt": 0.1,
+   "optional_calls_per_attempt": 0.05740740740740741,
+   "forced_calls_per_attempt": 0.04259259259259259,
+   "rescues_per_attempt": 0.017901234567901235,
+   "harms_per_attempt": 0.001440329218106996,
+   "n_attempts": 1620,
+   "n_decisions": 1551,
+   "usd_owned": 0.0003801908497942387,
+   "usd_cloud": 0.0033639399604014826,
+   "usd_small_owned": 0.0,
+   "usd_small_cloud": 0.002983749110607244,
+   "usd_frontier": 0.00034733868312757197,
+   "usd_jev": 3.2852166666666664e-05,
+   "jev_price_note": "third-party $0.042/M input, unconfirmed",
+   "excludes": "Pinocchio CPU compute (reported separately as elapsed CPU seconds)",
+   "router": "direct jev",
+   "view": "frozen",
+   "q_nominal": 0.1,
+   "gain_vs_random": [
+    0.013043357133191649,
+    0.005557261067339447,
+    0.021311169193619292
+   ],
+   "gain_vs_forced_only": [
+    0.016460905349794237,
+    0.008024691358024692,
+    0.02633744855967078
+   ],
+   "by_benchmark": {
+    "humaneval+": {
+     "pass": 0.9512027491408935,
+     "q_vp": 0.06369426751592357,
+     "gain_vs_random_within_benchmark": 0.018385974128307832
+    },
+    "mbpp+": {
+     "pass": 0.8249632892804698,
+     "q_vp": 0.058333333333333334,
+     "gain_vs_random_within_benchmark": 0.010812530592266273
+    }
+   }
+  },
+  {
+   "policy": "direct jev | top-k | q=0.10",
+   "pass": 0.8670781893004116,
+   "pass_by_replicate": [
+    0.8685185185185185,
+    0.8617283950617284,
+    0.8709876543209877
+   ],
+   "q_vp": 0.09993552546744036,
+   "q_total": 0.1382716049382716,
+   "frontier_calls_per_attempt": 0.1382716049382716,
+   "optional_calls_per_attempt": 0.09567901234567901,
+   "forced_calls_per_attempt": 0.04259259259259259,
+   "rescues_per_attempt": 0.023251028806584362,
+   "harms_per_attempt": 0.0024691358024691358,
+   "n_attempts": 1620,
+   "n_decisions": 1551,
+   "usd_owned": 0.00048658632304526746,
+   "usd_cloud": 0.003470335433652511,
+   "usd_small_owned": 0.0,
+   "usd_small_cloud": 0.002983749110607244,
+   "usd_frontier": 0.00045373415637860084,
+   "usd_jev": 3.2852166666666664e-05,
+   "jev_price_note": "third-party $0.042/M input, unconfirmed",
+   "excludes": "Pinocchio CPU compute (reported separately as elapsed CPU seconds)",
+   "router": "direct jev",
+   "view": "top-k",
+   "q_nominal": 0.1,
+   "gain_vs_random": [
+    0.015085979309777576,
+    0.006901957788255202,
+    0.02408716324289538
+   ],
+   "gain_vs_forced_only": [
+    0.020781893004115225,
+    0.010905349794238682,
+    0.03148148148148148
+   ],
+   "by_benchmark": {
+    "humaneval+": {
+     "pass": 0.961512027491409,
+     "q_vp": 0.11252653927813164,
+     "gain_vs_random_within_benchmark": 0.02698360583973559
+    },
+    "mbpp+": {
+     "pass": 0.8267254038179148,
+     "q_vp": 0.09444444444444444,
+     "gain_vs_random_within_benchmark": 0.010177843041279167
+    }
+   }
+  },
+  {
+   "policy": "direct jev | frozen | q=0.25",
+   "pass": 0.8800411522633744,
+   "pass_by_replicate": [
+    0.8827160493827161,
+    0.8740740740740741,
+    0.8833333333333333
+   ],
+   "q_vp": 0.22308188265635073,
+   "q_total": 0.25617283950617287,
+   "frontier_calls_per_attempt": 0.25617283950617287,
+   "optional_calls_per_attempt": 0.21358024691358024,
+   "forced_calls_per_attempt": 0.04259259259259259,
+   "rescues_per_attempt": 0.03827160493827161,
+   "harms_per_attempt": 0.004526748971193415,
+   "n_attempts": 1620,
+   "n_decisions": 1551,
+   "usd_owned": 0.0007589883806584362,
+   "usd_cloud": 0.00374273749126568,
+   "usd_small_owned": 0.0,
+   "usd_small_cloud": 0.002983749110607244,
+   "usd_frontier": 0.0007261362139917695,
+   "usd_jev": 3.2852166666666664e-05,
+   "jev_price_note": "third-party $0.042/M input, unconfirmed",
+   "excludes": "Pinocchio CPU compute (reported separately as elapsed CPU seconds)",
+   "router": "direct jev",
+   "view": "frozen",
+   "q_nominal": 0.25,
+   "gain_vs_random": [
+    0.02103010668810511,
+    0.0096024276796141,
+    0.03222640857621379
+   ],
+   "gain_vs_forced_only": [
+    0.033744855967078186,
+    0.019336419753086417,
+    0.049387860082304495
+   ],
+   "by_benchmark": {
+    "humaneval+": {
+     "pass": 0.9697594501718213,
+     "q_vp": 0.21231422505307856,
+     "gain_vs_random_within_benchmark": 0.03173331582288179
+    },
+    "mbpp+": {
+     "pass": 0.8417033773861967,
+     "q_vp": 0.22777777777777777,
+     "gain_vs_random_within_benchmark": 0.016306085821504324
+    }
+   }
+  },
+  {
+   "policy": "direct jev | top-k | q=0.25",
+   "pass": 0.8849794238683126,
+   "pass_by_replicate": [
+    0.8876543209876543,
+    0.8790123456790123,
+    0.8882716049382716
+   ],
+   "q_vp": 0.2501611863313991,
+   "q_total": 0.2820987654320988,
+   "frontier_calls_per_attempt": 0.2820987654320988,
+   "optional_calls_per_attempt": 0.23950617283950618,
+   "forced_calls_per_attempt": 0.04259259259259259,
+   "rescues_per_attempt": 0.043209876543209874,
+   "harms_per_attempt": 0.004526748971193415,
+   "n_attempts": 1620,
+   "n_decisions": 1551,
+   "usd_owned": 0.0008085262407407408,
+   "usd_cloud": 0.0037922753513479845,
+   "usd_small_owned": 0.0,
+   "usd_small_cloud": 0.002983749110607244,
+   "usd_frontier": 0.000775674074074074,
+   "usd_jev": 3.2852166666666664e-05,
+   "jev_price_note": "third-party $0.042/M input, unconfirmed",
+   "excludes": "Pinocchio CPU compute (reported separately as elapsed CPU seconds)",
+   "router": "direct jev",
+   "view": "top-k",
+   "q_nominal": 0.25,
+   "gain_vs_random": [
+    0.02442496942102931,
+    0.012703954280000481,
+    0.03653428120377201
+   ],
+   "gain_vs_forced_only": [
+    0.03868312757201646,
+    0.022628600823045266,
+    0.055967078189300405
+   ],
+   "by_benchmark": {
+    "humaneval+": {
+     "pass": 0.9738831615120275,
+     "q_vp": 0.23354564755838642,
+     "gain_vs_random_within_benchmark": 0.03511283297218027
+    },
+    "mbpp+": {
+     "pass": 0.8469897209985315,
+     "q_vp": 0.2574074074074074,
+     "gain_vs_random_within_benchmark": 0.01962582259204873
+    }
+   }
+  },
+  {
+   "policy": "direct jev | frozen | q=0.50",
+   "pass": 0.8936213991769546,
+   "pass_by_replicate": [
+    0.8981481481481481,
+    0.8870370370370371,
+    0.895679012345679
+   ],
+   "q_vp": 0.504835589941973,
+   "q_total": 0.5259259259259259,
+   "frontier_calls_per_attempt": 0.5259259259259259,
+   "optional_calls_per_attempt": 0.48333333333333334,
+   "forced_calls_per_attempt": 0.04259259259259259,
+   "rescues_per_attempt": 0.06193415637860082,
+   "harms_per_attempt": 0.014609053497942387,
+   "n_attempts": 1620,
+   "n_decisions": 1551,
+   "usd_owned": 0.001289580561728395,
+   "usd_cloud": 0.004273329672335639,
+   "usd_small_owned": 0.0,
+   "usd_small_cloud": 0.002983749110607244,
+   "usd_frontier": 0.0012567283950617283,
+   "usd_jev": 3.2852166666666664e-05,
+   "jev_price_note": "third-party $0.042/M input, unconfirmed",
+   "excludes": "Pinocchio CPU compute (reported separately as elapsed CPU seconds)",
+   "router": "direct jev",
+   "view": "frozen",
+   "q_nominal": 0.5,
+   "gain_vs_random": [
+    0.018551551766681787,
+    0.006373824574038804,
+    0.030989176079496174
+   ],
+   "gain_vs_forced_only": [
+    0.04732510288065843,
+    0.023657407407407405,
+    0.07325102880658435
+   ],
+   "by_benchmark": {
+    "humaneval+": {
+     "pass": 0.9656357388316151,
+     "q_vp": 0.4564755838641189,
+     "gain_vs_random_within_benchmark": 0.019051371287237072
+    },
+    "mbpp+": {
+     "pass": 0.8628487518355359,
+     "q_vp": 0.5259259259259259,
+     "gain_vs_random_within_benchmark": 0.017662478925327678
+    }
+   }
+  },
+  {
+   "policy": "direct jev | top-k | q=0.50",
+   "pass": 0.8930041152263374,
+   "pass_by_replicate": [
+    0.8975308641975308,
+    0.8864197530864197,
+    0.8950617283950617
+   ],
+   "q_vp": 0.5003223726627982,
+   "q_total": 0.5216049382716049,
+   "frontier_calls_per_attempt": 0.5216049382716049,
+   "optional_calls_per_attempt": 0.47901234567901235,
+   "forced_calls_per_attempt": 0.04259259259259259,
+   "rescues_per_attempt": 0.06131687242798354,
+   "harms_per_attempt": 0.014609053497942387,
+   "n_attempts": 1620,
+   "n_decisions": 1551,
+   "usd_owned": 0.001279666158436214,
+   "usd_cloud": 0.004263415269043457,
+   "usd_small_owned": 0.0,
+   "usd_small_cloud": 0.002983749110607244,
+   "usd_frontier": 0.0012468139917695474,
+   "usd_jev": 3.2852166666666664e-05,
+   "jev_price_note": "third-party $0.042/M input, unconfirmed",
+   "excludes": "Pinocchio CPU compute (reported separately as elapsed CPU seconds)",
+   "router": "direct jev",
+   "view": "top-k",
+   "q_nominal": 0.5,
+   "gain_vs_random": [
+    0.01819150262806685,
+    0.005971172832812572,
+    0.030833647619074478
+   ],
+   "gain_vs_forced_only": [
+    0.046707818930041146,
+    0.023245884773662552,
+    0.07263374485596708
+   ],
+   "by_benchmark": {
+    "humaneval+": {
+     "pass": 0.9656357388316151,
+     "q_vp": 0.45222929936305734,
+     "gain_vs_random_within_benchmark": 0.019200210125418612
+    },
+    "mbpp+": {
+     "pass": 0.8619676945668134,
+     "q_vp": 0.5212962962962963,
+     "gain_vs_random_within_benchmark": 0.017088703975634962
+    }
+   }
+  }
+ ],
+ "jev_calls_with_unknown_usage": {
+  "cheap": 0,
+  "cheap+code": 0,
+  "cheap+code+thinking": 0,
+  "cheap+strong4": 0,
+  "strong4 mean": 0,
+  "pinocchio": 0,
+  "direct jev": 0
+ }
+}

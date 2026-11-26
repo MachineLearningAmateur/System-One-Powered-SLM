@@ -32,7 +32,8 @@ you run or change anything.
 7. **Run data stays out of git, with one exception.** `results/` is git-ignored, except the finished
    1.7B study's data that `.gitignore` lists: the runs `pilot-v1`, `pilot-v1b`, `main-test-v1`,
    `frontier-dev-v1` and `frontier-test-v1`, their aggregate files, and the two EvalPlus dataset files.
-   They are in git so that a clone can reuse the pipeline. They hold hidden labels, so rule 6 applies to
+   They are in git so that a clone can reuse the pipeline. The Qwen3.5-9B runs `q9b-pilot-v1`,
+   `q9b-pilot-v1b` and `q9b-test-v1` and their aggregate files are also in git, at the operator's request. They hold hidden labels, so rule 6 applies to
    them. New run data, aggregate results and trace exports go into git only when the operator asks.
 8. **Freeze before test data.** Before you generate on any test task, the hypotheses, the analysis plan
    and the frozen routers must be committed and the commit tagged. Record every later change as a dated

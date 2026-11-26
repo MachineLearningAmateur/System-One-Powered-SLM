@@ -1,0 +1,72 @@
+{
+ "run_id": "q9b-pilot-v1",
+ "session": "20261126T093724-9c3383",
+ "source": "trajectories.jsonl",
+ "started": "2026-11-26T09:37:24.873272+00:00",
+ "protocol": true,
+ "vllm_running": false,
+ "git_commit": "258b536c9a9850aaa7b280d53b4845536ee9d9a5",
+ "git_dirty": false,
+ "grading_code_sha256": "57b1adfff894a69424ac2e6ca75819e09030a24ec79130b2e6aa81547f37f986",
+ "evalplus_cache_sha256": "87352cb827ebd180289ea5949391df9f2b6c50f6ca4ca71a6f224bb724ec2fb3",
+ "container": {
+  "image": "sha256:207c21732a0a8d66b487e1623777bcf4ec4f07bf98b522c50ac97ef3e9cc2d19",
+  "memory": 10737418240,
+  "memory_swap": 10737418240,
+  "nano_cpus": 4000000000,
+  "pids_limit": 512,
+  "cgroupns": "private",
+  "network": "none"
+ },
+ "n_checkpoints": 245,
+ "dropped_executions": [],
+ "exclusions": {
+  "version": "grading-exclusions-v1",
+  "sha256": "f0e5b4f30f891a30de56b01fe259e751e8310d0e365c15b832f87cf1599c82db",
+  "tasks": [
+   "HumanEval/32"
+  ],
+  "excluded_checkpoints": [],
+  "n_before": 245,
+  "n_after": 245
+ },
+ "grader_version": "grader-v3",
+ "grader_settings": {
+  "evalplus": "0.3.1",
+  "min_time_limit": 1.0,
+  "gt_time_limit_factor": 4.0,
+  "fast_check": true,
+  "timeout_per_task": 60,
+  "candidate_budget_bytes": 4294967296
+ },
+ "datasets": {
+  "humaneval": {
+   "vm_size": 3109531648,
+   "n_tasks": 66,
+   "n_codes": 69,
+   "calibration_failures": [],
+   "canary_passed": true,
+   "memory_limit": 7246090240
+  },
+  "mbpp": {
+   "vm_size": 4131500032,
+   "n_tasks": 151,
+   "n_codes": 174,
+   "calibration_failures": [],
+   "canary_passed": true,
+   "memory_limit": 8267714560
+  }
+ },
+ "ended": "2026-11-26T09:39:01.298162+00:00",
+ "elapsed_s": 94.3,
+ "n_codes": 243,
+ "labels": {
+  "pass": 185,
+  "fail": 60,
+  "invalid": 0,
+  "no_code": 0
+ },
+ "first_two_disagree": 0,
+ "first_two_valid_pairs": 243,
+ "checkpoints_first_grade_differs": 0
+}

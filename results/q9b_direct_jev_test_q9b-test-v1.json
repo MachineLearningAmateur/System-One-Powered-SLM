@@ -1,0 +1,29 @@
+{
+ "version": "q9b-direct-jev-test-v1",
+ "run": "q9b-test-v1",
+ "split": "test",
+ "routers": "routers-q9b-v1",
+ "population": "visible-pass checkpoints, Amendment A2 exclusions applied",
+ "n_visible_pass": 1551,
+ "n_hidden_fail": 235,
+ "n_tasks": 318,
+ "n_fail_tasks": 75,
+ "auroc": {
+  "cheap": 0.6701448619284744,
+  "direct jev": 0.7771308930996572
+ },
+ "test": {
+  "a": "cheap",
+  "b": "direct jev",
+  "delta": 0.10698603117118277,
+  "p_two_sided": 0.0032,
+  "n_boot": 19999,
+  "ci95": [
+   0.03686748581546438,
+   0.17484290240209213
+  ],
+  "alpha": 0.05,
+  "reject_at_0.05": true,
+  "family": "separate from the H1/H2 Holm family"
+ }
+}

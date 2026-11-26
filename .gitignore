@@ -43,6 +43,23 @@ results/runs/*
 !results/resource_guide_pilot-v1+pilot-v1b_predict-v2.json
 !results/test_analysis_main-test-v1.json
 !results/transfer_main-test-v1.json
+# The Qwen3.5-9B study's data (docs/q9b-plan.md), committed at the operator's request on 2026-11-26.
+# The smoke run q9b-smoke stays ignored.
+!results/runs/q9b-pilot-v1/
+!results/runs/q9b-pilot-v1b/
+!results/runs/q9b-test-v1/
+!results/dev_router_scores_q9b-v1.json
+!results/jev_gates_q9b-pilot-v1+q9b-pilot-v1b.json
+!results/jev_gates_q9b-test-v1.json
+!results/q9b_cost_latency_q9b-pilot-v1.json
+!results/q9b_cost_latency_q9b-test-v1.json
+!results/q9b_direct_jev_test_q9b-pilot-v1.json
+!results/q9b_direct_jev_test_q9b-test-v1.json
+!results/replay_q9b-pilot-v1_final_routers-q9b-v1.json
+!results/replay_q9b-pilot-v1+q9b-pilot-v1b_dev-oof_routers-q9b-v1.json
+!results/replay_q9b-test-v1_final_routers-q9b-v1.json
+!results/resource_guide_q9b-pilot-v1+q9b-pilot-v1b_predict-v2.json
+!results/test_analysis_q9b-test-v1.json
 hf_cache/
 *.safetensors
 *.bin

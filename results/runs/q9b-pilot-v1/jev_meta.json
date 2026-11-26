@@ -1,0 +1,25 @@
+{
+ "run_id": "q9b-pilot-v1",
+ "protocol": {
+  "rubric_version": "rubric-v2",
+  "rubric_sha256": "9d90bfda289aa6cc48d73d8d7db10d6d74a5353e7b2c0c90f8ec5faa9f1150a9",
+  "evidence_version": "evidence-v3",
+  "byte_budget": 56000,
+  "model_requested": "jev-latest",
+  "arms": [
+   "base+history",
+   "base+history+trace"
+  ]
+ },
+ "model_version": "jev-1.14.0",
+ "sessions": [
+  {
+   "started": "2026-11-26T09:47:09.568503+00:00",
+   "git_commit": "2cc7d2441ebfe1a7f5c700d52453b745c3b43130",
+   "git_dirty": false,
+   "outcome": "finished",
+   "ended": "2026-11-26T09:47:55.869851+00:00",
+   "input_tokens_total": 1002261
+  }
+ ]
+}

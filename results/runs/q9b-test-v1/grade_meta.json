@@ -1,0 +1,100 @@
+{
+ "run_id": "q9b-test-v1",
+ "session": "20261126T180725-f46278",
+ "source": "trajectories.jsonl",
+ "started": "2026-11-26T18:07:25.203606+00:00",
+ "protocol": true,
+ "vllm_running": false,
+ "git_commit": "cde3b0b16b948a5b057ad073916a7d4a12c97032",
+ "git_dirty": false,
+ "grading_code_sha256": "57b1adfff894a69424ac2e6ca75819e09030a24ec79130b2e6aa81547f37f986",
+ "evalplus_cache_sha256": "87352cb827ebd180289ea5949391df9f2b6c50f6ca4ca71a6f224bb724ec2fb3",
+ "container": {
+  "image": "sha256:207c21732a0a8d66b487e1623777bcf4ec4f07bf98b522c50ac97ef3e9cc2d19",
+  "memory": 10737418240,
+  "memory_swap": 10737418240,
+  "nano_cpus": 4000000000,
+  "pids_limit": 512,
+  "cgroupns": "private",
+  "network": "none"
+ },
+ "n_checkpoints": 1898,
+ "dropped_executions": [
+  {
+   "exec_id": "0fe4d0619cbd444c94ff46a20efa7f20",
+   "reason": "incomplete",
+   "n_rows": 1
+  },
+  {
+   "exec_id": "764281652f934952a874a09ebd53f3fa",
+   "reason": "incomplete",
+   "n_rows": 1
+  },
+  {
+   "exec_id": "635797aa295e4a38805c7ec2f9f66340",
+   "reason": "incomplete",
+   "n_rows": 2
+  },
+  {
+   "exec_id": "8f730c72e709486f97d0556a556d2c05",
+   "reason": "incomplete",
+   "n_rows": 1
+  }
+ ],
+ "exclusions": {
+  "version": "grading-exclusions-v1",
+  "sha256": "f0e5b4f30f891a30de56b01fe259e751e8310d0e365c15b832f87cf1599c82db",
+  "tasks": [
+   "HumanEval/32"
+  ],
+  "excluded_checkpoints": [
+   "HumanEval/32/a0/r1",
+   "HumanEval/32/a1/r1",
+   "HumanEval/32/a1/r2",
+   "HumanEval/32/a2/r1",
+   "HumanEval/32/a3/r1",
+   "HumanEval/32/a4/r1"
+  ],
+  "n_before": 1904,
+  "n_after": 1898
+ },
+ "grader_version": "grader-v3",
+ "grader_settings": {
+  "evalplus": "0.3.1",
+  "min_time_limit": 1.0,
+  "gt_time_limit_factor": 4.0,
+  "fast_check": true,
+  "timeout_per_task": 60,
+  "candidate_budget_bytes": 4294967296
+ },
+ "datasets": {
+  "humaneval": {
+   "vm_size": 3109498880,
+   "n_tasks": 97,
+   "n_codes": 450,
+   "calibration_failures": [],
+   "canary_passed": true,
+   "memory_limit": 7246057472
+  },
+  "mbpp": {
+   "vm_size": 4131581952,
+   "n_tasks": 227,
+   "n_codes": 1244,
+   "calibration_failures": [],
+   "canary_passed": true,
+   "memory_limit": 8268853248
+  }
+ },
+ "ended": "2026-11-26T18:26:40.354314+00:00",
+ "elapsed_s": 1153.1,
+ "n_codes": 1694,
+ "labels": {
+  "pass": 1341,
+  "fail": 557,
+  "invalid": 0,
+  "no_code": 0
+ },
+ "first_two_disagree": 0,
+ "first_two_valid_pairs": 1694,
+ "checkpoints_first_grade_differs": 0
+}

@@ -1,0 +1,261 @@
+{
+ "runs": [
+  "q9b-pilot-v1",
+  "q9b-pilot-v1b"
+ ],
+ "checkpoints": 576,
+ "unscored_checkpoints": 0,
+ "http_attempts": {
+  "ok": 1212
+ },
+ "model_versions": {
+  "jev-1.14.0": 1212
+ },
+ "input_tokens": 2250682,
+ "arms": {
+  "base+history": {
+   "records": 576,
+   "status": {
+    "ok": 576
+   },
+   "valid_share": 1.0,
+   "failed_after_retries_share": 0.0,
+   "max_request_bytes": 7238,
+   "over_budget": 0,
+   "trace_truncated": 0,
+   "base_trimmed": 0,
+   "not_applicable": {
+    "na:arm_lacks_trace": 1450,
+    "na:first_round,arm_lacks_trace": 1515,
+    "na:visible_pass,arm_lacks_trace": 491,
+    "na:first_round": 505
+   },
+   "features": {
+    "code_likely_fails": {
+     "n": 576,
+     "distinct": 77,
+     "mode": 0.21,
+     "share_at_mode": 0.046875,
+     "share_at_0_or_1": 0.0,
+     "sd": 0.1785505090673069,
+     "min": 0.07,
+     "max": 0.89,
+     "vp_pairs": 35778,
+     "vp_pairs_tied_share": 0.023310414221029682
+    },
+    "repeats_previous_code": {
+     "n": 71,
+     "distinct": 36,
+     "mode": 0.98,
+     "share_at_mode": 0.1267605633802817,
+     "share_at_0_or_1": 0.0,
+     "sd": 0.3390180927456337,
+     "min": 0.06,
+     "max": 0.98,
+     "vp_pairs": 300,
+     "vp_pairs_tied_share": 0.013333333333333334
+    },
+    "special_cases_visible_tests": {
+     "n": 576,
+     "distinct": 13,
+     "mode": 0.03,
+     "share_at_mode": 0.5659722222222222,
+     "share_at_0_or_1": 0.0,
+     "sd": 0.01754953307387724,
+     "min": 0.02,
+     "max": 0.16,
+     "vp_pairs": 35778,
+     "vp_pairs_tied_share": 0.3463301470177204
+    }
+   },
+   "duplicate_feature_vectors": 346
+  },
+  "base+history+trace": {
+   "records": 576,
+   "status": {
+    "ok": 576
+   },
+   "valid_share": 1.0,
+   "failed_after_retries_share": 0.0,
+   "max_request_bytes": 44605,
+   "over_budget": 0,
+   "trace_truncated": 0,
+   "base_trimmed": 0,
+   "not_applicable": {
+    "na:first_round": 2020,
+    "na:visible_pass": 491
+   },
+   "features": {
+    "approach_change_without_evidence": {
+     "n": 71,
+     "distinct": 41,
+     "mode": 0.1,
+     "share_at_mode": 0.07042253521126761,
+     "share_at_0_or_1": 0.0,
+     "sd": 0.18462548611980742,
+     "min": 0.07,
+     "max": 0.77,
+     "vp_pairs": 300,
+     "vp_pairs_tied_share": 0.01
+    },
+    "clear_next_step": {
+     "n": 85,
+     "distinct": 46,
+     "mode": 0.17,
+     "share_at_mode": 0.058823529411764705,
+     "share_at_0_or_1": 0.0,
+     "sd": 0.202965011388049,
+     "min": 0.08,
+     "max": 0.91,
+     "vp_pairs": 0,
+     "vp_pairs_tied_share": null
+    },
+    "code_likely_fails": {
+     "n": 576,
+     "distinct": 79,
+     "mode": 0.13,
+     "share_at_mode": 0.04861111111111111,
+     "share_at_0_or_1": 0.0,
+     "sd": 0.1888052170876582,
+     "min": 0.05,
+     "max": 0.87,
+     "vp_pairs": 35778,
+     "vp_pairs_tied_share": 0.020962602716753313
+    },
+    "on_task": {
+     "n": 576,
+     "distinct": 61,
+     "mode": 0.95,
+     "share_at_mode": 0.1440972222222222,
+     "share_at_0_or_1": 0.0,
+     "sd": 0.13702465776617542,
+     "min": 0.2,
+     "max": 0.98,
+     "vp_pairs": 35778,
+     "vp_pairs_tied_share": 0.07580077142377997
+    },
+    "repeating_failed_fix": {
+     "n": 71,
+     "distinct": 47,
+     "mode": 0.11,
+     "share_at_mode": 0.04225352112676056,
+     "share_at_0_or_1": 0.0,
+     "sd": 0.30686937890765253,
+     "min": 0.05,
+     "max": 0.94,
+     "vp_pairs": 300,
+     "vp_pairs_tied_share": 0.03
+    },
+    "repeats_previous_code": {
+     "n": 71,
+     "distinct": 39,
+     "mode": 0.98,
+     "share_at_mode": 0.14084507042253522,
+     "share_at_0_or_1": 0.0,
+     "sd": 0.35513296207174466,
+     "min": 0.07,
+     "max": 0.98,
+     "vp_pairs": 300,
+     "vp_pairs_tied_share": 0.023333333333333334
+    },
+    "special_cases_visible_tests": {
+     "n": 576,
+     "distinct": 16,
+     "mode": 0.03,
+     "share_at_mode": 0.6006944444444444,
+     "share_at_0_or_1": 0.0,
+     "sd": 0.02422436215341839,
+     "min": 0.02,
+     "max": 0.29,
+     "vp_pairs": 35778,
+     "vp_pairs_tied_share": 0.37808150259936274
+    },
+    "stated_fix_matches_change": {
+     "n": 71,
+     "distinct": 41,
+     "mode": 0.98,
+     "share_at_mode": 0.08450704225352113,
+     "share_at_0_or_1": 0.0,
+     "sd": 0.3775326300186828,
+     "min": 0.04,
+     "max": 0.99,
+     "vp_pairs": 300,
+     "vp_pairs_tied_share": 0.043333333333333335
+    },
+    "unsupported_claim": {
+     "n": 576,
+     "distinct": 75,
+     "mode": 0.28,
+     "share_at_mode": 0.05555555555555555,
+     "share_at_0_or_1": 0.0,
+     "sd": 0.17430341739364769,
+     "min": 0.08,
+     "max": 0.91,
+     "vp_pairs": 35778,
+     "vp_pairs_tied_share": 0.020431550114595562
+    }
+   },
+   "duplicate_feature_vectors": 13
+  }
+ },
+ "repeat": {
+  "records": 60,
+  "same_request_bytes": 60,
+  "abs_change": {
+   "approach_change_without_evidence": {
+    "n": 2,
+    "mean": 0.0,
+    "max": 0.0,
+    "exact_same_share": 1.0
+   },
+   "clear_next_step": {
+    "n": 2,
+    "mean": 0.014999999999999986,
+    "max": 0.019999999999999962,
+    "exact_same_share": 0.0
+   },
+   "code_likely_fails": {
+    "n": 60,
+    "mean": 0.012333333333333337,
+    "max": 0.04999999999999999,
+    "exact_same_share": 0.25
+   },
+   "on_task": {
+    "n": 30,
+    "mean": 0.003333333333333336,
+    "max": 0.020000000000000018,
+    "exact_same_share": 0.7
+   },
+   "repeating_failed_fix": {
+    "n": 2,
+    "mean": 0.0050000000000000044,
+    "max": 0.010000000000000009,
+    "exact_same_share": 0.5
+   },
+   "repeats_previous_code": {
+    "n": 4,
+    "mean": 0.007500000000000007,
+    "max": 0.020000000000000018,
+    "exact_same_share": 0.5
+   },
+   "special_cases_visible_tests": {
+    "n": 60,
+    "mean": 0.0013333333333333333,
+    "max": 0.010000000000000002,
+    "exact_same_share": 0.8666666666666667
+   },
+   "stated_fix_matches_change": {
+    "n": 2,
+    "mean": 0.014999999999999958,
+    "max": 0.019999999999999907,
+    "exact_same_share": 0.0
+   },
+   "unsupported_claim": {
+    "n": 30,
+    "mean": 0.01166666666666667,
+    "max": 0.040000000000000036,
+    "exact_same_share": 0.3
+   }
+  }
+ }
+}

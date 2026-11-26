@@ -22,16 +22,21 @@ import sys
 from collections import Counter
 
 from system1.config import RESULTS
+from system1.eval.exclusions import load_exclusions
 from system1.eval.labels import load_labelled
 from system1.eval.ledger import read_jsonl
 from system1.features.evidence import ARMS
 
 
-def last_records(path) -> dict:
+def last_records(path, excluded: set[str]) -> tuple[dict, int]:
+    """Last record per (checkpoint, arm), without the tasks of Amendment A2 (they have no label);
+    also the number of (checkpoint, arm) keys left out for that reason."""
     rows, bad = read_jsonl(path)
     if bad:
         raise RuntimeError(f"{len(bad)} damaged lines in {path}")
-    return {(r["checkpoint_id"], r["arm"]): r for r in rows}
+    last = {(r["checkpoint_id"], r["arm"]): r for r in rows}
+    kept = {k: r for k, r in last.items() if r["task_id"] not in excluded}
+    return kept, len(last) - len(kept)
 
 
 def feature_stats(values: list[float], vp_pairs: tuple[list[float], list[float]]) -> dict:
@@ -50,20 +55,26 @@ def main() -> int:
     ap.add_argument("--run-id", action="append", required=True)
     args = ap.parse_args()
 
+    excl = load_exclusions()
     labels, scores, repeats, ledger = {}, {}, {}, []
+    n_excluded = 0
     for rid in args.run_id:
         d = RESULTS / "runs" / rid
         for c in load_labelled(d):
             labels[(rid, c["checkpoint_id"])] = c
-        for k, r in last_records(d / "jev_scores.jsonl").items():
+        recs, n = last_records(d / "jev_scores.jsonl", excl["tasks"])
+        n_excluded += n
+        for k, r in recs.items():
             scores[(rid, *k)] = r
         if (d / "jev_repeat.jsonl").exists():
-            for k, r in last_records(d / "jev_repeat.jsonl").items():
+            for k, r in last_records(d / "jev_repeat.jsonl", excl["tasks"])[0].items():
                 repeats[(rid, *k)] = r
         ledger += read_jsonl(d / "jev_ledger.jsonl")[0]
     missing = [k for k in labels if any((*k, arm) not in scores for arm in ARMS)]
-    out: dict = {"runs": args.run_id, "checkpoints": len(labels), "unscored_checkpoints": len(missing)}
-    print(f"checkpoints {len(labels)}; without a record in every arm: {len(missing)}")
+    out: dict = {"runs": args.run_id, "checkpoints": len(labels), "unscored_checkpoints": len(missing),
+                 "exclusions": excl["version"], "excluded_records": n_excluded}
+    print(f"checkpoints {len(labels)}; without a record in every arm: {len(missing)}; "
+          f"records of excluded tasks left out ({excl['version']}): {n_excluded}")
 
     calls = Counter(r["status"] for r in ledger)
     versions = Counter(r.get("model_returned") for r in ledger if r["status"] == "ok")
