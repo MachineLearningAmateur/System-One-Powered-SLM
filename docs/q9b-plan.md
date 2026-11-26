@@ -105,7 +105,89 @@ The gate passes for the study population (both benchmarks). Generation used 1,15
 `ok`, with 961,997 input and 919,527 output tokens (about USD 0.23) for the MBPP+ part; the full pilot cost
 about USD 0.30.
 
-## Part B (to be written before the freeze)
+## Development scoring and results
 
-Routers fit on development data, H1 and H2, the direct Jev test, the 10/25/50% budgets, the frozen score
-limits for each router and budget, the frontier answers for the replay, and the cost and latency report.
+Jev returned `jev-1.14.0` for all 1,152 arm records of the two pilot runs; every record was `ok`. It used
+2,250,682 input tokens (about USD 0.095 at USD 0.042 per million). No request was over the 56,000-byte
+budget, no trace was cut, and no base evidence was trimmed. The 30-checkpoint repeat sample had identical
+request bytes for all 60 requests; the largest change of any answer was 0.05. Pinocchio input v1 and v2
+scored all 576 checkpoints of both runs (`results/jev_gates_q9b-pilot-v1+q9b-pilot-v1b.json`,
+`results/resource_guide_q9b-pilot-v1+q9b-pilot-v1b_predict-v2.json`).
+
+Out-of-fold development AUROC on the 491 visible-pass checkpoints (89 hidden fails on 37 tasks; 20
+task-grouped splits): telemetry-only router 0.765 (0.680–0.845), code router 0.772, full router 0.765,
+cheap + Strong4 0.772, Strong4 mean 0.702, direct Jev (history-request `code_likely_fails`, no fitting)
+0.671. Full minus telemetry-only: +0.001 (−0.031 to +0.032). The resource-guide rule (a gain of at least
+0.03) is not met. These are development estimates; they do not change the hypotheses below.
+
+## Part B: the frozen test protocol (written November 26, before any test-task generation)
+
+Everything here was set on development data only. After the tag `q9b-protocol-freeze-v1`, any change is
+a dated amendment, and its result is exploratory.
+
+**F1. Routers.** `configs/routers_q9b-v1.json` (fit at commit `fe085f9` on `q9b-pilot-v1` and
+`q9b-pilot-v1b`; SHA-256 prefix `18c1ffae813c8033`): the telemetry-only, code and full LR routers, cheap +
+Strong4, the Strong4 mean, Pinocchio (input v1; 1 − p_correct) and direct Jev. Each LR router is one
+logistic regression refitted on all 491 visible-pass development rows. When a Jev answer that a router
+needs is missing, the telemetry-only router decides at the same operating point. No 1.7B or 8B router,
+threshold or weight is reused.
+
+**F2. H1 and H2 (Holm family of two, as in the 1.7B and 8B studies).** On the visible-pass test
+checkpoints, with the Amendment A2 exclusion: H1, AUROC(full router) − AUROC(telemetry-only router); H2,
+AUROC(full router) − AUROC(code router). Two-sided paired whole-task bootstrap, tasks resampled within
+benchmark, 19,999 draws; Holm over the two at familywise 0.05. Command:
+`uv run python scripts/test_analysis.py --run-id q9b-test-v1 --routers q9b-v1`. Everything else that
+script reports is descriptive.
+
+**F3. The direct Jev test (prespecified, separate from the Holm family).** AUROC(direct Jev) −
+AUROC(telemetry-only router), the same bootstrap and population, two-sided at 0.05 on its own, with no
+multiplicity adjustment (operator decision, November 26). Direct Jev is the frozen `direct jev` router:
+the `code_likely_fails` probability of the history request, used as is. Command:
+`uv run python scripts/analysis/q9b_direct_jev_test.py --run-id q9b-test-v1`. In the 8B study, direct Jev
+was chosen after the test results were seen; here it is fixed before them, so its result is confirmatory
+for this study only.
+
+**F4. Budgets.** 10%, 25% and 50% of the visible-pass decision checkpoints (`replay.RATES`), for every
+router in F1 and for random escalation at the realized rate, with the endpoints always-small,
+forced-failure-only, always-frontier and the oracle.
+
+**F5. Score limits.** For each router and budget, the frozen limit (t, alpha) in
+`configs/routers_q9b-v1.json`: the weighted development quantile, each row weighted 1 / (the sampled
+attempts of its task). The replay applies it to each test checkpoint alone (escalate if s > t, or s = t
+with a seeded draw below alpha) and reports the realized rate. It also reports the exact-budget (top-k)
+view, for comparison with the 1.7B and 8B papers. Limits for the routers that the paper discusses:
+
+| Router | 10% (t, alpha) | 25% (t, alpha) | 50% (t, alpha) |
+| --- | --- | --- | --- |
+| Telemetry-only | 0.3878, 0.26 | 0.2254, 0.75 | 0.1010, 0.50 |
+| Full | 0.4158, 0.06 | 0.2139, 0.75 | 0.0954, 0.90 |
+| Direct Jev | 0.4400, 0.86 | 0.3200, 0.93 | 0.2100, 0.19 |
+| Strong4 mean | 0.2650, 0.55 | 0.1900, 0.49 | 0.1500, 0.90 |
+
+Command: `uv run python scripts/replay.py --split test --run-id q9b-test-v1 --frontier-run
+frontier-test-v1 --scores final --routers q9b-v1`.
+
+**F6. Frontier answers.** The replay uses the saved task-only answers of `frontier-test-v1` (the 1.7B
+study's `anthropic/claude-sonnet-5.5-20260928` answers, 3 replicates for each of the 324 test tasks after
+Amendment A2, graded in one protocol session). They do not depend on the worker. No new frontier call is
+made.
+
+**F7. Cost and latency.** `uv run python scripts/analysis/q9b_cost_latency.py --run-id q9b-test-v1
+--replay results/replay_q9b-test-v1_final_routers-q9b-v1.json --frontier-run frontier-test-v1`. It
+reports the median, mean and 90th percentile time of each worker call (thinking and answer), the worker
+time for each attempt, each Jev call and each frontier call; the GPU-free worker cost for each attempt
+(the run's DeepInfra tokens × USD 0.10 / 0.15 per million input / output tokens ÷ the run's complete
+attempts); and for each policy, the break-even worker cost = always-frontier API cost − the policy's API
+cost (frontier + Jev) per attempt. A cascade is cheaper than always-frontier only if the worker costs less
+than that. Latency is DeepInfra network and queue time at concurrency 16, not local GPU time.
+
+**Test run.** Five attempts on each of the 325 test tasks (HumanEval+ and MBPP+), `q9b-test-v1`,
+concurrency 16, the Amendment A2 exclusion at labeling. At the pilot's use (about 4,770 tokens for each
+attempt), generation needs about 7.8 million tokens (about USD 1); guard `--max-billed-tokens 15000000`
+(at most about USD 2.25). Grading follows generation, in the networkless sandbox. Jev scores both arms of
+every checkpoint (about 7 million input tokens, about USD 0.30; guard `--max-input-tokens 10000000`), then
+Pinocchio scores both input versions. Each billed step needs the operator's dollar approval first.
+
+**What is descriptive.** Every comparison with the 1.7B and 8B studies (other worker generation,
+tokenizer, top-1 instead of top-5 confidence, unpinned hosted weights), the replay pass rates and costs,
+results by benchmark, cap hit and round, and Pinocchio.
