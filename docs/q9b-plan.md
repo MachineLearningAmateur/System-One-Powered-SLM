@@ -76,6 +76,35 @@ fit, apply the runbook's projection rule to the 22-task subsample. If fewer than
 projected to have a visible-pass hidden failure, stop and ask the operator: add MBPP+, or make the study
 descriptive only. Do not change the benchmark, split or cap after the pilot is seen.
 
+## Amendment A1 (November 26, 2026): HumanEval+ and MBPP+
+
+The HumanEval+ part of the development pilot (`q9b-pilot-v1` attempt 0 on 66 tasks, `q9b-pilot-v1b`
+attempts 1–4 on the 22 HumanEval+ subsample tasks; 154 attempts, about USD 0.065) was graded first. Of 153
+visible-pass checkpoints, 21 failed hidden tests. Six of the 22 subsample tasks had a visible-pass hidden
+failure (27.3%, Wilson 13.2%–48.2%), which projects 26.7 of 98 test tasks (12.9–47.2): the headroom gate
+failed. As the plan required, generation stopped and the operator decided. The operator chose the task set
+of the 1.7B study: HumanEval+ and MBPP+ (217 development and 325 test tasks). This decision used
+development labels only; no test task was generated or graded.
+
+The 151 MBPP+ development tasks were added to the same two run ids on the same commit (`258b536`), with the
+same protocol fingerprint; the run script allows added tasks. Both runs were then graded again with
+`--force`. The HumanEval+-only labels were kept as `hidden_labels.heonly-20261126.jsonl` and
+`grade_meta.heonly-20261126.json` in each run folder, and every grading call stays in `hidden_grades.jsonl`.
+The new HumanEval+ labels agree with the first ones (the same counts).
+
+Development pilot, both benchmarks (protocol grade sessions `20261126T093724-9c3383` and
+`20261126T093901-b63f69`; 0 invalid labels; the first two grades disagree on 0 of 540 codes):
+
+| Benchmark | Attempts | Final hidden pass | Visible-pass checkpoints | Hidden fails among them | Cap hits | Projected test tasks with a visible-pass hidden fail |
+| --- | ---: | ---: | ---: | ---: | ---: | --- |
+| HumanEval+ | 154 | 85.7% | 153 | 21 (13.7%) | 3 of 165 | 26.7 of 98 (12.9–47.2) |
+| MBPP+ | 351 | 76.9% | 338 | 68 (20.1%) | 35 of 411 | 77.2 of 227 (50.9–108.6) |
+| Both | 505 | 79.6% | 491 | 89 (18.1%) | 38 of 576 | 103.9 of 325 |
+
+The gate passes for the study population (both benchmarks). Generation used 1,152 DeepInfra calls, all
+`ok`, with 961,997 input and 919,527 output tokens (about USD 0.23) for the MBPP+ part; the full pilot cost
+about USD 0.30.
+
 ## Part B (to be written before the freeze)
 
 Routers fit on development data, H1 and H2, the direct Jev test, the 10/25/50% budgets, the frozen score

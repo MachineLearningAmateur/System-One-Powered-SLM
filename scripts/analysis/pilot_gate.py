@@ -1,7 +1,11 @@
-"""Pilot headroom gate: cap hits, hidden pass rate, projected positive test tasks."""
+"""Pilot headroom gate: cap hits, hidden pass rate, projected positive test tasks.
+
+    uv run python scripts/analysis/pilot_gate.py [<run-id> ...]   (default: pilot-v1 pilot-v1b)
+"""
 import json
 import math
 import statistics
+import sys
 from collections import defaultdict
 from pathlib import Path
 
@@ -14,7 +18,7 @@ sub = json.loads((ROOT / "configs/pilot_subsample_v1.json").read_text())
 SUB = set(sub["tasks"])
 
 cps = []
-for rid in ("pilot-v1", "pilot-v1b"):
+for rid in (sys.argv[1:] or ["pilot-v1", "pilot-v1b"]):
     rep = {}
     rows = load_labelled(RUNS / rid, report=rep)
     print(rid, len(rows), "checkpoints; report:", {k: (v if not isinstance(v, list) else len(v)) for k, v in rep.items()})
@@ -36,7 +40,10 @@ def wilson(k, n, z=1.96):
 for bench in ("humaneval+", "mbpp+", "all"):
     B = [c for c in cps if bench == "all" or c["benchmark"] == bench]
     print(f"\n=== {bench} ===")
-    cap = sum(c["generation"]["cap_hit"] for c in B)
+    if not B:
+        print("no checkpoints")
+        continue
+    cap =sum(c["generation"]["cap_hit"] for c in B)
     print(f"checkpoints {len(B)}; cap hits {cap} ({cap / len(B):.1%})")
     for a_set, name in ((lambda c: c["attempt"] == 0, "attempt 0, all dev"), (lambda c: True, "all attempts")):
         att = defaultdict(list)
