@@ -221,3 +221,18 @@ def test_rejected_pinocchio_records_are_reported_not_missing():
         assert recs == {} and counts["rejected"] == []  # genuinely missing
     finally:
         mod.first_round_messages = orig
+
+
+def test_direct_jev_router_uses_one_history_answer():
+    import importlib.util
+    from pathlib import Path
+    spec = importlib.util.spec_from_file_location("replay_script3", Path(__file__).resolve().parents[1] / "scripts" / "replay.py")
+    rs = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(rs)
+    router = {"model": {"kind": "jev_question", "arm": "base+history", "question": "code_likely_fails"}}
+    row = {"cp": {"checkpoint_id": "T/a0/r1"}, "history": {"features": {"code_likely_fails": 0.4}},
+           "trace": {"features": {"code_likely_fails": 0.9}}}
+    assert rs.score_final(row, router) == 0.4  # the history arm, not the trace arm
+    assert rs.score_final({**row, "history": None}, router) is None  # missing -> the cheap LR decides
+    assert rs.score_final({**row, "history": {"features": {}}}, router) is None
+    assert rs.ARMS["direct jev"] == ["base+history"]  # charged one Jev arm

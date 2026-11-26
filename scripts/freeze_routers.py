@@ -19,7 +19,9 @@ Pinocchio, whose router score is 1 - p_correct from scripts/score_pinocchio.py
 (no fitting, like the strong4 mean). v2 refuses to write if any v1 router's
 model or thresholds would differ from the frozen v1 file. Versions added later for
 another generator (docs/new-generator-runbook.md) are fit on their own dev runs, so
-that check does not apply to them.
+that check does not apply to them. q9b-v1 (November 26, before any 9B test run) adds
+"direct jev": the code_likely_fails probability of the history request (kind
+"jev_question", no fitting), so that its score limits are frozen on dev data.
 """
 
 from __future__ import annotations
@@ -40,7 +42,8 @@ from system1.eval import replay as R
 
 ROUTERS_V1 = list(P.FEATURE_SETS) + list(P.SENSITIVITY_SETS) + ["strong4 mean"]
 ROUTERS = {"v1": ROUTERS_V1, "v2": ROUTERS_V1 + ["pinocchio"],
-           "q8b-v1": ROUTERS_V1 + ["pinocchio"], "q9b-v1": ROUTERS_V1 + ["pinocchio"]}
+           "q8b-v1": ROUTERS_V1 + ["pinocchio"], "q9b-v1": ROUTERS_V1 + ["pinocchio", "direct jev"]}
+DIRECT_JEV_QUESTION = "code_likely_fails"  # q9b-v1: one Jev answer from the history request, no fitting
 FALLBACK = "cheap"  # decides when a Jev (or Pinocchio) score is missing
 PINOCCHIO_FILE = "pinocchio_scores.jsonl"
 
@@ -121,6 +124,13 @@ def main() -> int:
             s = np.array([pin[d["cp"]["checkpoint_id"]] for d in vp])
             model = {"kind": "external", "name": "pinocchio-0.8b", "file": PINOCCHIO_FILE,
                      "score": "1 - p_correct", "setup": json.loads(pin_setup)}
+        elif name == "direct jev":
+            vals = [P._num((d["history"] or {}).get("features", {}).get(DIRECT_JEV_QUESTION)) for d in vp]
+            if any(v is None for v in vals):
+                raise SystemExit(f"STOP: {sum(v is None for v in vals)} dev decision checkpoints have no "
+                                 f"history-arm {DIRECT_JEV_QUESTION}")
+            s = np.array(vals, float)
+            model = {"kind": "jev_question", "arm": P.HISTORY_ARM, "question": DIRECT_JEV_QUESTION}
         elif name == "strong4 mean":
             s = np.array([P.jev_mean(d["history"], d["trace"]) for d in vp])
             model = {"kind": "mean", "questions": P.STRONG_QS, "na_oriented": P.NA_ORIENTED,

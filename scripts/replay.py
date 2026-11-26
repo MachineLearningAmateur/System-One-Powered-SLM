@@ -60,7 +60,8 @@ from system1.loop.runner import complete_executions
 JEV_USD_PER_M_INPUT = 0.042  # third-party price, unconfirmed for the direct API (findings.md, Costs)
 ARMS = {"cheap": [], "cheap+code": [P.HISTORY_ARM], "cheap+code+thinking": [P.HISTORY_ARM, P.TRACE_ARM],
         "cheap+strong4": [P.HISTORY_ARM, P.TRACE_ARM], "strong4 mean": [P.HISTORY_ARM, P.TRACE_ARM],
-        "pinocchio": []}  # Pinocchio runs locally: its cost is reported as CPU seconds, not dollars
+        "pinocchio": [],  # Pinocchio runs locally: its cost is reported as CPU seconds, not dollars
+        "direct jev": [P.HISTORY_ARM]}
 
 
 def load_rg():
@@ -169,6 +170,9 @@ def score_final(row: dict, router: dict, pin: dict[str, dict] | None = None) -> 
     if m["kind"] == "external":
         rec = (pin or {}).get(row["cp"]["checkpoint_id"])
         return None if rec is None else float(rec["score"])
+    if m["kind"] == "jev_question":  # one Jev answer, no fitting (q9b-v1 direct Jev)
+        rec = row["history"] if m["arm"] == P.HISTORY_ARM else row["trace"]
+        return None if rec is None else P._num(rec.get("features", {}).get(m["question"]))
     if m["kind"] == "mean":
         if row["history"] is None or row["trace"] is None:
             return None
