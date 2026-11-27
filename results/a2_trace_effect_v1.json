@@ -1,0 +1,380 @@
+{
+ "version": "a2-trace-effect-v1",
+ "prespecified": false,
+ "workers": {
+  "Qwen3-1.7B": {
+   "routers": "routers_v2.json",
+   "n_dev": 470,
+   "n_test": 1457,
+   "reasoning_judgments": {
+    "on_task": {
+     "dev": {
+      "n": 470,
+      "fail": 116,
+      "auroc": 0.8062293006039353
+     },
+     "test": {
+      "n": 1457,
+      "fail": 280,
+      "auroc": 0.7646194926568759
+     },
+     "frozen_weight": 0.14042322147744873,
+     "weight_toward_failure": -0.14042322147744873
+    },
+    "repeating_failed_fix": {
+     "dev": {
+      "n": 39,
+      "fail": 19,
+      "auroc": 0.6434210526315789
+     },
+     "test": {
+      "n": 111,
+      "fail": 41,
+      "auroc": 0.695993031358885
+     },
+     "frozen_weight": 0.38504030467415545,
+     "weight_toward_failure": 0.38504030467415545
+    },
+    "approach_change_without_evidence": {
+     "dev": {
+      "n": 39,
+      "fail": 19,
+      "auroc": 0.7763157894736842
+     },
+     "test": {
+      "n": 111,
+      "fail": 41,
+      "auroc": 0.7630662020905924
+     },
+     "frozen_weight": 0.05702168827013774,
+     "weight_toward_failure": 0.05702168827013774
+    },
+    "unsupported_claim": {
+     "dev": {
+      "n": 470,
+      "fail": 116,
+      "auroc": 0.7180255211377363
+     },
+     "test": {
+      "n": 1457,
+      "fail": 280,
+      "auroc": 0.7163369340939435
+     },
+     "frozen_weight": -0.3160075308947193,
+     "weight_toward_failure": -0.3160075308947193
+    },
+    "stated_fix_matches_change": {
+     "dev": {
+      "n": 39,
+      "fail": 19,
+      "auroc": 0.675
+     },
+     "test": {
+      "n": 111,
+      "fail": 41,
+      "auroc": 0.6625435540069686
+     },
+     "frozen_weight": -0.22980613322603521,
+     "weight_toward_failure": 0.22980613322603521
+    }
+   },
+   "dev_oof_vs_test": {
+    "cheap+code": {
+     "dev_oof": 0.8152883304110656,
+     "test_refit": 0.7444350042480883
+    },
+    "cheap+code+thinking": {
+     "dev_oof": 0.8031122150789013,
+     "test_refit": 0.7323097463284379
+    }
+   },
+   "drop_one": {
+    "on_task": {
+     "test_auroc": 0.7317180483068334,
+     "minus_full": -0.0005916980216045253
+    },
+    "repeating_failed_fix": {
+     "test_auroc": 0.7329378565359873,
+     "minus_full": 0.0006281102075493816
+    },
+    "approach_change_without_evidence": {
+     "test_auroc": 0.7316694987255736,
+     "minus_full": -0.0006402476028642967
+    },
+    "unsupported_claim": {
+     "test_auroc": 0.7448112635028523,
+     "minus_full": 0.01250151717441439
+    },
+    "stated_fix_matches_change": {
+     "test_auroc": 0.73206396407331,
+     "minus_full": -0.0002457822551279465
+    },
+    "all five": {
+     "test_auroc": 0.7444350042480883
+    }
+   },
+   "full_minus_code_refit": {
+    "delta": -0.012125257919650356,
+    "p_two_sided": 0.01035,
+    "n_boot": 19999,
+    "ci95": [
+     -0.02137010907211096,
+     -0.003522591970362699
+    ]
+   },
+   "same_question": {
+    "code_likely_fails": {
+     "rows": 1457,
+     "auroc_history": 0.8260392644738438,
+     "auroc_trace": 0.806851559655298,
+     "mean_shift_fail": -0.044000000000000004,
+     "mean_shift_pass": -0.02677994902293968,
+     "share_fail_lowered": 0.6428571428571429,
+     "share_pass_raised": 0.17926932880203908,
+     "by_thinking_tertile": [
+      {
+       "tokens_from": 218.0,
+       "rows": 486,
+       "fail": 37,
+       "auroc_history": 0.8434057665683501,
+       "auroc_trace": 0.7871546379341481
+      },
+      {
+       "tokens_from": 1058.3333333333333,
+       "rows": 485,
+       "fail": 81,
+       "auroc_history": 0.7618414619239701,
+       "auroc_trace": 0.7232764943160982
+      },
+      {
+       "tokens_from": 2086.6666666666665,
+       "rows": 486,
+       "fail": 162,
+       "auroc_history": 0.8067081999695167,
+       "auroc_trace": 0.784912741960067
+      }
+     ]
+    },
+    "special_cases_visible_tests": {
+     "rows": 1457,
+     "auroc_history": 0.757547942711494,
+     "auroc_trace": 0.698051948051948,
+     "mean_shift_fail": -0.003785714285714286,
+     "mean_shift_pass": -0.002225998300764656,
+     "share_fail_lowered": 0.4392857142857143,
+     "share_pass_raised": 0.04078164825828377,
+     "by_thinking_tertile": [
+      {
+       "tokens_from": 218.0,
+       "rows": 486,
+       "fail": 37,
+       "auroc_history": 0.6913561668572805,
+       "auroc_trace": 0.6004032986215614
+      },
+      {
+       "tokens_from": 1058.3333333333333,
+       "rows": 485,
+       "fail": 81,
+       "auroc_history": 0.7223444566678889,
+       "auroc_trace": 0.618781322576702
+      },
+      {
+       "tokens_from": 2086.6666666666665,
+       "rows": 486,
+       "fail": 162,
+       "auroc_history": 0.7103147386069196,
+       "auroc_trace": 0.7019509221155311
+      }
+     ]
+    }
+   }
+  },
+  "Qwen3.5-9B": {
+   "routers": "routers_q9b-v1.json",
+   "n_dev": 491,
+   "n_test": 1551,
+   "reasoning_judgments": {
+    "on_task": {
+     "dev": {
+      "n": 491,
+      "fail": 89,
+      "auroc": 0.6637319022863213
+     },
+     "test": {
+      "n": 1551,
+      "fail": 235,
+      "auroc": 0.6991803013645477
+     },
+     "frozen_weight": 0.26848550264863513,
+     "weight_toward_failure": -0.26848550264863513
+    },
+    "repeating_failed_fix": {
+     "dev": {
+      "n": 35,
+      "fail": 15,
+      "auroc": 0.6216666666666666
+     },
+     "test": {
+      "n": 112,
+      "fail": 41,
+      "auroc": 0.4452078323600137
+     },
+     "frozen_weight": -0.2982326331793146,
+     "weight_toward_failure": -0.2982326331793146
+    },
+    "approach_change_without_evidence": {
+     "dev": {
+      "n": 35,
+      "fail": 15,
+      "auroc": 0.8316666666666668
+     },
+     "test": {
+      "n": 112,
+      "fail": 41,
+      "auroc": 0.5020611473720371
+     },
+     "frozen_weight": 0.7244178125447072,
+     "weight_toward_failure": 0.7244178125447072
+    },
+    "unsupported_claim": {
+     "dev": {
+      "n": 491,
+      "fail": 89,
+      "auroc": 0.6677147968025041
+     },
+     "test": {
+      "n": 1551,
+      "fail": 235,
+      "auroc": 0.6610214706072559
+     },
+     "frozen_weight": 0.36585200447148847,
+     "weight_toward_failure": 0.36585200447148847
+    },
+    "stated_fix_matches_change": {
+     "dev": {
+      "n": 35,
+      "fail": 15,
+      "auroc": 0.7149999999999999
+     },
+     "test": {
+      "n": 112,
+      "fail": 41,
+      "auroc": 0.3541738234283751
+     },
+     "frozen_weight": -0.10360180318697194,
+     "weight_toward_failure": 0.10360180318697194
+    }
+   },
+   "dev_oof_vs_test": {
+    "cheap+code": {
+     "dev_oof": 0.7720107328525909,
+     "test_refit": 0.6775205328849512
+    },
+    "cheap+code+thinking": {
+     "dev_oof": 0.76530269998323,
+     "test_refit": 0.6736597038090927
+    }
+   },
+   "drop_one": {
+    "on_task": {
+     "test_auroc": 0.663477332988424,
+     "minus_full": -0.01018237082066864
+    },
+    "repeating_failed_fix": {
+     "test_auroc": 0.6765213736015003,
+     "minus_full": 0.0028616697924076506
+    },
+    "approach_change_without_evidence": {
+     "test_auroc": 0.6867975166526548,
+     "minus_full": 0.01313781284356208
+    },
+    "unsupported_claim": {
+     "test_auroc": 0.6672152881070943,
+     "minus_full": -0.006444415701998385
+    },
+    "stated_fix_matches_change": {
+     "test_auroc": 0.6748302399275691,
+     "minus_full": 0.0011705361184763952
+    },
+    "all five": {
+     "test_auroc": 0.6775205328849512
+    }
+   },
+   "full_minus_code_refit": {
+    "delta": -0.0038608290758584962,
+    "p_two_sided": 0.7686,
+    "n_boot": 19999,
+    "ci95": [
+     -0.030142715778668443,
+     0.02146899615168649
+    ]
+   },
+   "same_question": {
+    "code_likely_fails": {
+     "rows": 1551,
+     "auroc_history": 0.7771308930996572,
+     "auroc_trace": 0.7646882881717648,
+     "mean_shift_fail": -0.006340425531914894,
+     "mean_shift_pass": -0.007211246200607905,
+     "share_fail_lowered": 0.4723404255319149,
+     "share_pass_raised": 0.31458966565349544,
+     "by_thinking_tertile": [
+      {
+       "tokens_from": 54.0,
+       "rows": 517,
+       "fail": 72,
+       "auroc_history": 0.778854556803995,
+       "auroc_trace": 0.7462234706616729
+      },
+      {
+       "tokens_from": 535.6666666666666,
+       "rows": 517,
+       "fail": 100,
+       "auroc_history": 0.7521822541966428,
+       "auroc_trace": 0.7340887290167866
+      },
+      {
+       "tokens_from": 1157.9999999999998,
+       "rows": 517,
+       "fail": 63,
+       "auroc_history": 0.7955387735123418,
+       "auroc_trace": 0.8080728620376196
+      }
+     ]
+    },
+    "special_cases_visible_tests": {
+     "rows": 1551,
+     "auroc_history": 0.721641984091056,
+     "auroc_trace": 0.6917981633576926,
+     "mean_shift_fail": -0.0010638297872340426,
+     "mean_shift_pass": -0.0012082066869300912,
+     "share_fail_lowered": 0.28936170212765955,
+     "share_pass_raised": 0.06990881458966565,
+     "by_thinking_tertile": [
+      {
+       "tokens_from": 54.0,
+       "rows": 517,
+       "fail": 72,
+       "auroc_history": 0.7408551810237203,
+       "auroc_trace": 0.6975031210986267
+      },
+      {
+       "tokens_from": 535.6666666666666,
+       "rows": 517,
+       "fail": 100,
+       "auroc_history": 0.6920263788968825,
+       "auroc_trace": 0.6625299760191846
+      },
+      {
+       "tokens_from": 1157.9999999999998,
+       "rows": 517,
+       "fail": 63,
+       "auroc_history": 0.7058946926788336,
+       "auroc_trace": 0.7085693308160268
+      }
+     ]
+    }
+   }
+  }
+ }
+}

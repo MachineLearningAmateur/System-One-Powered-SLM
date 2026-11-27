@@ -61,6 +61,7 @@ results/runs/*
 !results/resource_guide_q9b-pilot-v1+q9b-pilot-v1b_predict-v2.json
 !results/test_analysis_q9b-test-v1.json
 !results/q9b_exploratory_v1.json
+!results/a2_trace_effect_v1.json
 hf_cache/
 *.safetensors
 *.bin
