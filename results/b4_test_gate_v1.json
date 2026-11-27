@@ -1,0 +1,190 @@
+{
+ "version": "b4-test-gate-v1",
+ "prespecified": false,
+ "workers": {
+  "Qwen3-1.7B": {
+   "run": "main-test-v1",
+   "replay": "docs\\results\\replay_main-test-v1_final_routers-v2.json",
+   "always_small": 0.7296296296296296,
+   "always_frontier": 0.9032921810699588,
+   "test_gate": {
+    "pass": 0.8069958847736627,
+    "calls_per_attempt": 0.10061728395061728
+   },
+   "routers": {
+    "cheap q=0.10": {
+     "pass": 0.832716049382716,
+     "calls_per_attempt": 0.19074074074074074,
+     "pass_minus_gate_pp": 2.5720164609053353,
+     "extra_calls_per_attempt": 0.09012345679012346
+    },
+    "cheap q=0.25": {
+     "pass": 0.8491769547325103,
+     "calls_per_attempt": 0.3253086419753086,
+     "pass_minus_gate_pp": 4.218106995884763,
+     "extra_calls_per_attempt": 0.22469135802469134
+    },
+    "cheap q=0.50": {
+     "pass": 0.8767489711934155,
+     "calls_per_attempt": 0.5506172839506173,
+     "pass_minus_gate_pp": 6.975308641975286,
+     "extra_calls_per_attempt": 0.44999999999999996
+    },
+    "cheap+code+thinking q=0.10": {
+     "pass": 0.8345679012345679,
+     "calls_per_attempt": 0.19074074074074074,
+     "pass_minus_gate_pp": 2.7572016460905235,
+     "extra_calls_per_attempt": 0.09012345679012346
+    },
+    "cheap+code+thinking q=0.25": {
+     "pass": 0.85761316872428,
+     "calls_per_attempt": 0.3253086419753086,
+     "pass_minus_gate_pp": 5.061728395061726,
+     "extra_calls_per_attempt": 0.22469135802469134
+    },
+    "cheap+code+thinking q=0.50": {
+     "pass": 0.8853909465020575,
+     "calls_per_attempt": 0.5506172839506173,
+     "pass_minus_gate_pp": 7.839506172839483,
+     "extra_calls_per_attempt": 0.44999999999999996
+    },
+    "strong4 mean q=0.10": {
+     "pass": 0.8355967078189299,
+     "calls_per_attempt": 0.19074074074074074,
+     "pass_minus_gate_pp": 2.860082304526723,
+     "extra_calls_per_attempt": 0.09012345679012346
+    },
+    "strong4 mean q=0.25": {
+     "pass": 0.8674897119341565,
+     "calls_per_attempt": 0.3253086419753086,
+     "pass_minus_gate_pp": 6.0493827160493785,
+     "extra_calls_per_attempt": 0.22469135802469134
+    },
+    "strong4 mean q=0.50": {
+     "pass": 0.8940329218106995,
+     "calls_per_attempt": 0.5506172839506173,
+     "pass_minus_gate_pp": 8.703703703703681,
+     "extra_calls_per_attempt": 0.44999999999999996
+    }
+   },
+   "self_tests": {
+    "own new tests": {
+     "visible_pass": 41,
+     "hidden_fail": 13,
+     "hidden_fail_share": 0.3170731707317073
+    },
+    "only visible copies": {
+     "visible_pass": 663,
+     "hidden_fail": 132,
+     "hidden_fail_share": 0.19909502262443438
+    },
+    "none": {
+     "visible_pass": 753,
+     "hidden_fail": 135,
+     "hidden_fail_share": 0.17928286852589642
+    }
+   }
+  },
+  "Qwen3.5-9B": {
+   "run": "q9b-test-v1",
+   "replay": "results\\replay_q9b-test-v1_final_routers-q9b-v1.json",
+   "always_small": 0.8166666666666667,
+   "always_frontier": 0.9032921810699588,
+   "test_gate": {
+    "pass": 0.8462962962962963,
+    "calls_per_attempt": 0.04259259259259259
+   },
+   "routers": {
+    "cheap q=0.10": {
+     "pass": 0.8631687242798355,
+     "calls_per_attempt": 0.1382716049382716,
+     "pass_minus_gate_pp": 1.6872427983539162,
+     "extra_calls_per_attempt": 0.095679012345679
+    },
+    "cheap q=0.25": {
+     "pass": 0.8763374485596707,
+     "calls_per_attempt": 0.2820987654320988,
+     "pass_minus_gate_pp": 3.0041152263374338,
+     "extra_calls_per_attempt": 0.23950617283950618
+    },
+    "cheap q=0.50": {
+     "pass": 0.8870370370370371,
+     "calls_per_attempt": 0.5216049382716049,
+     "pass_minus_gate_pp": 4.074074074074074,
+     "extra_calls_per_attempt": 0.47901234567901235
+    },
+    "cheap+code+thinking q=0.10": {
+     "pass": 0.8697530864197531,
+     "calls_per_attempt": 0.1382716049382716,
+     "pass_minus_gate_pp": 2.3456790123456805,
+     "extra_calls_per_attempt": 0.095679012345679
+    },
+    "cheap+code+thinking q=0.25": {
+     "pass": 0.8788065843621399,
+     "calls_per_attempt": 0.2820987654320988,
+     "pass_minus_gate_pp": 3.251028806584355,
+     "extra_calls_per_attempt": 0.23950617283950618
+    },
+    "cheap+code+thinking q=0.50": {
+     "pass": 0.889917695473251,
+     "calls_per_attempt": 0.5216049382716049,
+     "pass_minus_gate_pp": 4.362139917695462,
+     "extra_calls_per_attempt": 0.47901234567901235
+    },
+    "strong4 mean q=0.10": {
+     "pass": 0.8641975308641975,
+     "calls_per_attempt": 0.1382716049382716,
+     "pass_minus_gate_pp": 1.7901234567901159,
+     "extra_calls_per_attempt": 0.095679012345679
+    },
+    "strong4 mean q=0.25": {
+     "pass": 0.8823045267489712,
+     "calls_per_attempt": 0.2820987654320988,
+     "pass_minus_gate_pp": 3.600823045267487,
+     "extra_calls_per_attempt": 0.23950617283950618
+    },
+    "strong4 mean q=0.50": {
+     "pass": 0.8989711934156378,
+     "calls_per_attempt": 0.5216049382716049,
+     "pass_minus_gate_pp": 5.267489711934148,
+     "extra_calls_per_attempt": 0.47901234567901235
+    },
+    "direct jev q=0.10": {
+     "pass": 0.8670781893004116,
+     "calls_per_attempt": 0.1382716049382716,
+     "pass_minus_gate_pp": 2.078189300411526,
+     "extra_calls_per_attempt": 0.095679012345679
+    },
+    "direct jev q=0.25": {
+     "pass": 0.8849794238683126,
+     "calls_per_attempt": 0.2820987654320988,
+     "pass_minus_gate_pp": 3.8683127572016307,
+     "extra_calls_per_attempt": 0.23950617283950618
+    },
+    "direct jev q=0.50": {
+     "pass": 0.8930041152263374,
+     "calls_per_attempt": 0.5216049382716049,
+     "pass_minus_gate_pp": 4.670781893004106,
+     "extra_calls_per_attempt": 0.47901234567901235
+    }
+   },
+   "self_tests": {
+    "own new tests": {
+     "visible_pass": 227,
+     "hidden_fail": 62,
+     "hidden_fail_share": 0.27312775330396477
+    },
+    "only visible copies": {
+     "visible_pass": 814,
+     "hidden_fail": 129,
+     "hidden_fail_share": 0.15847665847665848
+    },
+    "none": {
+     "visible_pass": 510,
+     "hidden_fail": 44,
+     "hidden_fail_share": 0.08627450980392157
+    }
+   }
+  }
+ }
+}
