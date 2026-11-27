@@ -62,6 +62,7 @@ results/runs/*
 !results/test_analysis_q9b-test-v1.json
 !results/q9b_exploratory_v1.json
 !results/a2_trace_effect_v1.json
+!results/latency_summary_v1.json
 hf_cache/
 *.safetensors
 *.bin
